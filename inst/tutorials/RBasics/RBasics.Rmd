@@ -1,0 +1,288 @@
+---
+title: "R Basics"
+output: 
+  learnr::tutorial:
+    progressive: TRUE
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(mosaic)
+theme_set(theme_bw())
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+baseball <- read.csv(file='http://www.calvin.edu/~sld33/data/Baseball.csv')
+tutorial_options(exercise.eval = FALSE)
+```
+
+
+<style type="text/css">
+  span.boxed {
+    border:5px solid gray;
+    border-radius:10px;
+    padding: 5px;
+  }
+span.invboxed {
+  border:5px solid gray;
+  padding: 5px;
+  border-radius:10px;
+  color: white;
+}
+
+table, td, th { border:0px; }
+
+/* cellpadding */
+  th, td { padding: 5px; }
+
+</style>
+
+## Communicating with R
+  You will do most of your work in R with *code* or *commands*. Instead of pointing and clicking, you will type one or more lines of code, which R will *execute* (doing the work you have asked it to do). Then, R will return the results of whatever operation you asked it to do - sometimes producing a plot, other times creating a plot. Sometimes executing code has almost no visible effect (no plot or text output is produced), but instead some object is created and stored in R's *environment* for later use.
+  
+###Two key questions
+  To get R (or any software) to do something for you,
+there are two important questions you must be able to answer.  Before
+continuing, think about what those questions might be.
+  
+### The Questions
+
+To get R (or any software) to do a job for you, there are two
+important questions you must be able to answer:
+  
+#### 1. What do you want the computer to do?
+  
+#### 2. What must the computer know in order to do that?
+  
+### Providing R with the information it needs
+  
+  R *functions* provide R with the answer to the first question: what do you want the computer to do?
+  
+  Most functions in R have short, but descriptive names that describe what they do.  For example, R has some functions to do basic mathematical operations:  the function `sqrt` computes the square root of a number, and the function `round` rounds a number (by default, it rounds to the nearest integer).
+  
+  But just giving R a function is not enough: you also need to answer the second question (what information does R need to do the job?). For example, if you want to use the function `round`, you also need to provide R with the number you want to round!
+  
+  We will provide answers to our two questions by filling in
+the boxes of a basic template:
+  
+  <center>
+  <h2><strong><span class="boxed">function</span> ( <span class="boxed">&nbsp;information1&nbsp; , &nbsp;information2&nbsp; , ...)</strong> 
+  </h2></center>
+  &nbsp;
+
+(The `...` indicates that there may be some additional *arguments* (input information we could provide to R) we could add
+  eventually. Some functions need only one input, but if a function takes more than one argument, they are separated by commas.)
+
+###Using simple functions
+Let's practice what you just learned, trying out the `sqrt` and `round` functions. 
+
+Edit the code below to compute the square root of 64:
+```{r find-sqrt, exercise=TRUE}
+function(information_R_needs)
+```
+
+Now try computing the square root of 44, then rounding it to the nearest integer:
+
+```{r round-sqrt, exercise=TRUE}
+function1(information_R_needs)
+function2(information_R_needs)
+```
+
+### Storing information in R: variables
+In the last section, you computed the square root of 44 and then rounded it, probably like this:
+
+```{r, echo=TRUE}
+sqrt(44)
+round(6.63325)
+```
+
+But to do that, you probably had to first find the root, make a note of the result, and then provide that number to the `round` function.  What a pain!
+
+A better alternative, if you are computing a value that you will want to use later on, is to store it as a named variable in R.  In the previous example, you might want to store the square root of 44 in a variable called my_root; then you can provide my_root to the `round` function without checking the result of the `sqrt` calculation first:
+
+```{r naming-variable, echo=TRUE}
+my_root <- sqrt(44)
+round(my_root)
+```
+
+Notice that to assign a name to the results of some R code, you use the symbol "<-". You can think of it as an *assignment arrow* -- it points from a result toward a name and assigns the name to the result.
+
+Try editing the code to change the name of the variable from my_root to something else, then run your new code:
+
+```{r name-a-variable, exercise=TRUE}
+my_root <- sqrt(44)
+round(my_root)
+```
+
+### What if I have a list of numbers to store?
+
+Sometime you might want to create a variable that contains more than one number.  You can use the function `c` to *concatenate* a list of numbers:
+
+```{r}
+my_fave_numbers <- c(4, 44, 16)
+my_fave_numbers
+```
+
+(First we stored the list of numbers, calling it my_fave_numbers; then we printed the results to the screen by simply typing the variable name my_fave_numbers).
+
+Try making a list of your three favorite numbers, then using the function `sum` to add them all up:
+
+```{r c-and-sum, exercise=TRUE}
+```
+
+```{r c-and-sum-hint, results='hide'}
+my_numbers <- c(14, 27, 455)
+sum(my_numbers)
+```
+
+### What about data that are not numeric?
+R can work with categorical data as well as numeric data.  For example, we could create a list of words and store it as a variable if we wanted (feel free to try changing the words if you want):
+
+```{r cat-var, exercise=TRUE}
+my_words <- c('RStudio', 'is', 'awesome')
+my_words
+```
+
+### What if I have a LOT more data to store?
+`c` works great for creating small lists of just a few values, but it is not a good way to enter or store large data tables.  In R, these larger datasets are stored as objects called *data.frame*s.  The next sections will get you started using them. 
+
+## How should data tables be organized for statistical analysis?
+A comprehensive guide to good practices for formatting data tables is available at <http://kbroman.org/dataorg/>.
+
+A few key points to keep in mind:
+
+- This data table is for the computer to read, not for humans! So eliminate formatting designed to make it "pretty" (colors, shading, fonts...)
+- Use short, simple variable names that do not contain any spaces or special characters (like ?, \$, \%, _, etc.)
+- Organize the table so there is one column for every variable, and one row for every observation (person/place/thing for which data were collected).
+- Use informative variable values rather than arbitrary numeric codes. For example, a variable Color should have values 'red', 'white', and 'blue' rather than 1, 2, and 3.
+
+You will have chances to practice making your own data files and importing them into R outside this tutorial.
+
+## Using built-in datasets in R
+  R has a number of built-in datasets that are accessible to you as soon as you start RStudio.
+  
+  In addition to the datasets that are included with base R, there are add-on *packages* for R that contain additional software tools and sometimes datasets.  To use datasets contained in a package, you have to load the package by running the command library(packagename) (or equivalently, require(packagename)).  For example, we will practice looking at a dataset from the package `mosaic`. Before we can access the data, we have to load the package.  Edit the code below to load the `mosaic` package and then click "run code" to run it. (Nothing obvious will happen...but R will have access to the tools and data in the `mosaic` package once you run the code!)
+
+```{r require-package, echo = FALSE, exercise=TRUE}
+library()
+```
+
+### Viewing a dataset
+The mosaic package includes a dataset called HELPrct.
+
+If you just enter the dataset name (HELPrct) as a command, R will print (most of) the dataset out to the screen:
+
+```{r}
+HELPrct
+```
+
+That's not really useful...how can we extract selected, useful information about a dataset?
+
+
+### Gathering information about a dataset
+
+There are a few functions that make it easier to take a quick look at a dataset:
+
+- `head` prints out the first few rows of the dataset.
+- `str` shows the *str*ucture of the dataset
+- `names` prints out the names of the variables (columns) in the dataset
+- `summary` prints out a summary of all the variables (columns) in the dataset
+- `nrow` reports the number of rows (observations or cases) in the dataset
+- `ncol` reports the number of columns (variables) in the dataset
+
+Try applying each of these functions to the HELPrct data and see what the output looks like each time:
+
+```{r check-out-data, exercise=TRUE}
+HELPrct
+```
+
+```{r check-out-data-hint, results='hide'}
+head(HELPrct)
+```
+
+### Getting more help
+You can get help related to R function, and built-in R datasets, using a special function: `?`.  Just type ? followed by the name of the function or dataset you want help on:
+
+```{r get-help, exercise=TRUE}
+
+```
+
+```{r get-help-hint, results='hide'}
+?HELPrct
+```
+
+
+## Reading in data from a file
+For this class, you will often be asked to analyze data that is stored in files that are available online - usually in csv format. It's simple to read them into R. For example, we can read in the file Baseball.csv, which is stored at <http://www.calvin.edu/~sld33/data/Baseball.csv>:
+
+```{r}
+baseball <- read.csv(file='http://www.calvin.edu/~sld33/data/Baseball.csv')
+```
+
+### What about local files?
+The same function, `read.csv`, can be used to read in a local file.  You just need to change the input file from the URL (in quotes) to the file path and name (in quotes).  For example, the input file='http://www.calvin.edu/~sld33/data/Baseball.csv' might become file='C:\\Data\\Baseball.csv'.
+
+We won't do an example in this tutorial because there isn't a way to work with local files within a tutorial environment, but you can practice it once you are working independently in RStudio.
+
+### Side note: named input arguments
+The input argument we provided to R is the URL (in quotes -- either single or double quotes are fine).  But notice that this time, we gave the input argument a *name*, "file", and specified its value with an equal sign.
+
+This is not *required* - the command works fine without it:
+
+```{r}
+baseball <- read.csv('http://www.calvin.edu/~sld33/data/Baseball.csv')
+```
+
+However, if a function has *more than just one* input argument, it's good to get in the habit of providing names for the inputs.  If you provide names, then the order in which you list the inputs doesn't matter; without names, the order matters and you have to use ? to figure out what order R expects!
+
+### Your turn
+Use one of the functions you learned earlier to find out how many variables are in the baseball dataset, and what their names are. 
+
+```{r baseball-info, exercise=TRUE}
+```
+
+```{r baseball-info-hint, results='hide', echo=FALSE}
+names(baseball)
+```
+
+### Renaming variables in a dataset
+
+Those variable names are awful!  We can actually use `names` and `c` to assign replacement names, if we want.  Since the variable names are strings (words), they should be enclosed in quotes. Choose sensible new names for each variable and modify the code below to assign them to the baseball dataset.
+
+```{r, rename-baseball, exercise=TRUE}
+names(baseball) <- c('new_name_1', 'new_name_2', ...)
+```
+
+### Check out the data
+Finally, use one of the functions you have learned so far to extract some information about the baseball dataset. *Remember, `?` won't work on baseball because it's not a built-in R dataset.*
+
+```{r look-at-baseball, exercise=TRUE}
+
+```
+
+## Review
+
+What have you learned so far?  More than you think!
+
+### Functions in R
+You've learned that R code is made up of functions, which are generally named descriptively according to the job they do.  Functions have one or more input arguments, which is where you provide R with all the data and information it needs to do the job.  The syntax for calling a function uses the template:
+
+  <center>
+  <h2><strong><span class="boxed">function</span> ( <span class="boxed">&nbsp;information1&nbsp; , &nbsp;information2&nbsp; , ...)</strong> 
+  </h2></center>
+  &nbsp;
+  
+  
+### Variables in R
+You've practiced creating variables in R using `c`, and saving information (or the results of a computation) using the assignment arrow <-.  
+
+### Datasets in R
+You've considered several different ways to get datasets to work with in R: you can use datasets that are built in to R or R packages, or you can use `read.csv` to read in data files stored in .csv format.
+
