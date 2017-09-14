@@ -56,6 +56,7 @@ th, td { padding: 5px; }
 ## How do we make this plot?
 
 ### US Births in 1978
+
 Here is an interesting plot showing the number of live births in the United
 States each day of 1978.  We are going to use it to learn how to create
 plots using the `ggformula` package.
