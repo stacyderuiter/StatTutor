@@ -433,27 +433,27 @@ gf_point(births ~ date, data = Births1988, color = &quot;skyblue&quot;)</code></
 <tr>
 <td>
 
-<div id="htmlwidget-55245de24ef1a3af098b" style="width:100%;height:auto;", class = "quiz html-widget">
+<div id="htmlwidget-038ace173ac3c65761cb" style="width:100%;height:auto;", class = "quiz html-widget">
 <div class="panel panel-default">
 <div class="panel-body quizArea">
 </div>
 </div>
 </div>
 
-<script type="application/json" data-for="htmlwidget-55245de24ef1a3af098b">{"x":{"question":"Does it appear that the conjecture about weekends is generally correct?","answers":[{"option":"yes","correct":true,"message":null},{"option":"no","correct":false,"message":null}],"label":"color-mapping-quiz-1","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":false,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Does it appear that the conjecture about weekends is generally correct?","a":[{"option":"yes","correct":true,"message":null},{"option":"no","correct":false,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-038ace173ac3c65761cb">{"x":{"question":"Does it appear that the conjecture about weekends is generally correct?","answers":[{"option":"yes","correct":true,"message":null},{"option":"no","correct":false,"message":null}],"label":"color-mapping-quiz-1","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":false,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Does it appear that the conjecture about weekends is generally correct?","a":[{"option":"yes","correct":true,"message":null},{"option":"no","correct":false,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
 </td>
 </tr>
 <tr>
 <td>
 
-<div id="htmlwidget-2e2708b0510a8da2e387" style="width:100%;height:auto;", class = "quiz html-widget">
+<div id="htmlwidget-82fe097f4fc28e7522a9" style="width:100%;height:auto;", class = "quiz html-widget">
 <div class="panel panel-default">
 <div class="panel-body quizArea">
 </div>
 </div>
 </div>
 
-<script type="application/json" data-for="htmlwidget-2e2708b0510a8da2e387">{"x":{"question":"What happens if you omit the <code>~<\/code> before <code>~wday<\/code>?","answers":[{"option":"It works just the same.  The tilde isn&#39;t required.","correct":false,"message":null},{"option":"All the dots are the same color.","correct":false,"message":null},{"option":"There is an error message: &#39;wday&#39; not found.","correct":true,"message":null}],"label":"color-mapping-quiz-2","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":false,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"What happens if you omit the <code>~<\/code> before <code>~wday<\/code>?","a":[{"option":"It works just the same.  The tilde isn&#39;t required.","correct":false,"message":null},{"option":"All the dots are the same color.","correct":false,"message":null},{"option":"There is an error message: &#39;wday&#39; not found.","correct":true,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-82fe097f4fc28e7522a9">{"x":{"question":"What happens if you omit the <code>~<\/code> before <code>~wday<\/code>?","answers":[{"option":"It works just the same.  The tilde isn&#39;t required.","correct":false,"message":null},{"option":"All the dots are the same color.","correct":false,"message":null},{"option":"There is an error message: &#39;wday&#39; not found.","correct":true,"message":null}],"label":"color-mapping-quiz-2","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":false,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"What happens if you omit the <code>~<\/code> before <code>~wday<\/code>?","a":[{"option":"It works just the same.  The tilde isn&#39;t required.","correct":false,"message":null},{"option":"All the dots are the same color.","correct":false,"message":null},{"option":"There is an error message: &#39;wday&#39; not found.","correct":true,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
 </td>
 </tr>
 </table>
@@ -578,7 +578,7 @@ mean( births ~ wday, data = Births1978)</code></pre>
 </div>
 <div id="section-multi-tasking" class="section level3">
 <h3>Multi-tasking</h3>
-<p>Sometimes it is nice to compute multiple numerical summaries at once. <code>df_stats()</code> is designed for this.</p>
+<p>Sometimes it is nice to compute multiple numerical summaries at once. <code>df_stats()</code> is designed for this. (This starts <code>df_</code> because the result is a data frame rather than a graph.) We simply include a comma separated list of summary functions in addition to our formula and data.</p>
 <div class="tutorial-exercise" data-label="df_stats" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>df_stats( births ~ wday, data = Births1978, min, max)</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
@@ -588,8 +588,8 @@ mean( births ~ wday, data = Births1978)</code></pre>
 <h3>Exercises</h3>
 <ol style="list-style-type: decimal">
 <li><p>Try adding some additional numerical summaries to the example above.</p></li>
-<li><p>What happens if you name the summaries? (Example: <code>a = min, b = max</code>.)</p></li>
-<li><p>What happens if you use a summary like <code>range</code> that computes more than one number?</p></li>
+<li><p>What happens if you name the summaries? (Example: <code>lo = min, hi = max</code>.)</p></li>
+<li><p>What happens if you use a summary like <code>range</code> that computes more than one number? (What if you give it a name?)</p></li>
 <li><p>What happens if you don’t include any numerical summaries? (Trust me, it’s a good thing.)</p></li>
 <li><p>Now try adding a grouping variable.</p></li>
 <li><p>Now try using <code>Births</code> and grouping by both <code>year</code> and <code>wday</code>.</p></li>
@@ -601,7 +601,7 @@ mean( births ~ wday, data = Births1978)</code></pre>
 </div>
 <div id="section-df_stats-and-plots" class="section level3">
 <h3>df_stats() and plots</h3>
-<p>One nice things about <code>df_stats()</code> is that it returns a data frame. This means we can use the results from <code>df_stats()</code> in our plots.</p>
+<p>One nice things about <code>df_stats()</code> is that it returns a data frame with a convenient structure. This means we can use the results from <code>df_stats()</code> in our plots.</p>
 <div class="tutorial-exercise" data-label="df_stats_plotting" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>Births1978_summary &lt;- df_stats(births ~ wday, data = Births1978, mean, median)
 gf_violin( births ~ wday, data = Births1978) %&gt;%

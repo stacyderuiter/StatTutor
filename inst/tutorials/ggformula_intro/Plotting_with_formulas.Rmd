@@ -617,7 +617,9 @@ mean( births ~ wday, data = Births1978)
 ### Multi-tasking
 
 Sometimes it is nice to compute multiple numerical summaries at once.
-`df_stats()` is designed for this.
+`df_stats()` is designed for this.  (This starts `df_` because the result is a 
+data frame rather than a graph.)  We simply include a comma separated 
+list of summary functions in addition to our formula and data.
 
 ```{r, df_stats, exercise = TRUE}
 df_stats( births ~ wday, data = Births1978, min, max)
@@ -627,9 +629,10 @@ df_stats( births ~ wday, data = Births1978, min, max)
 
  1. Try adding some additional numerical summaries to the example above.
  
- 2. What happens if you name the summaries? (Example: `a = min, b = max`.)
+ 2. What happens if you name the summaries? (Example: `lo = min, hi = max`.)
  
  3. What happens if you use a summary like `range` that computes more than one number?
+ (What if you give it a name?)
  
  4. What happens if you don't include any numerical summaries?  (Trust me, it's a good thing.)
  
@@ -643,8 +646,9 @@ df_stats( births ~ wday, data = Births1978, min, max)
 
 ### df_stats() and plots
 
-One nice things about `df_stats()` is that it returns a data frame.  This means we can use 
-the results from `df_stats()` in our plots.
+One nice things about `df_stats()` is that it returns a data frame with 
+a convenient structure.
+This means we can use the results from `df_stats()` in our plots.
 
 ```{r, df_stats_plotting, exercise = TRUE}
 Births1978_summary <- df_stats(births ~ wday, data = Births1978, mean, median)
