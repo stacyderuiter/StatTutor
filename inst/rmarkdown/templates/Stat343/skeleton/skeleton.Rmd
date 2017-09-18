@@ -28,9 +28,27 @@ knitr::opts_chunk$set(
 ```
 
 
+<!-- Some macros to make mathematics easier -->
+
+\newcommand{\Prob}{\mathrm{P}}
+\newcommand{\intersect}{\;\cap\;}
+\newcommand{\union}{\operatorname{\cup}}
+\newcommand{\E}{\operatorname{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\SD}{\operatorname{SD}}
+
 <!-- Put your work below here.  Put text in text chunks, code in R chunks. -->
 
-### Problem ?.?
+### Problem 0.0
+
+Example using some mathematics like
+$\Prob(A \union B) = \Prob(A) + \Prob(B) - \Prob(A \intersect B)$
+within a line of text.
+
+This next one is a "displayed equation".
+
+$$\Prob(A^c) = 1 - \Prob(A)$$
+
 
 
 ### Problem ?.?
