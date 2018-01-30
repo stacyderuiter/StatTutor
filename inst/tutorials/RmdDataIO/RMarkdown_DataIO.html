@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="true" />
+<meta name="allow-skip" content="false" />
+
+<title>R Markdown and Reading Data Into R</title>
+
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<div id="section-general-instructions" class="section level2">
+<h2>General Instructions</h2>
+<p>While you work through this tutorial, you will create an R Markdown (.Rmd) document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents that include R code and results. Since all the data analysis and results are automatically included in the compiled output document, your work is <em>reproducible</em> and it’s easy to re-do analysis if the data change, or if a mistake is uncovered. For more details on using R Markdown see <a href="http://rmarkdown.rstudio.com" class="uri">http://rmarkdown.rstudio.com</a>.</p>
+<p>To create a real Rmd file, you will have to work in RStudio (outside this tutorial environment). So, as you work on this tutorial, you will probably switch back and forth between the tutorial itself and a “real” RStudio session.</p>
+</div>
+<div id="section-logging-in-to-rstudio" class="section level2">
+<h2>Logging in to RStudio</h2>
+<p>Go to <a href="http://rstudio.calvin.edu" class="uri">http://rstudio.calvin.edu</a> and enter your user name and password to log in. If you need help, go to the “Links and Resources” section of the course Moodle site and click on “Calvin RStudio server information.”</p>
+</div>
+<div id="section-executing-code-in-r" class="section level2">
+<h2>Executing code in R</h2>
+<p>You can <em>do</em> things in R by typing commands in the <em>Console</em> panel; however, working that way makes it hard to keep a record of your work (and hard to redo things if anything changes or if a mistake was made). For this class, you will work in R markdown files, which can contain text, R code, and R output (such as figures).</p>
+</div>
+<div id="section-r-markdown-files-are-stand-alone" class="section level2">
+<h2>R Markdown files are stand-alone!</h2>
+<p>Every R Markdown file (Rmd file) must be completely stand-alone. It doesn’t share any information with the <em>Console</em> or the <em>Environment</em> that you see in your RStudio session. <strong>All</strong> R code that you need to do whatever you are trying to do must be included in the Rmd file itself!</p>
+<p>For example, if you use the point-and-click user interface in the RStudio <em>Environment</em> tab to import a data file, the read-in dataset will <em>not</em> be available for use within your Rmd file.</p>
+<p>Similarly, if you load a package by typing “library(mosaic)” (or “require(mosaic)”) in the <em>Console</em> window, <code>mosaic</code> functions and data will <em>not</em> be available to use within the Rmd file.</p>
+<p>Keep it stand-alone!</p>
+</div>
+<div id="section-create-an-r-markdown-file" class="section level2">
+<h2>Create an R Markdown file</h2>
+<p>In RStudio, navigate to File -&gt; New File -&gt; R Markdown…, or click on the white rectangle with a green + and select R Markdown from the drop-down menu.</p>
+<p><img src="images/NewRmdFile.jpg" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-markdown-templates" class="section level2">
+<h2>Markdown Templates</h2>
+<p>Choose “From Template” and select the “mosaic fancy” template. (This template has a lot of <em>stuff</em> in it to show what you can do in an Rmd document. Once you have some practice, you may want to switch to the simpler “mosaic plain (PDF)” template - it contains less <em>stuff</em> you’d need to delete before inserting your own content.)</p>
+<p><img src="images/MosaicFancy.png" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-save-your-rmd-file" class="section level2">
+<h2>Save your Rmd file</h2>
+<p>Save your file by clicking on the disk icon at the top of the file tab (maybe give it a useful file name like DeRuiterProject1.Rmd. Avoid spaces and special characters in your file name). <strong>The file will be saved to the server, not to your computer.</strong> All your files will be accessible in the RStudio <em>Files</em> tab (lower right panel) whenever you log into RStudio, regardless of which computer you are using.</p>
+<p><img src="images/FileTab.png" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-downloading-files-from-rstudio" class="section level2">
+<h2>Downloading files from RStudio</h2>
+<p>However, you will have to download your files if you want a copy on your own computer, or to be able to upload a copy to Moodle to turn in. To download, go to the <em>File</em> tab, check the box for the file you want, then select More - Export. from the menu at the top of the <em>File</em> tab.</p>
+<p><img src="images/Export.png" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-knit" class="section level2">
+<h2>Knit!</h2>
+<p>How do Rmd files actually work? What’s so cool about them?</p>
+<p>Click on the <em>small black arrow</em> next to the word “Knit” (and the ball of yard icon) at the top of the file window. Select “Knit to PDF”. Check out the compiled PDF result, and compare it to the original markdown file. Wow!</p>
+<p><img src="images/KnitButton.png" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-personalize-your-markdown-file" class="section level2">
+<h2>Personalize your Markdown file</h2>
+<p>At the top of the markdown file, enter an appropriate title, author(s), and date (within the quotation marks). Knit again to see the effect.</p>
+<p><img src="images/Title.png" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-rmd-file-anatomy-text" class="section level2">
+<h2>Rmd file anatomy: Text</h2>
+<p>The R Markdown file is a text file where you save all the R commands you want to use, plus any text commenting on the work you are doing and the results you get. Parts of the file with a plain white background are normal text.</p>
+<p>You can format the text. For example, enclosing a word in asterisks will generate italics, so *my text* in the Rmd file will become <em>my text</em> in the PDF. Using two asterisks instead of one will generate boldface, so **my text** becomes <strong>my text</strong>. You can also make bulleted lists, numbered lists, section headers, and more. For example,</p>
+<p>### Some Text</p>
+<p>becomes</p>
+<div id="section-some-text" class="section level3">
+<h3>Some Text</h3>
+<p>(a sub-section header). Fewer hashtags make the text even larger, and more make it smaller.</p>
+<p>Check out the R Markdown cheat sheet <a href="https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf" class="uri">https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf</a> for more examples.</p>
+<p>For instructions on how to include R output and special characters (symbols, subscripts, etc.) in your text, see the document in the “Links and Resources” section of the course Moodle site.</p>
+<p>Before moving on, try a few of the tricks you just learned in your Rmd file. Make it pretty!</p>
+</div>
+</div>
+<div id="section-rmd-file-anatomy-r-code-chunks" class="section level2">
+<h2>Rmd file anatomy: R code chunks</h2>
+<p>An Rmd file can also contain one or more <strong>R code chunks.</strong> These sections of the file have a grey background onscreen. Each one begins with</p>
+<p>```{r}</p>
+<p>and ends with</p>
+<p>```</p>
+<p>like so:</p>
+<p><img src="images/CodeChunk.png" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-how-to-add-a-new-r-code-chunk-to-your-file" class="section level2">
+<h2>How to add a new R code chunk to your file</h2>
+<p>To add a code chunk to your file, you can type in the header and footer by hand to start and end the chunk. Or, you can click on the green box with the C inside (at the top of the Rmd file) to insert an empty chunk. When you click the <strong>Knit</strong> button a document will be generated that includes both text content as well as the output of any embedded R code chunks within the document.</p>
+<p><img src="images/InsertCodeChunk.png" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-setup-chunk" class="section level2">
+<h2>Setup Chunk</h2>
+<p>The first R code chunk in a Rmd file is usually used to specify settings. In this chunk, you can also give R permission to use certain packages (software toolkits) with</p>
+<pre class="r"><code>library(packagename) </code></pre>
+<p>Alternatively,</p>
+<pre class="r"><code>require(packagename)</code></pre>
+<p>does the same thing.</p>
+<p>For example, we will almost always use the mosaic package. So, verify that the first R code chunk in your file includes the line <code>library(mosaic)</code> or <code>require(mosaic)</code> (both options work equally well).</p>
+<p><img src="images/SettingsChunk.png" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-the-settings-chunk-is-invisible" class="section level2">
+<h2>The settings chunk is invisible!</h2>
+<p>If you look carefully at the PDF output, you will see that the settings chunk does <em>not</em> appear there. That’s intentional - for homework, you don’t need to show me what settings you used, although <strong>I would always like the R code you use to solve problems to show up in the output PDF.</strong></p>
+</div>
+<div id="section-making-r-code-invisible-in-the-pdf" class="section level2">
+<h2>Making R code invisible in the PDF</h2>
+<p>Going back to the Rmd file, look at the header of the settings chunk – this is the part between the {curly braces}. Notice that in addition to the required “r” label, which is followed by an (optional) chunk name, the option</p>
+<p><code>include=FALSE</code></p>
+<p>appears, which means that the code from this chunk will be invisible in your compiled output document.</p>
+</div>
+<div id="section-are-there-other-options-i-can-set" class="section level2">
+<h2>Are there other options I can set?</h2>
+<p>You can add other options for R chunks (we will learn about some more choices later) and they should all be separated by commas. You can control things like what is included in the output PDF and how big figures are in the PDF. For this class, the defaults defined in the mosaic plain and fancy templates will work well most of the time.</p>
+<p>If interested, see <a href="https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf" class="uri">https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf</a> or <a href="http://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf" class="uri">http://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf</a>.</p>
+</div>
+<div id="section-clean-up" class="section level2">
+<h2>Clean Up</h2>
+<p>At this point, you probably want to get rid of all the extra content in the template. Delete <strong>everything</strong> in the file that comes <em>after</em> the settings R code chunk. Now you have space to include your own R code and text.</p>
+</div>
+<div id="section-running-r-code-from-an-rmd-file-knit-the-file" class="section level2">
+<h2>Running R Code from an Rmd file: Knit the file</h2>
+<p>There are multiple ways to run and test R code from a markdown file. Sometimes you want to knit the whole file and get the PDF; other times you want to run just a specific bit of code to make sure it’s working correctly.</p>
+<p>Obviously, every time you knit the file, all R code will be run automatically.</p>
+</div>
+<div id="section-running-r-code-from-an-rmd-file-run-menu" class="section level2">
+<h2>Running R Code from an Rmd file: Run Menu</h2>
+<p>You can also use shortcuts/buttons to run specific chunk(s). Here is one way to do it (option 1): Use the <em>Run</em> pulldown menu at the top of the markdown file. (Choose the option you want based on what you are trying to do).</p>
+<p><img src="images/RunMenu.png" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-running-code-from-an-rmd-file-shortcut-button" class="section level2">
+<h2>Running Code from an Rmd file: Shortcut Button</h2>
+<p>Here is another way to use shortcuts/buttons to run only a specific chunk (option 2): Click on the green arrow at the upper right of a code chunk to run the chunk.</p>
+<p><img src="images/RunButton.png" width="85%" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-running-code-from-an-rmd-file-copy-and-paste" class="section level2">
+<h2>Running Code from an Rmd file: Copy and Paste</h2>
+<p>Finally, here’s a third way to use shortcuts/buttons (option 3):</p>
+<p>Copy the code you want to run, paste to the console window, and hit Enter.</p>
+<p>(Or on Windows, place your cursor in the line you want to run and hit ctrl + enter.)</p>
+</div>
+<div id="section-r-markdown-files-stand-alone" class="section level2">
+<h2>R Markdown files stand alone</h2>
+<p>We already covered this once, but we’re covering it again because it’s one of the most common student mistakes in Rmd files!</p>
+<p>If you run R code in the console or the RStudio GUI (for example, reading in a data set by pasting code into the console or using the <em>Import Dataset</em> button in the <em>Environment</em> tab), <strong>you won’t be able to use the results in your markdown file.</strong> Any and all commands you need, including reading in data, need to be included in the file.</p>
+</div>
+<div id="section-reading-in-a-data-file-stored-online" class="section level2">
+<h2>Reading in a data file stored online</h2>
+<p>You can load online datafiles in .csv format into R using the function <code>read.csv()</code>. The input to <code>read.csv()</code> is the full url where the file is located, in quotation marks. (Single or double quotes – it doesn’t matter which you choose, as they are equivalent in R.)</p>
+<p>For example, to read in a dataset about bees stored at <a href="http://www.calvin.edu/~sld33/data/FlyingBees.csv" class="uri">http://www.calvin.edu/~sld33/data/FlyingBees.csv</a>, use the command below. The data includes measurements of the size of each bee, and the time it took the bee to fly through a maze.</p>
+<pre class="r"><code>bees &lt;- read.csv(&#39;http://www.calvin.edu/~sld33/data/FlyingBees.csv&#39;)</code></pre>
+</div>
+<div id="section-when-you-read-in-data-store-it-to-a-named-object" class="section level2">
+<h2>When you read in data, store it to a named object</h2>
+<pre class="r"><code>bees &lt;- read.csv(&#39;http://www.calvin.edu/~sld33/data/FlyingBees.csv&#39;)</code></pre>
+<p>Note that we assigned the name <strong>bees</strong> to the dataset we read in using &lt;- (the “arrow” points from the object toward the name being assigned to the object).</p>
+</div>
+<div id="section-a-few-very-basic-r-functions" class="section level2">
+<h2>A few (very) basic R functions</h2>
+<p>After reading the data in, you can use R functions to have a look at it, for example:</p>
+<pre class="r"><code>head(bees)
+str(bees)
+nrow(bees)</code></pre>
+<p>Try each of the lines of code above in R. What do the functions <code>head()</code>, <code>str()</code>, and <code>nrow()</code> <strong>do</strong>? Try to figure it out based on the output they produce.</p>
+<p>If you get stuck, consult R’s built-in help files. Remember, you can access the help for a function by running the code <code>?functionName</code> – for example, if you want help on <code>head()</code>, run:</p>
+<pre class="r"><code>?head</code></pre>
+</div>
+<div id="section-reading-in-a-local-data-file" class="section level2">
+<h2>Reading in a local data file</h2>
+<p>You can also upload your own data file to the server, and then read it in to R using read.csv. The basic process is:</p>
+<ul>
+<li>Use spreadsheet software to create the data table</li>
+<li>Save the file as a csv file.</li>
+<li>Upload the csv file to the RStudio server</li>
+<li>Use the <code>read.csv()</code> function to read the file into R</li>
+</ul>
+</div>
+<div id="section-tips-for-formatting-a-data-table" class="section level2">
+<h2>Tips for formatting a data table</h2>
+<p>Your data table should have one row per <strong>observation</strong> (or “<strong>case</strong>”) – the people, animals, places, or things about which data have been collected.</p>
+<p>There should be one column for each <strong>variable</strong> observed. Choose short but informative names for your variables (and the values they can take on), and avoid using any special symbols or spaces in the names.</p>
+</div>
+<div id="section-create-your-own-data-table" class="section level2">
+<h2>Create your own data table</h2>
+<p>Use any spreadsheet software to create a simple data file.</p>
+<p>Use these data: Researchers studied wild marmots to see if they made whistles (alarm calls) in response to hiker passing near their burrows. Some hikers had dogs, others not. 20 out of 21 hikers with dogs caused whistles, while 12 out of 20 hikers without dogs caused whistles. When you are happy with your table, save it in CSV (comma separated values) format.</p>
+</div>
+<div id="section-uploading-a-file-to-rstudio" class="section level2">
+<h2>Uploading a file to RStudio</h2>
+<p>Go to the <em>Files</em> tab in RStudio (lower right). Click <em>Upload</em> and browse to select the file you created. Then, use the <code>read.csv()</code> function to read in the file. Remember to put the file name in quotes, and use &lt;- to assign a name to the dataset! Note that if you made folders in your <em>Files</em> tab and stored the csv file inside one of them, you will have to include the relative path from your Rmd file to your data file, <em>e.g.</em>, “myfolder/myfilename.csv”.)</p>
+</div>
+<div id="section-a-note-about-printing" class="section level2">
+<h2>A note about printing</h2>
+<p>When you knit a Rmd file, it will probably automatically open in RStudio’s built-in PDF pre-viewer. If you print from there, it will look awful (blurry). But when you knit, a PDF of the output is also saved in your <em>Files</em> tab. If you go to the <em>Files</em> tab and double click the PDF, it should open in your computer’s normal PDF viewer and you can print it from there…and it will look good.</p>
+</div>
+<div id="section-practice-what-youve-learned" class="section level2">
+<h2>Practice what you’ve learned</h2>
+<p>Start with the Rmd file you’ve been working with so far. Make sure it has an informative title, the names of everyone in your group, and the date.</p>
+<p>Add answers to the following questions in the text part of the file, as well as R code chunks containing all R code that you used to answer them. If you used a ? (help) command, explain how/why in the text (since its results will not appear in the PDF). To answer the questions, you will need to use things you learned in the R Basics tutorial as well as this slide show.</p>
+<ol style="list-style-type: decimal">
+<li>The mosaic package contains a dataset called HELPrct. How many cases are in the HELPrct dataset, and what are they (about what or whom were data being collected)?<br />
+</li>
+<li>How many females participated in the HELPrct study?</li>
+<li>Display the first few rows of the marmot dataset you created. In a few sentences, explain how you set up the data table and how you chose the variable names and values.</li>
+<li>How many bees were in the bee maze study?</li>
+<li>What was the median size of the bees in the study?</li>
+</ol>
+
+<script type="application/shiny-prerendered" data-context="server-start">
+library(mosaic)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap-3.3.5"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">R Markdown and Reading Data Into R</h2>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+
+</html>

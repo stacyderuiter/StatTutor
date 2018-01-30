@@ -28,6 +28,10 @@ Births1978 <- Births %>%
   dplyr::filter(year == 1978)
 data(Galton, package = "mosaicData")
 # knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+D <- data.frame(
+  group = LETTERS[1:3],
+  count = c(20, 25, 18)
+)
 knitr::opts_chunk$set(
   echo = FALSE,
   fig.align = "center",
@@ -57,6 +61,9 @@ table, td, th { border:0px; }
   
 ## Acknowledgements
 This tutorial was created based closely on the "Introduction" tutorial provided with the `ggformula` package. If desired you can access the original tutorial by running the code below in RStudio.
+
+### Note: Do NOT actually switch to R and run the code below...
+unless you want to view the original tutorial!  Instead, click "Next Topic" below to continue with *this* tutorial...
 
 ```{r, echo=TRUE, eval=FALSE}
 library(ggformula)
@@ -370,6 +377,35 @@ Bar graphs help visualize the distribution of a categorical variable, and we can
 gf_bar(~TVHrsDay, data=NHANES)
 ```
 
+## Bar graphs by groups
+What if you want to show a set of proportions for each of several groups?  For example, the NHANES data also includes a variable `Marijuana` that indicates whether the person has used marijuana.  Is there a relationship?
+
+```{r, echo=TRUE}
+gf_bar(~TVHrsDay | Marijuana, data=NHANES)
+```
+
+## Stacked bar graphs
+What if, instead of one figure panel per group, you want to see a stacked bar graph for the same data?  Here's an example.  You use the input `fill= ~variable_name` to specify the name of the variable that defines the groups (here, `Marijuana`).
+
+```{r, echo=TRUE}
+gf_bar(~TVHrsDay, fill=~Marijuana, data=NHANES)
+```
+
+## Side-by-Side bar graphs
+What if, instead of stacked bars, you want side-by-side bars? Simply add the additional input `position='dodge'`.
+
+```{r, echo=TRUE}
+gf_bar(~TVHrsDay, fill=~Marijuana, data=NHANES, position='dodge')
+```
+
+### Other groups?
+Try to make a similar plot to one or more of the bar graph variations shown above, but using a variable other than `Marijuana` to specify the groups. First, we will look at the `head()` of the dataset to see what variables are there - then it's up to you to choose one to plot, and modify the code above to make the figure.
+
+```{r, not-mari, exercise=TRUE}
+head(NHANES)
+```
+
+## Bar graph with pre-tabulated data
 Sometimes, you may be given data that is already tabulated. Instead of a dataset with one row for every case, you will have one row for every group, and a variable that gives the number of observations in each group.  For example, the simple dataset below is pre-tabulated:
 
 ```{r, echo=FALSE}
@@ -385,6 +421,7 @@ We can use the function `gf_col` to make a bar graph of pre-tabulated data.  Thi
 ```{r col-plot, exercise=TRUE}
 gf_col(count ~ group, data = D)
 ```
+
 
 ## Custom colors and transparency (Optional)
 
@@ -526,7 +563,7 @@ answer("There is an error message: 'wday' not found.", correct = TRUE)
 )
 ```
 
-## Facets 
+## Facets (Multi-panel plots)
 
 If we want to look at all 20 years of birth data, overlaying the data
 is likely to put too much information in too little space and make it hard to tell which

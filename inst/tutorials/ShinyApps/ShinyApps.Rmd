@@ -1,0 +1,352 @@
+---
+title: "Creating A Shiny App"
+output: 
+  learnr::tutorial:
+  progressive: TRUE
+runtime: shiny_prerendered
+---
+  
+```{r setup, include=FALSE}
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(ggthemes)
+library(mosaic)
+library(NHANES)
+library(GGally)
+theme_set(theme_bw())
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+
+DPiD <- read.csv('https://goo.gl/C7qnbQ')
+```
+
+## Data
+The goal of this tutorial is to demonstrate how to create a simple Shiny App (web dashboard/interactive web app created in RStudio) that lets users explore a dataset.
+
+Through most of this tutorial, you'll be using the dataset `faithful` which is built in to R. However, for your Project 1 app, you'll need to use a different dataset.  And...you'll need to figure out how to read that data into R within your app and get it ready to use.
+
+As an example, we'll use the student survey dataset we created recently in class.  This will allow us to demonstrate a few somewhat *optional*, but quite *useful*, R coding skills before we start actually working on our app:
+
+- Reading in a dataset from a Google Sheet
+- "Tidy"ing a messy dataset
+
+## Reading data from Google Sheets
+There are several ways to read data from Google Sheets.
+
+The most reliable, but not the easiest, is the one demonstrated in the R Basics tutorial at <http://rsconnect.calvin.edu:3939/connect/#/apps/17/>:  Export the sheet as a .csv file, upload the file to the RStudio server, and then read in the data from the local file.  Pretty foolproof, but a bit of an annoying process.
+
+Here is a simple way to read data directly from Google which usually works well. Be warned - sometimes strange errors crop up when you try to do this - don't hesitate to ask for help if needed.
+
+### Setup: Make the sheet public as a .csv
+Before you can read in the data file, make it public online two ways.  In Google Sheets,
+
+1. Click the "Share" button on the upper right and make sure the document is shared so that "anyone with the link can [view, comment, or edit]".
+
+```{r, echo=FALSE, out.width='85%'}
+knitr::include_graphics(path='images/ShareButton.png')
+```
+
+2. Go to the "File" menu on the upper left and select "Publish to the web..."
+
+```{r, echo=FALSE, out.width='30%'}
+knitr::include_graphics(path='images/FileMenu.png')
+```
+
+In the pop-up window that appears, opt to publish the current sheet as a comma-separated values (.csv) file.  Copy the resulting URL (highlighted in blue in the image).
+
+```{r, out.width='85%', echo=FALSE}
+knitr::include_graphics(path='images/PublishWeb.png')
+```
+
+3. Optional: If you want a shorter URL, you can go to <goo.gl> (or another link shortener) to do so. I did that and got the short URL: <https://goo.gl/C7qnbQ>
+
+### Reading in Google Sheets Web CSV
+Once you have the link to the published CSV file (which is **not** the same as the "sharing" link to edit the sheet, or the URL you see in your browser when editing the sheet), you can read in the file directly in RStudio using `read.csv()`.
+
+In this case, we want to treat blank cells as missing data; we can tell R this by including the input `na.strings=c('')` to `read.csv()`. This tells R to treat an empty cell as an "NA" (missing datapoint).
+```{r, echo=TRUE}
+DPiD <- read.csv('https://goo.gl/C7qnbQ', na.strings = c(''))
+head(DPiD)
+```
+
+## Tidying a Categorical Variable
+We now have data! But some of it is a mess. For example, let's take a quick look at the `Year` variable:
+
+```{r}
+gf_bar(~Year, data=DPiD) + coord_flip()
+```
+
+Argh! Your classmates adopted 3 spellings of "senior", 3 of "sophomore", and 4 of "junior".  We can fix this using function `fct_recode` from package `forcats`. Its inputs are a factor (categorical) variable, then a set of inputs of the form `old_value = "new_value"`. 
+
+Here, we're also using the \$ syntax, where dataset_name\$variable_name isolates just one variable from a dataset.
+
+```{r, echo=TRUE, message=FALSE}
+require(forcats)
+DPiD$Year <- fct_recode(DPiD$Year, senior="Sr.", senior='SR', senior='Sr',
+                        sophomore='Sophomore', sophomore='sophomore', sophomore='soph',
+                        junior='Junior', junior='Jr.', junior='JR', junior='Jr')
+gf_bar(~Year, data=DPiD) + coord_flip()
+```
+
+### Your Turn!
+Use plots to find another variable that needs this kind of fix, and fix it.
+
+*Note: In the tutorial environment, any new variables you create, or fixes you implement, will be valid only within the single code pane you are working in. If you want to save your work and keep a "clean" version of the `DPiD` dataset, you may want to go to RStudio and work in an Rmd document instead of here in the tutorial.*
+
+```{r, tidy-DPiD, exercise=TRUE}
+```
+
+## Shiny App from Template
+One way to quickly create a very simple shiny app is to start with the basic template built in to R Studio.
+
+In the "New File" menu (Paper icon with plus sign in green circle) on the upper left, choose "Shiny Web App..."
+
+```{r, out.width='85%', echo=FALSE}
+knitr::include_graphics(path='images/AppTemplate.png')
+```
+
+In the resulting pop-up window, you have several choices to make:
+
+```{r, echo=FALSE, out.width='85%'}
+knitr::include_graphics(path='images/ShinyDialog.png')
+```
+
+### Name your App
+You can choose a name for your app (keep it short, without any space or special characters). 
+
+### One file or two?
+You can also choose between a one-file (app.R) or two-file (ui.R and server.R) setup.  The "ui" (user interface) part of an app defines the setup and structure of the app, while the "server" part processes data and creates the actual content.  These two parts can either be stored in the same, single file (which is always called **app.R**) or in two files (always called **ui.R** and **server.R**).  Whether you choose one file or two, they will be stored in a folder with the same name as the name you choose for your app. *Note: the rest of the tutorial will assume that you chose a single-file app.R app.*
+
+Finally, you have to choose where to save the files...this is so important we'll give it its own section...
+
+## Where to Save Shiny Apps
+Finally, you have to choose a folder in which to save your new app.  The preferred choice is to save it in a folder called "ShinyApps" in your Home directory on the server (as shown in the picture above).  If you do this, then your app (once complete and working) will automatically be deployed and accessible via the internet without any further action from you.
+
+## Viewing Your App Locally
+Once you have clicked "Create" to initialize and save your app file(s), you can click the "Run App" button in the upper right corner of the file to preview the app.  
+
+```{r, echo=FALSE, out.width='85%'}
+knitr::include_graphics(path='images/RunAppButton.png')
+```
+
+### Your Turn...
+Try running the template app without making any edits to preview what it looks like.
+
+
+## Viewing Your App Online
+If you saved your app in the directory "Home/ShinyApps", you can also view it online right away.  The URL to your app will be of the form:
+
+**shiny.calvin.edu/your_Calvin_user_ID/AppName**
+
+For example, my user name is **sld33** and I have an app called **statref** which is at:
+
+<http://shiny.calvin.edu/sld33/statref>
+
+### Try it...
+Construct the URL to your current app and use a web browser to view it.
+
+Next, let's think about making some modifications to the app.
+
+## Reading in Data
+The template app uses the `faithful` dataset, which is built in to base R.  For your own app, you will want to use another dataset. The data file must be hosted online or stored in the app's folder.
+
+To read in a data file for use in your app, just include the R code to read in the file near the beginning of the file (after the `library()` command(s) on line 10).  So, if you wanted to use the DPiD student survey data, starting at line 10, your file would look like:
+
+```{r, eval=FALSE, echo=TRUE}
+library(shiny)
+
+#read in data
+DPiD <- read.csv('https://goo.gl/C7qnbQ')
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+   ...
+```
+
+*Note: in R code, any line preceded by \# is a comment (explanatory text that is not executed by R).*
+
+(Of course, if you are really going to use the DPiD data, you will also need to include more lines of code to "tidy" up the dataset as discussed earlier.)
+
+## Editing the Plot
+The plot in the template app is a histogram created with "base R" graphics.  How would we change it to a similar histogram, but using our function `gf_histogram()` from the `ggformula` package?
+
+The code that makes the plot is found at lines 38-45 of the app.R file:
+
+```{r, echo=TRUE, eval=FALSE}
+   output$distPlot <- renderPlot({
+      # generate bins based on input$bins from ui.R
+      x    <- faithful[, 2] 
+      bins <- seq(min(x), max(x), length.out = input$bins + 1)
+      
+      # draw the histogram with the specified number of bins
+      hist(x, breaks = bins, col = 'darkgray', border = 'white')
+   })
+```
+
+This code uses the `shiny` function `renderPlot()` to make a plot object to display in the app.  All code inside the `renderPlot()` parentheses should work together to finally produce the plot of interest. 
+
+All objects (like plots) to be displayed in your app should be stored as objects with names of the form output\$object_name.  This groups them together into a list of objects called `output`, from and the **server** part of your app.R file specifies how to display them in the end. You can choose the object names, but you can't change the name of `output` or shiny won't know where to find your stuff.
+
+Now, how can we alter the plot to use `gf_histogram()`? We know the dataset is called `faithful`. What variables does it contain?
+
+```{r, echo=TRUE}
+head(faithful)
+```
+
+The plot in the template app shows the `waiting` variable, which gives the duration in seconds between sequential eruptions of the Old Faithful geyser in Yellowstone Park.
+
+### Our histogram, with gf_histogram()
+
+To simply make a histogram of the variable `waiting`, you would use:
+
+```{r, echo=TRUE}
+gf_histogram(~waiting, data=faithful)
+```
+
+### Actually using the user-specified number of bins
+
+However, we don't want to show *that* histogram in the app; we want to show a histogram where the number of bins in the histogram is controlled by the user's positioning of the slider.  
+
+The current position of the slider is stored in the object `input$bins`, which gives the user-desired number of bins.
+
+`gf_histogram()` accepts the input `bins = n` where $n$ is the desired number of bins...so all we have to do is plug in `input$bins`:
+
+```{r, echo=TRUE, eval=FALSE}
+gf_histogram(~waiting, data=faithful, bins= input$bins)
+```
+
+Replace all the code at lines 40-44 of the template app.R file with the `gf_histogram()` call above, and preview the app again to see if you've succeeded!
+
+*Note: if you added code at the top of your file to read in a dataset, the exact line numbers may be a bit larger than 40-44.  You should be replacing all the code within the `renderPlot({})` call.*
+
+## Editing Sliders
+What if you want to make some changes to the slider input that controls the number of bins?  For example, you might want to change the prompt the user sees, or the minimum and maximum numbers of bins the user can select.
+
+The code that defines the slider is found in the **server** part of the file, at lines 21-25 of the app.R file:
+
+```{r, echo=TRUE, eval=FALSE}
+         sliderInput("bins",
+                     "Number of bins:",
+                     min = 1,
+                     max = 50,
+                     value = 30)
+```
+
+Try changing the prompt (currently it's "Number of bins:"), or the min, max, and value numbers, and see what happens by previewing the resulting app.
+
+## Adding Pull-Down Menus
+In your own app, you will want the user to be able to choose between different variables to plot. To do this, you will need to add a new pull-down menu.
+
+For example, let's change the template app so the user can make a histogram of *either* the `waiting` variable or the other variable in `faithful`, `eruptions` (the duration of each eruption).
+
+We want it to appear above the slider, so we need to insert some code in the spot indicated below (around line 21 of app.R):
+
+```{r, echo=TRUE, eval=FALSE}
+...
+# We will add our new code here
+         sliderInput("bins",
+                     "Number of bins:",
+                     min = 1,
+                     max = 50,
+                     value = 30)
+),
+...
+```
+
+The function that created a pull-down menu is called `selectInput()`.  We can specify the following inputs to `selectInput()`:
+
+- `inputId` is the name we'll use to refer to the user's selection in our R code in the app.R file
+- `label` is the prompt the user will see in the web app
+- `choices` is a list of options the user will choose between
+- `selection` (optional) gives the option that is initially selected by default (if the user doesn't do anything)
+
+We can use the function `names()` to easily get a list of all the variables in a dataset.  So, our `selectInput()` code might look like:
+
+```{r, echo=TRUE, eval=FALSE}
+selectInput(inputId = 'variable',
+            label = 'Choose a variable to plot:',
+            choices = names(faithful),
+            selected = 'waiting')
+```
+
+After making any changes you want, insert this code around line 21 of your app.R file so the end result looks like:
+
+```{r, echo=TRUE, eval=FALSE}
+...
+      sidebarPanel(
+        selectInput(inputId = 'variable',
+            label = 'Choose a variable to plot:',
+            choices = names(faithful),
+            selected = 'waiting'),
+         sliderInput("bins",
+                     "Number of bins:",
+                     min = 1,
+                     max = 50,
+                     value = 30)
+      ),
+...
+```
+
+*Don't forget the comma after the end of the `selectInput()` code!*
+
+Preview your app. The new pull-down menu should be there...but it doesn't do any thing yet!
+
+We need to change the `renderPlot({})` code to actually use the `variable` input from the user.
+
+The new code should look like:
+
+```{r, echo=TRUE, eval=FALSE}
+...
+    renderPlot({
+      my_formula <- as.formula(paste("~", input$variable, sep=""))
+      gf_histogram(my_formula, data=faithful, bins= input$bins)
+    })
+...
+```
+
+*Note: If you want to know why this works, and why it doesn't work to just do `gf_histogram(~input$variable, ...)` ask Prof DR and she'll be happy to explain...*
+
+## Adding a Theme
+The package `shinythemes` lets you easily customize the color scheme of your app.
+
+At the top of your app.R file, be sure to include the command
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE}
+require(shinythemes)
+```
+
+Then, within the `fluidPage()` function, add an input of the form `theme = "theme_name",`, but replace theme_name with the name of the theme you want.  To see all the options, check out <https://shiny.rstudio.com/gallery/shiny-theme-selector.html>.
+
+For example, to use the theme "cerulean", you would include the following as (part of) your app.R file:
+
+```{r, eval=FALSE, echo=TRUE}
+ui <- fluidPage(
+   theme = "cerulean",
+   # Application title
+   titlePanel("The Name of My App"),
+   ... #(more inputs go here)
+)
+...
+   
+```
+
+## Learn More
+For your first project, the goal is to create a simple, working app, not to learn everything there is to know about coding shiny apps! My advice is to start *very* simple and get something that works, and then slowly add features from there.
+
+As you did this tutorial, you probably felt confused by some of the R code, which is quite a lot more complicated that what you have seen so far...But we've only scratched the surface of the possibilities here...
+
+If you're a beginner at programming and R, don't worry about all the details and keep things as simple as you can. Your Project 1 app might be pretty much like the one you made in this tutorial, but using a different dataset instead of `faithful`.
+
+If you are great at R coding or just into coding in general, this is your chance to explore and experiment. Include more options, different plot types, fancy layouts...the sky's the limit.  Some resources for you are below - or you can always consult Prof DR with "How can I..." questions!
+
+To learn more ways to customize and format your app, you may consult:
+
+
+- Shiny tutorials from RStudio, <https://shiny.rstudio.com/tutorial/>. The RStudio tutorials give a more detailed and comprehensive introduction to shiny than this tutorial does. *Note that because of the on-campus server we are using, deploying an app online is easier for you than the process described in the tutorials...just follow the directions from earlier in this tutorial about where to save your app, and it's deployed.*
+- An online gallery of shiny apps, <https://shiny.rstudio.com/gallery/>. These examples show you some of what is possible with shiny, and you can view the source code for them and copy/modify it to use in your own work. 

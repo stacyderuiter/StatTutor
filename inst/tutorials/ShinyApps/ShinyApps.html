@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="false" />
+<meta name="allow-skip" content="false" />
+
+<title>Creating A Shiny App</title>
+
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<div id="section-data" class="section level2">
+<h2>Data</h2>
+<p>The goal of this tutorial is to demonstrate how to create a simple Shiny App (web dashboard/interactive web app created in RStudio) that lets users explore a dataset.</p>
+<p>Through most of this tutorial, you’ll be using the dataset <code>faithful</code> which is built in to R. However, for your Project 1 app, you’ll need to use a different dataset. And…you’ll need to figure out how to read that data into R within your app and get it ready to use.</p>
+<p>As an example, we’ll use the student survey dataset we created recently in class. This will allow us to demonstrate a few somewhat <em>optional</em>, but quite <em>useful</em>, R coding skills before we start actually working on our app:</p>
+<ul>
+<li>Reading in a dataset from a Google Sheet</li>
+<li>“Tidy”ing a messy dataset</li>
+</ul>
+</div>
+<div id="section-reading-data-from-google-sheets" class="section level2">
+<h2>Reading data from Google Sheets</h2>
+<p>There are several ways to read data from Google Sheets.</p>
+<p>The most reliable, but not the easiest, is the one demonstrated in the R Basics tutorial at <a href="http://rsconnect.calvin.edu:3939/connect/#/apps/17/" class="uri">http://rsconnect.calvin.edu:3939/connect/#/apps/17/</a>: Export the sheet as a .csv file, upload the file to the RStudio server, and then read in the data from the local file. Pretty foolproof, but a bit of an annoying process.</p>
+<p>Here is a simple way to read data directly from Google which usually works well. Be warned - sometimes strange errors crop up when you try to do this - don’t hesitate to ask for help if needed.</p>
+<div id="section-setup-make-the-sheet-public-as-a-.csv" class="section level3">
+<h3>Setup: Make the sheet public as a .csv</h3>
+<p>Before you can read in the data file, make it public online two ways. In Google Sheets,</p>
+<ol style="list-style-type: decimal">
+<li>Click the “Share” button on the upper right and make sure the document is shared so that “anyone with the link can [view, comment, or edit]”.</li>
+</ol>
+<p><img src="images/ShareButton.png" width="85%" style="display: block; margin: auto;" /></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Go to the “File” menu on the upper left and select “Publish to the web…”</li>
+</ol>
+<p><img src="images/FileMenu.png" width="30%" style="display: block; margin: auto;" /></p>
+<p>In the pop-up window that appears, opt to publish the current sheet as a comma-separated values (.csv) file. Copy the resulting URL (highlighted in blue in the image).</p>
+<p><img src="images/PublishWeb.png" width="85%" style="display: block; margin: auto;" /></p>
+<ol start="3" style="list-style-type: decimal">
+<li>Optional: If you want a shorter URL, you can go to &lt;goo.gl&gt; (or another link shortener) to do so. I did that and got the short URL: <a href="https://goo.gl/C7qnbQ" class="uri">https://goo.gl/C7qnbQ</a></li>
+</ol>
+</div>
+<div id="section-reading-in-google-sheets-web-csv" class="section level3">
+<h3>Reading in Google Sheets Web CSV</h3>
+<p>Once you have the link to the published CSV file (which is <strong>not</strong> the same as the “sharing” link to edit the sheet, or the URL you see in your browser when editing the sheet), you can read in the file directly in RStudio using <code>read.csv()</code>.</p>
+<p>In this case, we want to treat blank cells as missing data; we can tell R this by including the input <code>na.strings=c('')</code> to <code>read.csv()</code>. This tells R to treat an empty cell as an “NA” (missing datapoint).</p>
+<pre class="r"><code>DPiD &lt;- read.csv(&#39;https://goo.gl/C7qnbQ&#39;, na.strings = c(&#39;&#39;))
+head(DPiD)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["ID"],"name":[1],"type":["int"],"align":["right"]},{"label":["PreviousCourses"],"name":[2],"type":["fctr"],"align":["left"]},{"label":["Major"],"name":[3],"type":["fctr"],"align":["left"]},{"label":["Year"],"name":[4],"type":["fctr"],"align":["left"]},{"label":["relationship_status"],"name":[5],"type":["fctr"],"align":["left"]},{"label":["favorite_number"],"name":[6],"type":["fctr"],"align":["left"]},{"label":["last_haircut"],"name":[7],"type":["fctr"],"align":["left"]},{"label":["bedtime"],"name":[8],"type":["fctr"],"align":["left"]},{"label":["drink"],"name":[9],"type":["fctr"],"align":["left"]},{"label":["soda_pop"],"name":[10],"type":["fctr"],"align":["left"]},{"label":["pet"],"name":[11],"type":["fctr"],"align":["left"]},{"label":["movie_genre"],"name":[12],"type":["fctr"],"align":["left"]},{"label":["rand_num"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["phone"],"name":[14],"type":["fctr"],"align":["left"]},{"label":["height"],"name":[15],"type":["fctr"],"align":["left"]},{"label":["dining"],"name":[16],"type":["fctr"],"align":["left"]},{"label":["SW_ST"],"name":[17],"type":["fctr"],"align":["left"]},{"label":["mac_PC"],"name":[18],"type":["fctr"],"align":["left"]},{"label":["sleep"],"name":[19],"type":["int"],"align":["right"]},{"label":["music"],"name":[20],"type":["fctr"],"align":["left"]},{"label":["sport"],"name":[21],"type":["fctr"],"align":["left"]},{"label":["month"],"name":[22],"type":["fctr"],"align":["left"]},{"label":["countries"],"name":[23],"type":["int"],"align":["right"]},{"label":["eye_color"],"name":[24],"type":["fctr"],"align":["left"]},{"label":["relationship_count"],"name":[25],"type":["int"],"align":["right"]},{"label":["best_time"],"name":[26],"type":["fctr"],"align":["left"]}],"data":[{"1":"1","2":"Stats 243,245,343 CS 108","3":"Statistics","4":"Jr.","5":"single","6":"4","7":"45","8":"23:00","9":"other","10":"pop","11":"dog","12":"comedy","13":"7","14":"apple","15":"71","16":"commons","17":"SW","18":"PC","19":"15","20":"rap","21":"soccer","22":"September","23":"6","24":"brown","25":"2","26":"night"},{"1":"2","2":"Stats 143","3":"Finance","4":"Jr.","5":"dating","6":"11","7":"9","8":"23:00","9":"other","10":"pop","11":"dog","12":"comedy","13":"1","14":"apple","15":"75","16":"knoll","17":"SW","18":"mac","19":"16","20":"rap","21":"basketball","22":"July","23":"5","24":"blue","25":"1","26":"night"},{"1":"3","2":"Stats 243, Econ 343","3":"Actuarial Science","4":"Sophomore","5":"dating","6":"6","7":"1","8":"23:30","9":"other","10":"soda","11":"neither","12":"SciFi","13":"6","14":"android","15":"68","16":"knoll","17":"SW","18":"mac","19":"12","20":"pop","21":"baseball","22":"May","23":"2","24":"hazel","25":"1","26":"night"},{"1":"4","2":"cs 108, 112, stats 143","3":"information system ( cs and business minor)","4":"sophomore","5":"single","6":"13","7":"30 days","8":"23:00","9":"pepsi","10":"soda","11":"dog","12":"scifi","13":"4","14":"apple","15":"68.5'","16":"commons","17":"SW","18":"PC","19":"22","20":"country","21":"golfing","22":"August","23":"1","24":"brown","25":"2","26":"afternoon"},{"1":"5","2":"AP Stats","3":"Economics","4":"sophomore","5":"single","6":"7","7":"4","8":"22:00","9":"coffee","10":"pop","11":"cat","12":"comedy","13":"3","14":"android","15":"72","16":"knoll","17":"SW","18":"PC","19":"18","20":"rap","21":"basketball","22":"December","23":"1","24":"brown","25":"1","26":"afternoon"},{"1":"6","2":"Stats 116 Math 271","3":"Mathematics and pre-med","4":"sophomore","5":"dating","6":"37","7":"12","8":"1:00","9":"coffee","10":"pop","11":"cat","12":"action","13":"7","14":"apple","15":"64","16":"commons","17":"SW","18":"mac","19":"14","20":"alternative","21":"dance","22":"October","23":"6","24":"brown","25":"2","26":"night"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<div id="section-tidying-a-categorical-variable" class="section level2">
+<h2>Tidying a Categorical Variable</h2>
+<p>We now have data! But some of it is a mess. For example, let’s take a quick look at the <code>Year</code> variable:</p>
+<p><img src="ShinyApps_files/figure-html/unnamed-chunk-5-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>Argh! Your classmates adopted 3 spellings of “senior”, 3 of “sophomore”, and 4 of “junior”. We can fix this using function <code>fct_recode</code> from package <code>forcats</code>. Its inputs are a factor (categorical) variable, then a set of inputs of the form <code>old_value = &quot;new_value&quot;</code>.</p>
+<p>Here, we’re also using the $ syntax, where dataset_name$variable_name isolates just one variable from a dataset.</p>
+<pre class="r"><code>require(forcats)
+DPiD$Year &lt;- fct_recode(DPiD$Year, senior=&quot;Sr.&quot;, senior=&#39;SR&#39;, senior=&#39;Sr&#39;,
+                        sophomore=&#39;Sophomore&#39;, sophomore=&#39;sophomore&#39;, sophomore=&#39;soph&#39;,
+                        junior=&#39;Junior&#39;, junior=&#39;Jr.&#39;, junior=&#39;JR&#39;, junior=&#39;Jr&#39;)
+gf_bar(~Year, data=DPiD) + coord_flip()</code></pre>
+<p><img src="ShinyApps_files/figure-html/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;" /></p>
+<div id="section-your-turn" class="section level3">
+<h3>Your Turn!</h3>
+<p>Use plots to find another variable that needs this kind of fix, and fix it.</p>
+<p><em>Note: In the tutorial environment, any new variables you create, or fixes you implement, will be valid only within the single code pane you are working in. If you want to save your work and keep a “clean” version of the <code>DPiD</code> dataset, you may want to go to RStudio and work in an Rmd document instead of here in the tutorial.</em></p>
+<div class="tutorial-exercise" data-label="tidy-DPiD" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+</div>
+</div>
+<div id="section-shiny-app-from-template" class="section level2">
+<h2>Shiny App from Template</h2>
+<p>One way to quickly create a very simple shiny app is to start with the basic template built in to R Studio.</p>
+<p>In the “New File” menu (Paper icon with plus sign in green circle) on the upper left, choose “Shiny Web App…”</p>
+<p><img src="images/AppTemplate.png" width="85%" style="display: block; margin: auto;" /></p>
+<p>In the resulting pop-up window, you have several choices to make:</p>
+<p><img src="images/ShinyDialog.png" width="85%" style="display: block; margin: auto;" /></p>
+<div id="section-name-your-app" class="section level3">
+<h3>Name your App</h3>
+<p>You can choose a name for your app (keep it short, without any space or special characters).</p>
+</div>
+<div id="section-one-file-or-two" class="section level3">
+<h3>One file or two?</h3>
+<p>You can also choose between a one-file (app.R) or two-file (ui.R and server.R) setup. The “ui” (user interface) part of an app defines the setup and structure of the app, while the “server” part processes data and creates the actual content. These two parts can either be stored in the same, single file (which is always called <strong>app.R</strong>) or in two files (always called <strong>ui.R</strong> and <strong>server.R</strong>). Whether you choose one file or two, they will be stored in a folder with the same name as the name you choose for your app. <em>Note: the rest of the tutorial will assume that you chose a single-file app.R app.</em></p>
+<p>Finally, you have to choose where to save the files…this is so important we’ll give it its own section…</p>
+</div>
+</div>
+<div id="section-where-to-save-shiny-apps" class="section level2">
+<h2>Where to Save Shiny Apps</h2>
+<p>Finally, you have to choose a folder in which to save your new app. The preferred choice is to save it in a folder called “ShinyApps” in your Home directory on the server (as shown in the picture above). If you do this, then your app (once complete and working) will automatically be deployed and accessible via the internet without any further action from you.</p>
+</div>
+<div id="section-viewing-your-app-locally" class="section level2">
+<h2>Viewing Your App Locally</h2>
+<p>Once you have clicked “Create” to initialize and save your app file(s), you can click the “Run App” button in the upper right corner of the file to preview the app.</p>
+<p><img src="images/RunAppButton.png" width="85%" style="display: block; margin: auto;" /></p>
+<div id="section-your-turn-1" class="section level3">
+<h3>Your Turn…</h3>
+<p>Try running the template app without making any edits to preview what it looks like.</p>
+</div>
+</div>
+<div id="section-viewing-your-app-online" class="section level2">
+<h2>Viewing Your App Online</h2>
+<p>If you saved your app in the directory “Home/ShinyApps”, you can also view it online right away. The URL to your app will be of the form:</p>
+<p><strong>shiny.calvin.edu/your_Calvin_user_ID/AppName</strong></p>
+<p>For example, my user name is <strong>sld33</strong> and I have an app called <strong>statref</strong> which is at:</p>
+<p><a href="http://shiny.calvin.edu/sld33/statref" class="uri">http://shiny.calvin.edu/sld33/statref</a></p>
+<div id="section-try-it" class="section level3">
+<h3>Try it…</h3>
+<p>Construct the URL to your current app and use a web browser to view it.</p>
+<p>Next, let’s think about making some modifications to the app.</p>
+</div>
+</div>
+<div id="section-reading-in-data" class="section level2">
+<h2>Reading in Data</h2>
+<p>The template app uses the <code>faithful</code> dataset, which is built in to base R. For your own app, you will want to use another dataset. The data file must be hosted online or stored in the app’s folder.</p>
+<p>To read in a data file for use in your app, just include the R code to read in the file near the beginning of the file (after the <code>library()</code> command(s) on line 10). So, if you wanted to use the DPiD student survey data, starting at line 10, your file would look like:</p>
+<pre class="r"><code>library(shiny)
+
+#read in data
+DPiD &lt;- read.csv(&#39;https://goo.gl/C7qnbQ&#39;)
+
+# Define UI for application that draws a histogram
+ui &lt;- fluidPage(
+   ...</code></pre>
+<p><em>Note: in R code, any line preceded by # is a comment (explanatory text that is not executed by R).</em></p>
+<p>(Of course, if you are really going to use the DPiD data, you will also need to include more lines of code to “tidy” up the dataset as discussed earlier.)</p>
+</div>
+<div id="section-editing-the-plot" class="section level2">
+<h2>Editing the Plot</h2>
+<p>The plot in the template app is a histogram created with “base R” graphics. How would we change it to a similar histogram, but using our function <code>gf_histogram()</code> from the <code>ggformula</code> package?</p>
+<p>The code that makes the plot is found at lines 38-45 of the app.R file:</p>
+<pre class="r"><code>   output$distPlot &lt;- renderPlot({
+      # generate bins based on input$bins from ui.R
+      x    &lt;- faithful[, 2] 
+      bins &lt;- seq(min(x), max(x), length.out = input$bins + 1)
+      
+      # draw the histogram with the specified number of bins
+      hist(x, breaks = bins, col = &#39;darkgray&#39;, border = &#39;white&#39;)
+   })</code></pre>
+<p>This code uses the <code>shiny</code> function <code>renderPlot()</code> to make a plot object to display in the app. All code inside the <code>renderPlot()</code> parentheses should work together to finally produce the plot of interest.</p>
+<p>All objects (like plots) to be displayed in your app should be stored as objects with names of the form output$object_name. This groups them together into a list of objects called <code>output</code>, from and the <strong>server</strong> part of your app.R file specifies how to display them in the end. You can choose the object names, but you can’t change the name of <code>output</code> or shiny won’t know where to find your stuff.</p>
+<p>Now, how can we alter the plot to use <code>gf_histogram()</code>? We know the dataset is called <code>faithful</code>. What variables does it contain?</p>
+<pre class="r"><code>head(faithful)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["eruptions"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["waiting"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"3.600","2":"79"},{"1":"1.800","2":"54"},{"1":"3.333","2":"74"},{"1":"2.283","2":"62"},{"1":"4.533","2":"85"},{"1":"2.883","2":"55"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>The plot in the template app shows the <code>waiting</code> variable, which gives the duration in seconds between sequential eruptions of the Old Faithful geyser in Yellowstone Park.</p>
+<div id="section-our-histogram-with-gf_histogram" class="section level3">
+<h3>Our histogram, with gf_histogram()</h3>
+<p>To simply make a histogram of the variable <code>waiting</code>, you would use:</p>
+<pre class="r"><code>gf_histogram(~waiting, data=faithful)</code></pre>
+<p><img src="ShinyApps_files/figure-html/unnamed-chunk-13-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-actually-using-the-user-specified-number-of-bins" class="section level3">
+<h3>Actually using the user-specified number of bins</h3>
+<p>However, we don’t want to show <em>that</em> histogram in the app; we want to show a histogram where the number of bins in the histogram is controlled by the user’s positioning of the slider.</p>
+<p>The current position of the slider is stored in the object <code>input$bins</code>, which gives the user-desired number of bins.</p>
+<p><code>gf_histogram()</code> accepts the input <code>bins = n</code> where <span class="math inline">\(n\)</span> is the desired number of bins…so all we have to do is plug in <code>input$bins</code>:</p>
+<pre class="r"><code>gf_histogram(~waiting, data=faithful, bins= input$bins)</code></pre>
+<p>Replace all the code at lines 40-44 of the template app.R file with the <code>gf_histogram()</code> call above, and preview the app again to see if you’ve succeeded!</p>
+<p><em>Note: if you added code at the top of your file to read in a dataset, the exact line numbers may be a bit larger than 40-44. You should be replacing all the code within the <code>renderPlot({})</code> call.</em></p>
+</div>
+</div>
+<div id="section-editing-sliders" class="section level2">
+<h2>Editing Sliders</h2>
+<p>What if you want to make some changes to the slider input that controls the number of bins? For example, you might want to change the prompt the user sees, or the minimum and maximum numbers of bins the user can select.</p>
+<p>The code that defines the slider is found in the <strong>server</strong> part of the file, at lines 21-25 of the app.R file:</p>
+<pre class="r"><code>         sliderInput(&quot;bins&quot;,
+                     &quot;Number of bins:&quot;,
+                     min = 1,
+                     max = 50,
+                     value = 30)</code></pre>
+<p>Try changing the prompt (currently it’s “Number of bins:”), or the min, max, and value numbers, and see what happens by previewing the resulting app.</p>
+</div>
+<div id="section-adding-pull-down-menus" class="section level2">
+<h2>Adding Pull-Down Menus</h2>
+<p>In your own app, you will want the user to be able to choose between different variables to plot. To do this, you will need to add a new pull-down menu.</p>
+<p>For example, let’s change the template app so the user can make a histogram of <em>either</em> the <code>waiting</code> variable or the other variable in <code>faithful</code>, <code>eruptions</code> (the duration of each eruption).</p>
+<p>We want it to appear above the slider, so we need to insert some code in the spot indicated below (around line 21 of app.R):</p>
+<pre class="r"><code>...
+# We will add our new code here
+         sliderInput(&quot;bins&quot;,
+                     &quot;Number of bins:&quot;,
+                     min = 1,
+                     max = 50,
+                     value = 30)
+),
+...</code></pre>
+<p>The function that created a pull-down menu is called <code>selectInput()</code>. We can specify the following inputs to <code>selectInput()</code>:</p>
+<ul>
+<li><code>inputId</code> is the name we’ll use to refer to the user’s selection in our R code in the app.R file</li>
+<li><code>label</code> is the prompt the user will see in the web app</li>
+<li><code>choices</code> is a list of options the user will choose between</li>
+<li><code>selection</code> (optional) gives the option that is initially selected by default (if the user doesn’t do anything)</li>
+</ul>
+<p>We can use the function <code>names()</code> to easily get a list of all the variables in a dataset. So, our <code>selectInput()</code> code might look like:</p>
+<pre class="r"><code>selectInput(inputId = &#39;variable&#39;,
+            label = &#39;Choose a variable to plot:&#39;,
+            choices = names(faithful),
+            selected = &#39;waiting&#39;)</code></pre>
+<p>After making any changes you want, insert this code around line 21 of your app.R file so the end result looks like:</p>
+<pre class="r"><code>...
+      sidebarPanel(
+        selectInput(inputId = &#39;variable&#39;,
+            label = &#39;Choose a variable to plot:&#39;,
+            choices = names(faithful),
+            selected = &#39;waiting&#39;),
+         sliderInput(&quot;bins&quot;,
+                     &quot;Number of bins:&quot;,
+                     min = 1,
+                     max = 50,
+                     value = 30)
+      ),
+...</code></pre>
+<p><em>Don’t forget the comma after the end of the <code>selectInput()</code> code!</em></p>
+<p>Preview your app. The new pull-down menu should be there…but it doesn’t do any thing yet!</p>
+<p>We need to change the <code>renderPlot({})</code> code to actually use the <code>variable</code> input from the user.</p>
+<p>The new code should look like:</p>
+<pre class="r"><code>...
+    renderPlot({
+      my_formula &lt;- as.formula(paste(&quot;~&quot;, input$variable, sep=&quot;&quot;))
+      gf_histogram(my_formula, data=faithful, bins= input$bins)
+    })
+...</code></pre>
+<p><em>Note: If you want to know why this works, and why it doesn’t work to just do <code>gf_histogram(~input$variable, ...)</code> ask Prof DR and she’ll be happy to explain…</em></p>
+</div>
+<div id="section-adding-a-theme" class="section level2">
+<h2>Adding a Theme</h2>
+<p>The package <code>shinythemes</code> lets you easily customize the color scheme of your app.</p>
+<p>At the top of your app.R file, be sure to include the command</p>
+<pre class="r"><code>require(shinythemes)</code></pre>
+<p>Then, within the <code>fluidPage()</code> function, add an input of the form <code>theme = &quot;theme_name&quot;,</code>, but replace theme_name with the name of the theme you want. To see all the options, check out <a href="https://shiny.rstudio.com/gallery/shiny-theme-selector.html" class="uri">https://shiny.rstudio.com/gallery/shiny-theme-selector.html</a>.</p>
+<p>For example, to use the theme “cerulean”, you would include the following as (part of) your app.R file:</p>
+<pre class="r"><code>ui &lt;- fluidPage(
+   theme = &quot;cerulean&quot;,
+   # Application title
+   titlePanel(&quot;The Name of My App&quot;),
+   ... #(more inputs go here)
+)
+...</code></pre>
+</div>
+<div id="section-learn-more" class="section level2">
+<h2>Learn More</h2>
+<p>For your first project, the goal is to create a simple, working app, not to learn everything there is to know about coding shiny apps! My advice is to start <em>very</em> simple and get something that works, and then slowly add features from there.</p>
+<p>As you did this tutorial, you probably felt confused by some of the R code, which is quite a lot more complicated that what you have seen so far…But we’ve only scratched the surface of the possibilities here…</p>
+<p>If you’re a beginner at programming and R, don’t worry about all the details and keep things as simple as you can. Your Project 1 app might be pretty much like the one you made in this tutorial, but using a different dataset instead of <code>faithful</code>.</p>
+<p>If you are great at R coding or just into coding in general, this is your chance to explore and experiment. Include more options, different plot types, fancy layouts…the sky’s the limit. Some resources for you are below - or you can always consult Prof DR with “How can I…” questions!</p>
+<p>To learn more ways to customize and format your app, you may consult:</p>
+<ul>
+<li>Shiny tutorials from RStudio, <a href="https://shiny.rstudio.com/tutorial/" class="uri">https://shiny.rstudio.com/tutorial/</a>. The RStudio tutorials give a more detailed and comprehensive introduction to shiny than this tutorial does. <em>Note that because of the on-campus server we are using, deploying an app online is easier for you than the process described in the tutorials…just follow the directions from earlier in this tutorial about where to save your app, and it’s deployed.</em></li>
+<li>An online gallery of shiny apps, <a href="https://shiny.rstudio.com/gallery/" class="uri">https://shiny.rstudio.com/gallery/</a>. These examples show you some of what is possible with shiny, and you can view the source code for them and copy/modify it to use in your own work. 
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(ggthemes)
+library(mosaic)
+library(NHANES)
+library(GGally)
+theme_set(theme_bw())
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+
+DPiD <- read.csv('https://goo.gl/C7qnbQ')
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-tidy-DPiD-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-tidy-DPiD-code-editor`)), session)
+output$`tutorial-exercise-tidy-DPiD-output` <- renderUI({
+  `tutorial-exercise-tidy-DPiD-result`()
+})
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap-3.3.5"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["4.5.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/font-awesome-4.5.0"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/font-awesome.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["localforage"]},{"type":"character","attributes":{},"value":["1.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/localforage"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["localforage.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]}]}
+</script>
+<!--/html_preserve--></li>
+</ul>
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">Creating A Shiny App</h2>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+
+</html>

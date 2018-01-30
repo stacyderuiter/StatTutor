@@ -1,0 +1,12 @@
+name: shinyapps
+title: ShinyApps
+username: sld33
+account: sld33
+server: rsconnect.calvin.edu
+hostUrl: http://rsconnect.calvin.edu:3939/__api__
+appId: 47
+bundleId: 138
+url: http://rsconnect.calvin.edu:3939/content/47/
+when: 1515034887.55848
+asMultiple: FALSE
+asStatic: FALSE

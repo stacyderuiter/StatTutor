@@ -1,0 +1,12 @@
+name: propttest
+title: PropTTest
+username: sld33
+account: sld33
+server: rsconnect.calvin.edu
+hostUrl: http://rsconnect.calvin.edu:3939/__api__
+appId: 38
+bundleId: 103
+url: http://rsconnect.calvin.edu:3939/content/38/
+when: 1510678292.9274
+asMultiple: FALSE
+asStatic: FALSE

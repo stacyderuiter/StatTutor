@@ -1,0 +1,266 @@
+---
+title: "R Markdown and Reading Data Into R"
+output: 
+  learnr::tutorial:
+    progressive: TRUE
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(mosaic)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+## General Instructions
+
+While you work through this tutorial, you will create an R Markdown (.Rmd) document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents that include R code and results. Since all the data analysis and results are automatically included in the compiled output document, your work is *reproducible* and it's easy to re-do analysis if the data change, or if a mistake is uncovered. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+To create a real Rmd file, you will have to work in RStudio (outside this tutorial environment). So, as you work on this tutorial, you will probably switch back and forth between the tutorial itself and a "real" RStudio session.
+
+## Logging in to RStudio
+Go to <http://rstudio.calvin.edu> and enter your user name and password to log in.  If you need help, go to the "Links and Resources" section of the course Moodle site and click on "Calvin RStudio server information."
+
+## Executing code in R
+You can *do* things in R by typing commands in the *Console* panel; however, working that way makes it hard to keep a record of your work (and hard to redo things if anything changes or if a mistake was made). For this class, you will work in R markdown files, which can contain text, R code, and R output (such as figures). 
+
+## R Markdown files are stand-alone!
+Every R Markdown file (Rmd file) must be completely stand-alone. It doesn't share any information with the *Console* or the *Environment* that you see in your RStudio session.  **All** R code that you need to do whatever you are trying to do must be included in the Rmd file itself!  
+
+For example, if you use the point-and-click user interface in the RStudio *Environment* tab to import a data file, the read-in dataset will *not* be available for use within your Rmd file.  
+
+Similarly, if you load a package by typing "library(mosaic)" (or "require(mosaic)") in the *Console* window, `mosaic` functions and data will *not* be available to use within the Rmd file.  
+
+Keep it stand-alone!
+
+## Create an R Markdown file
+In RStudio, navigate to File -> New File -> R Markdown..., or click on the white rectangle with a green + and select R Markdown from the drop-down menu.
+
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/NewRmdFile.jpg")
+```
+   
+## Markdown Templates   
+Choose "From Template" and select the "mosaic fancy" template. (This template has a lot of *stuff* in it to show what you can do in an Rmd document. Once you have some practice, you may want to switch to the simpler "mosaic plain (PDF)" template - it contains less *stuff* you'd need to delete before inserting your own content.)
+
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/MosaicFancy.png")
+```
+
+## Save your Rmd file
+Save your file by clicking on the disk icon at the top of the file tab (maybe give it a useful file name like DeRuiterProject1.Rmd. Avoid spaces and special characters in your file name). **The file will be saved to the server, not to your computer.** All your files will be accessible in the RStudio *Files* tab (lower right panel) whenever you log into RStudio, regardless of which computer you are using. 
+
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/FileTab.png")
+```
+   
+## Downloading files from RStudio
+However, you will have to download your files if you want a copy on your own computer, or to be able to upload a copy to Moodle to turn in. To download, go to the *File* tab, check the box for the file you want, then select More - Export. from the menu at the top of the *File* tab.
+
+ 
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/Export.png")
+```
+
+## Knit!
+How do Rmd files actually work?  What's so cool about them?
+
+Click on the *small black arrow* next to the word "Knit" (and the ball of yard icon) at the top of the file window. Select "Knit to PDF".  Check out the compiled PDF result, and compare it to the original markdown file. Wow!
+
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/KnitButton.png")
+```
+   
+## Personalize your Markdown file
+At the top of the markdown file, enter an appropriate title, author(s), and date (within the quotation marks). Knit again to see the effect.
+
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/Title.png")
+```
+
+## Rmd file anatomy: Text
+The R Markdown file is a text file where you save all the R commands you want to use, plus any text commenting on the work you are doing and the results you get.  Parts of the file with a plain white background are normal text.
+
+You can format the text. For example, enclosing a word in asterisks will generate italics, so \*my text\* in the Rmd file will become *my text* in the PDF.  Using two asterisks instead of one will generate boldface, so \*\*my text\*\* becomes **my text**.  You can also make bulleted lists, numbered lists, section headers, and more. For example, 
+
+\#\#\# Some Text
+
+becomes
+
+### Some Text
+
+(a sub-section header).  Fewer hashtags make the text even larger, and more make it smaller.
+
+Check out the R Markdown cheat sheet <https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf> for more examples.
+
+For instructions on how to include R output and special characters (symbols, subscripts, etc.) in your text, see the document in the "Links and Resources" section of the course Moodle site.
+
+Before moving on, try a few of the tricks you just learned in your Rmd file. Make it pretty!
+
+## Rmd file anatomy: R code chunks
+An Rmd file can also contain one or more **R code chunks.** These sections of the file have a grey background onscreen. Each one begins with 
+
+\`\`\`{r}
+
+and ends with 
+
+\`\`\`
+
+like so: 
+
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/CodeChunk.png")
+```
+
+## How to add a new R code chunk to your file
+To add a code chunk to your file, you can type in the header and footer by hand to start and end the chunk. Or, you can click on the green box with the C inside (at the top of the Rmd file) to insert an empty chunk.
+When you click the **Knit** button a document will be generated that includes both text content as well as the output of any embedded R code chunks within the document.
+
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/InsertCodeChunk.png")
+```
+   
+## Setup Chunk
+The first R code chunk in a Rmd file is usually used to specify settings. In this chunk, you can also give R permission to use certain packages (software toolkits) with 
+
+```{r, echo=TRUE, eval=FALSE}
+library(packagename) 
+```
+
+Alternatively,
+
+```{r, echo=TRUE, eval=FALSE}
+require(packagename)
+```
+
+does the same thing. 
+
+For example, we will almost always use the mosaic package. So, verify that the first R code chunk in your file includes the line `library(mosaic)` or `require(mosaic)` (both options work equally well). 
+
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/SettingsChunk.png")
+```
+
+## The settings chunk is invisible!
+If you look carefully at the PDF output, you will see that the settings chunk does *not* appear there.  That's intentional - for homework, you don't need to show me what settings you used, although **I would always like the R code you use to solve problems to show up in the output PDF.**
+
+## Making R code invisible in the PDF
+Going back to the Rmd file, look at the header of the settings chunk -- this is the part between the {curly braces}. Notice that in addition to the required "r" label, which is followed by an (optional) chunk name, the option 
+
+`include=FALSE` 
+
+appears, which means that the code from this chunk will be invisible in your compiled output document. 
+
+## Are there other options I can set?
+You can add other options for R chunks (we will learn about some more choices later) and they should all be separated by commas. You can control things like what is included in the output PDF and how big figures are in the PDF. For this class, the defaults defined in the mosaic plain and fancy templates will work well most of the time.
+
+If interested, see <https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf> or <http://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf>. 
+
+## Clean Up
+At this point, you probably want to get rid of all the extra content in the template.  Delete **everything** in the file that comes *after* the settings R code chunk. Now you have space to include your own R code and text.
+
+## Running R Code from an Rmd file: Knit the file
+There are multiple ways to run and test R code from a markdown file. Sometimes you want to knit the whole file and get the PDF; other times you want to run just a specific bit of code to make sure it's working correctly.
+
+Obviously, every time you knit the file, all R code will be run automatically.
+
+## Running R Code from an Rmd file: Run Menu
+You can also use shortcuts/buttons to run specific chunk(s). Here is one way to do it (option 1):
+  Use the *Run* pulldown menu at the top of the markdown file. (Choose the option you want based on what you are trying to do).
+  
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/RunMenu.png")
+```   
+   
+  
+## Running Code from an Rmd file: Shortcut Button
+Here is another way to use shortcuts/buttons to run only a specific chunk (option 2):
+    Click on the green arrow at the upper right of a code chunk to run the chunk.
+    
+```{r, fig.align='center', out.width="85%", echo=FALSE}
+knitr::include_graphics(path="images/RunButton.png")
+```
+
+## Running Code from an Rmd file: Copy and Paste
+Finally, here's a third way to use shortcuts/buttons (option 3):
+
+  Copy the code you want to run, paste to the console window, and hit Enter.
+  
+  (Or on Windows, place your cursor in the line you want to run and hit ctrl + enter.)
+  
+## R Markdown files stand alone
+We already covered this once, but we're covering it again because it's one of the most common student mistakes in Rmd files!
+
+If you run R code in the console or the RStudio GUI (for example, reading in a data set by pasting code into the console or using the *Import Dataset* button in the *Environment* tab), **you won't be able to use the results in your markdown file.**  Any and all commands you need, including reading in data, need to be included in the file.
+
+## Reading in a data file stored online
+You can load online datafiles in .csv format into R using the function `read.csv()`.  The input to `read.csv()` is the full url where the file is located, in quotation marks. (Single or double quotes -- it doesn't matter which you choose, as they are equivalent in R.)
+
+For example, to read in a dataset about bees stored at <http://www.calvin.edu/~sld33/data/FlyingBees.csv>, use the command below. The data includes measurements of the size of each bee, and the time it took the bee to fly through a maze.
+
+```{r}
+bees <- read.csv('http://www.calvin.edu/~sld33/data/FlyingBees.csv')
+```
+
+## When you read in data, store it to a named object
+```{r}
+bees <- read.csv('http://www.calvin.edu/~sld33/data/FlyingBees.csv')
+```
+
+Note that we assigned the name **bees** to the dataset we read in using <- (the "arrow" points from the object toward the name being assigned to the object). 
+
+## A few (very) basic R functions
+After reading the data in, you can use R functions to have a look at it, for example:
+
+```{r, results='hide'}
+head(bees)
+str(bees)
+nrow(bees)
+```
+
+Try each of the lines of code above in R.  What do the functions `head()`, `str()`, and `nrow()` **do**?  Try to figure it out based on the output they produce.
+
+If you get stuck, consult R's built-in help files. Remember, you can access the help for a function by running the code `?functionName` -- for example, if you want help on `head()`, run:
+
+```{r, echo=TRUE, eval=FALSE}
+?head
+```
+
+
+## Reading in a local data file
+You can also upload your own data file to the server, and then read it in to R using read.csv.  The basic process is:
+
+- Use spreadsheet software to create the data table
+- Save the file as a csv file.
+- Upload the csv file to the RStudio server
+- Use the `read.csv()` function to read the file into R
+
+## Tips for formatting a data table
+Your data table should have one row per **observation** (or "**case**") -- the people, animals, places, or things about which data have been collected.
+
+There should be one column for each **variable** observed. Choose short but informative names for your variables (and the values they can take on), and avoid using any special symbols or spaces in the names.
+
+
+## Create your own data table
+Use any spreadsheet software to create a simple data file. 
+
+Use these data: Researchers studied wild marmots to see if they made whistles (alarm calls) in response to hiker passing near their burrows.  Some hikers had dogs, others not.  20 out of 21 hikers with dogs caused whistles, while 12 out of 20 hikers without dogs caused whistles.
+When you are happy with your table, save it in CSV (comma separated values) format.
+
+## Uploading a file to RStudio
+Go to the *Files* tab in RStudio (lower right).  Click *Upload* and browse to select the file you created. Then, use the `read.csv()` function to read in the file. Remember to put the file name in quotes, and use <- to assign a name to the dataset!   Note that if you made folders in your *Files* tab and stored the csv file inside one of them, you will have to include the relative path from your Rmd file to your data file, *e.g.*, "myfolder/myfilename.csv".)
+
+## A note about printing
+When you knit a Rmd file, it will probably automatically open in RStudio's built-in PDF pre-viewer. If you print from there, it will look awful (blurry). But when you knit, a PDF of the output is also saved in your *Files* tab. If you go to the *Files* tab and double click the PDF, it should open in your computer's normal PDF viewer and you can print it from there...and it will look good.
+
+## Practice what you've learned
+Start with the Rmd file you've been working with so far.  Make sure it has an informative title, the names of everyone in your group, and the date.
+
+Add answers to the following questions in the text part of the file, as well as R code chunks containing all R code that you used to answer them. If you used a ? (help) command, explain how/why in the text (since its results will not appear in the PDF). To answer the questions, you will need to use things you learned in the R Basics tutorial as well as this slide show.
+
+1. The mosaic package contains a dataset called HELPrct. How many cases are in the HELPrct dataset, and what are they (about what or whom were data being collected)?  
+2. How many females participated in the HELPrct study?
+3. Display the first few rows of the marmot dataset you created. In a few sentences, explain how you set up the data table and how you chose the variable names and values.
+4. How many bees were in the bee maze study?
+5. What was the median size of the bees in the study?
+

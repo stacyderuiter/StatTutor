@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="false" />
+<meta name="allow-skip" content="false" />
+
+<title>More Plots with ggformula</title>
+
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<div id="section-beyond-basics" class="section level2">
+<h2>Beyond Basics</h2>
+<p>This tutorial continues where the “Plotting Basics” tutorial (<a href="http://rsconnect.calvin.edu:3939/connect/#/apps/45/" class="uri">http://rsconnect.calvin.edu:3939/connect/#/apps/45/</a>) left off. It shows you how to make a few more subtle modifications to your plots, and demonstrates how to make a few additional types of figures.</p>
+</div>
+<div id="section-jitter-plots" class="section level2">
+<h2>Jitter plots</h2>
+<p>If you would like to display the values of a <em>quantitative</em> variable for a few different <em>groups</em>, it is sometimes preferable to simply show <em>all</em> the data points instead of showing box plots or histograms for each group. <strong>Generally, this is a better idea for small datasets than for large ones!</strong></p>
+<div id="section-why-not-just-use-a-scatter-plot" class="section level3">
+<h3>Why not just use a scatter plot?</h3>
+<p>One (crude) way to do this is to just make a scatter plot of a quantitative variable as a function of a categorical one:</p>
+<pre class="r"><code>gf_point(height ~ sex, data=Galton)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-1-1.png" width="480" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-transparency-to-reduce-overplotting" class="section level3">
+<h3>Transparency to Reduce Overplotting</h3>
+<p>However, a lot of the data points are overplotted (on top of each other), so it’s hard to see how many observations there really are near, say, females 65 inches tall.</p>
+<p>Adding transparency might help a bit:</p>
+<pre class="r"><code>gf_point(height ~ sex, data=Galton, alpha=0.1)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-2-1.png" width="480" style="display: block; margin: auto;" /></p>
+<p>Well, it helped, but didn’t totally solve the problem.</p>
+</div>
+<div id="section-jitter-plot-to-the-rescue" class="section level3">
+<h3>Jitter plot to the rescue!</h3>
+<p>One way to improve this plot further would be to plot the data in clusters rather than vertical lines. The function <code>gf_jitter()</code> makes such plots.</p>
+<pre class="r"><code>gf_jitter(height ~ sex, data=Galton, alpha=0.5)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-3-1.png" width="480" style="display: block; margin: auto;" /></p>
+<p>If desired, you can adjust the width of the clusters using the input <code>width</code>. <code>width</code> is a proportion. Its default value is 0.4, which means the jittered data points will occupy 80% of the space between groups.</p>
+<p>A width of 0.5 or larger is too big - it will make it difficult or impossible to distinguish the clusters:</p>
+<pre class="r"><code>gf_jitter(height ~ sex, data=Galton, alpha=0.5, width=0.5)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-4-1.png" width="480" style="display: block; margin: auto;" /></p>
+<p>But we might want to try a smaller <code>width</code>:</p>
+<pre class="r"><code>gf_jitter(height ~ sex, data=Galton, alpha=0.5, width=0.25)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-5-1.png" width="480" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-your-turn" class="section level3">
+<h3>Your Turn!</h3>
+<p>Use the <code>iris</code> dataset (which is built in to base R) and create a jitter plot.</p>
+<div class="tutorial-exercise" data-label="iris-jitter" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+</div>
+</div>
+<div id="section-violin-plots" class="section level2">
+<h2>Violin Plots</h2>
+<p>A compromise between side-by-side boxplots, histograms, and jitter plots (for plots of a quantitative variable by groups) is the violin plot. This kind of plot is similar to a boxplot, but instead of a box, it shows a smoothed histogram (density plot) flipped on its side, and also mirrored (imagine two histograms joined base-to-base).</p>
+<p>The function <code>gf_violin()</code> makes violin plots.</p>
+<p>It’s easier to show than to explain, perhaps. Compare the boxplots and violin plots below to get an idea:</p>
+<pre class="r"><code>gf_boxplot(height ~ sex, data=Galton)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;" /></p>
+<div id="section-violin-jitter" class="section level3">
+<h3>Violin + Jitter?</h3>
+<p>Sometimes it might be desirable to overlay the actual data points (a jitter plot) atop a violin or boxplot, like so:</p>
+<pre class="r"><code>gf_boxplot(height ~ sex, data=Galton) %&gt;%
+  gf_jitter(alpha=0.2, width=0.3, color=&#39;grey34&#39;)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-7-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>gf_violin(height ~ sex, data=Galton) %&gt;%
+  gf_jitter(alpha=0.2, width=0.3, color=&#39;grey34&#39;)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-8-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-your-turn-1" class="section level3">
+<h3>Your Turn!</h3>
+<p>Use the <code>iris</code> dataset (or another of your choice – maybe <code>HELPrct</code>?) and experiment with violin plots.</p>
+<div class="tutorial-exercise" data-label="violin" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+</div>
+</div>
+<div id="section-pie-charts" class="section level2">
+<h2>Pie Charts</h2>
+<p>Making nice pie charts in R is a bit of work, because most of the plotting libraries are not set up to do it well…you have to force them to do your will. Don’t say you weren’t warned! But, with a little effort, you can make decent pie charts.</p>
+<p>A simple example, first. What if we want to show the proportion people of each race (variable name <code>Race1</code>) in the <code>NHANES</code> dataset?</p>
+<p>Strangely enough, we want to start with a stacked bar chart colored by race, like this. We include 1 rather than a variable name in the formula (because we want just one stacked bar), and we add the input <code>width=1</code> because we want the single bar to take up the whole width of the graph.</p>
+<pre class="r"><code>gf_bar(~1, fill=~Race1, data=NHANES, width=1)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-9-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>Now, to turn this into a pie chart, we will add the magical code <code>+ coord_polar('y')</code>. (Don’t change anything - it is always ‘y’ exactly as written, regardless of variable names being plotted. This actually changes the plot to polar coordinates, which makes it look like a pie…)</p>
+<pre class="r"><code>gf_bar(~1, fill=~Race1, data=NHANES, width=1) + coord_polar(&#39;y&#39;)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-10-1.png" width="576" style="display: block; margin: auto;" /></p>
+<div id="section-removing-the-junk" class="section level3">
+<h3>Removing the junk</h3>
+<p>Well, it’s close…but why is there a little X-axis scale on the <em>y</em> axis of the plot, and how can we get rid of all the axis ticks and labels?</p>
+<p>To do this relatively simply, we will create a “blank” plot theme that doesn’t contain any of these elements. (You could include this code in the settings chunk, if working in an Rmd file.)</p>
+<pre class="r"><code>blank_theme &lt;- theme_minimal()+
+  theme(
+  axis.title.x = element_blank(),
+  axis.title.y = element_blank(),
+  panel.border = element_blank(),
+  panel.grid=element_blank(),
+  axis.ticks = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_blank()
+  )</code></pre>
+<p>Now, make the plot again, but use this theme (adding the theme before the <code>+ coord_polar('y')</code>):</p>
+<pre class="r"><code>gf_bar(~1, fill=~Race1, data=NHANES, width=1) %&gt;% 
+  gf_theme(blank_theme) + 
+  coord_polar(&#39;y&#39;)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-12-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="section-side-by-side-pie-charts" class="section level2">
+<h2>Side by side pie charts</h2>
+<p>Once you have a pie chart, you can use facets to make side-by-side pies for different groups. For example, what if we plotted pie charts of race for each gender in <code>NHANES</code>?</p>
+<p>We just need to add <code>| group_variable</code> to the <code>gf_bar()</code> formula, and then also add the verbatim additional input <code>position=position_fill()</code>. (The <code>position</code> input makes sure that both pies are complete, without any slices missing…)</p>
+<pre class="r"><code>gf_bar(~ 1 | Gender, fill=~Race1, data=NHANES, width=1,
+       position=position_fill()) %&gt;% 
+  gf_theme(blank_theme) + 
+  coord_polar(&#39;y&#39;)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-13-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-contour-and-raster-plots" class="section level2">
+<h2>Contour and Raster Plots</h2>
+<p>If you are interested in the relationship of three quantitative variables, one option is a contour plot, which can be made with <code>gf_contour</code>. The formula for <code>gf_contour</code> is of the form $ z x + y$. For example, are there patterns in the number of babies born by month (1-12) and day of the month (1-31)?</p>
+<pre class="r"><code>gf_contour(births ~ day + month, data=Births1978)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-14-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>Hmm…interesting, if hard to make sense of. (Think about weekends - do they always fall on the same numeric days of the month?)</p>
+<p>Another way to visualize this relationship is with a density plot (heat map), created via <code>gf_raster</code>. Its formula is of the form <span class="math inline">\(y \sim x\)</span>, with input <code>fill</code> indicating the variable to color by:</p>
+<pre class="r"><code>gf_raster(month ~ day, fill=~births, data=Births1978)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-15-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>And if we combine them?</p>
+<pre class="r"><code>gf_raster(month ~ day, fill=~births, data=Births1978) %&gt;%
+  gf_contour(births ~ day + month, data=Births1978, color=&#39;white&#39;)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-16-1.png" width="576" style="display: block; margin: auto;" /></p>
+<div id="section-your-turn-2" class="section level3">
+<h3>Your Turn!</h3>
+<p>The dataset at <a href="http://www.calvin.edu/~sld33/data/EIA.csv" class="uri">http://www.calvin.edu/~sld33/data/EIA.csv</a> contains simulated data from an environmental impact assessment to determine the effects of wind farms on duck abundance. Variable <code>xcode</code> and <code>ycode</code> indicate the x and y positions at which each data point was collected. Variable <code>count</code> indicates the number of ducks observed at each (x,y) location during the study. Variable <code>impact</code> is 0 before the wind farm was operational, and 1 when it was operating. Make a raster plot to explore this data.</p>
+<p><em>Note: <code>gf_contour()</code> only works for data with a single observation of the variable to be contoured for each unique combination of the <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> variables, so it will not work on this dataset.</em></p>
+<div class="tutorial-exercise" data-label="ducks" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+</div>
+</div>
+<div id="section-pairs-plots" class="section level2">
+<h2>Pairs Plots</h2>
+<p>Sometimes it can be useful to make a matrix of pairwise scatterplots (or side-by-side boxplots) for all possible pairs of variables in a dataset. This is a quick way to look for patterns, but could be tedious to acheive if you have a lot of variables and have to make all the plots one by one. The function <code>ggpairs</code> from package <code>GGally</code> makes it easy; its first input is the dataset you want to plot.</p>
+<p>As an example, let’s use the built-in dataset <code>flea</code>, which contains data on body size measurements for 3 species of fleas.</p>
+<pre class="r"><code>ggpairs(flea)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-17-1.png" width="528" style="display: block; margin: auto;" /></p>
+<p>Along the diagonal of the matrix of plots, you see a distribution plot for each individual variable (bar graphs for categorical ones, and density plots for quantitative ones). For pairs of quantitative variables, the rest of the matrix is filled in as follows. In the upper half of the matrix, the correlation coefficients between quantitative variable pairs are shown, and the lower half shows scatter plots. (For categorical-quantitative pairs, histograms or boxplots by category are shown.)</p>
+<div id="section-your-turn-3" class="section level3">
+<h3>Your turn!</h3>
+<p>Make a pairs plot for the <code>iris</code> dataset. See any interesting patterns?</p>
+<div class="tutorial-exercise" data-label="iris-pairs" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+</div>
+</div>
+<div id="section-axis-labels-that-dont-fit" class="section level2">
+<h2>Axis Labels that Don’t Fit</h2>
+<p>Sometimes - particularly for bar graphs of categorical variables with long category names - axis tick labels overlap in an ugly way. For example:</p>
+<pre class="r"><code>gf_bar(~Education, data=NHANES)</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-18-1.png" width="384" style="display: block; margin: auto;" /></p>
+<div id="section-flip-the-axes" class="section level3">
+<h3>Flip the Axes</h3>
+<p>One simple way to solve this problem is to flip the x and y axes of the plot.</p>
+<pre class="r"><code>gf_bar(~Education, data=NHANES) + coord_flip()</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-19-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>(Note the use of the <code>+</code> instead of the pipe <code>%&gt;%</code> in this instance.)</p>
+</div>
+<div id="section-rotate-the-labels" class="section level3">
+<h3>Rotate the Labels</h3>
+<p>Another solution is to rotate the axis labels. We can do that by modifying the <code>angle</code> and <code>hjust</code> values for the x tick labels in the plot’s <code>theme</code>. <code>angle</code> is the angle in degrees by which to rotate the labels, and <code>hjust</code> moves them up and down (positive <code>hjust</code> moves down, and negative moves up). For example:</p>
+<pre class="r"><code>gf_bar(~Education, data=NHANES) %&gt;% 
+    gf_theme(axis.text.x=element_text(angle=65, hjust=1))</code></pre>
+<p><img src="AdvancedPlotting_files/figure-html4/unnamed-chunk-20-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-your-turn-4" class="section level3">
+<h3>Your Turn!</h3>
+<p>The dataset at <a href="http://www.calvin.edu/~sld33/data/MammalMetabolicRates.csv" class="uri">http://www.calvin.edu/~sld33/data/MammalMetabolicRates.csv</a> provides data on mammal metabolic rates. Make a bar graph of the number of observations per Order (or per Family, Genus, or Species) with legible axis tick labels.</p>
+<div class="tutorial-exercise" data-label="mmr" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+</div>
+</div>
+<div id="section-got-questions" class="section level2">
+<h2>Got Questions?</h2>
+Are there more types of plots you would like to make, or customizations you are interested in? Contact Prof DR and ask if there’s something you’d like to see added to this tutorial… 
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(ggthemes)
+library(mosaic)
+library(NHANES)
+library(GGally)
+theme_set(theme_bw())
+# data(Births78, package = "mosaicData")
+# Births78 <- Births78 %>% mutate(date = as.Date(date))
+data(Births, package = "mosaicData")
+data(NHANES, package = "NHANES")
+for (y in unique(Births$year)) {
+  assign(paste0("Births",y),  Births %>%
+           dplyr::filter(year == y))
+}
+Births1978 <- Births %>% 
+  dplyr::filter(year == 1978)
+data(Galton, package = "mosaicData")
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+D <- data.frame(
+  group = LETTERS[1:3],
+  count = c(20, 25, 18)
+)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-iris-jitter-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-iris-jitter-code-editor`)), session)
+output$`tutorial-exercise-iris-jitter-output` <- renderUI({
+  `tutorial-exercise-iris-jitter-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-violin-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-violin-code-editor`)), session)
+output$`tutorial-exercise-violin-output` <- renderUI({
+  `tutorial-exercise-violin-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-ducks-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-ducks-code-editor`)), session)
+output$`tutorial-exercise-ducks-output` <- renderUI({
+  `tutorial-exercise-ducks-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-iris-pairs-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-iris-pairs-code-editor`)), session)
+output$`tutorial-exercise-iris-pairs-output` <- renderUI({
+  `tutorial-exercise-iris-pairs-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-mmr-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-mmr-code-editor`)), session)
+output$`tutorial-exercise-mmr-output` <- renderUI({
+  `tutorial-exercise-mmr-result`()
+})
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap-3.3.5"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.9.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["4.5.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/font-awesome-4.5.0"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/font-awesome.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["localforage"]},{"type":"character","attributes":{},"value":["1.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/localforage"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["localforage.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">More Plots with ggformula</h2>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+
+</html>
