@@ -45,3 +45,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# R projects 
+.Rproj.user
+.Rproj.user/shared/notebooks
