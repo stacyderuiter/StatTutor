@@ -613,13 +613,15 @@ gf_dens( ~ BPSysAve, data = NHANES)
 #### Your turn
 
  1. Use `%>%` to overlay the two layers.
+
+ 2. Use `size = 2` or `size = 3` to make the density curve thicker.
  
- 2. Change `gf_dens()` to `gf_density()`.
+ 3. Change `gf_dens()` to `gf_density()`.
  
- 3. Can you make the density (use `gf_density()`) plot a different color and
+ 4. Can you make the density (use `gf_density()`) plot a different color and
  partly transparent?  That will make it easier to see the histogram.
  
- 4. Replace `BPSysAve` with a different quantitative variable.
+ 5. Replace `BPSysAve` with a different quantitative variable.
 
 ## Boxplots and violin plots
 
