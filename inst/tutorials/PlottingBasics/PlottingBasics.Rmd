@@ -630,7 +630,7 @@ a quantitative variable in different groups.
 1. Run the code below to see how this works (You're plotting systolic blood
 pressure for seven groups who watch different amounts of TV each day).
 
-2. Change `gf_boxplot()` to `bf_violin()` and see what happens.
+2. Change `gf_boxplot()` to `gf_violin()` and see what happens.
 
 3. Try changing the order of `x` and `y` in the formula -- what happens?
 
@@ -996,3 +996,101 @@ gf_bar(~ Race1, data = NHANES) %>%
   gf_theme(theme = theme_wsj(base_size = 6))
 ```
  
+ 
+## But I like numbers!
+
+Numerical summaries can be obtained using the **same template we used for plots**, so there is almost nothing to learn.
+
+Look how similar these are.  (I've inserted some spaces to make it even more obvious.)
+The first of these creates side by side boxplots.  The second does side-by-side means.
+
+```{r numbers1, exercise = TRUE}
+gf_boxplot(BPSysAve ~ TVHrsDay, data = NHANES)
+      mean(BPSysAve ~ TVHrsDay, data = NHANES)
+```
+
+### Your turn
+
+Try replaceing `mean()` with some other functions:
+
+  * `median()`
+  * `max()`
+  * `min()`
+  * `sd()` (standard deviation)
+  * `iqr()` (interquartile range)
+
+### Summaries of one variable  
+
+If we only have one variable, we can mimic histograms or barplots.
+
+#### 1 Quantitative variable
+
+```{r numbers2, exercise = TRUE}
+gf_histogram( ~ BPSysAve, data = NHANES)
+        mean( ~ BPSysAve, data = NHANES)
+```
+
+#### 1 Categorical variable
+
+`tally()` is a useful function for tallying a categorical variable.  (It can
+handle two categorical variables, too.)
+
+```{r, numbers3, exercise = TRUE}
+gf_bar( ~ Race1, data = NHANES)
+ tally( ~ Race1, data = NHANES)
+```
+
+
+### Multi-tasking
+
+The `df_stats()` function allows us to compute multiple summaries simultaneously
+-- great for all you multi-taskers out there. (It also saves paper if you are
+printing your work.)
+
+```{r, numbers4, exercise = TRUE}
+df_stats( ~ BPSysAve, data = NHANES, mean, median)
+```
+
+#### Your turn
+
+ 1. Add on `max`, and `min` to the list of summaries in the example above.
+ 
+ 2. Now delete all the summaries (get rid of `mean`, `median`, etc.) to see what
+ the default summaries are.  (It's a pretty useful set of summaries.)
+ 
+ 3. Now create a boxplot on a separate line using the same formula and data.  Do
+ you see how where the values corresponding to the edges of the boxes show up in
+ the default summary of `df_stats()`?
+
+### df-stats() for tallying
+
+The `counts()` and `props()` summaries compute counts and proportions for 
+categorical variables.
+
+```{r, numbers5, exercise = TRUE}
+df_stats( ~ Race1, data = NHANES, counts)
+df_stats( SmokeNow ~ Race1, data = NHANES, counts)
+```
+
+#### Your turn
+
+ 1. Change `counts` to `props` to see what happens.
+ 
+ 2. What happens if you switch the order of `SmokeNow` and `Race1` with `counts`?
+ 
+ 3. What happens if you switch the order of `SmokeNow` and `Race1` with `props`?
+ 
+ 4. Can we get counts and proportions at the same time? Try it.
+
+## One template to rule a lot
+
+Not quite as good as Frodo's ring, but our template is pretty powerful.
+
+<center>
+<h2><strong><span class="boxed">goal</span> ( <span class="boxed">&nbsp;y&nbsp;</span> ~ <span class="boxed">&nbsp;x&nbsp;</span> , data = <span class="boxed">mydata</span> , ...)</strong> 
+  </h2></center>
+&nbsp;
+
+We can use it for all sorts of numerical and graphical summaries of data.  (And later
+in the course we will use it statistical modeling as well.)
+
