@@ -602,10 +602,11 @@ gf_histogram( ~ BPSysAve, data = NHANES, bins = 30)
 
 A density plot is a smoothed contour tracing the shape of a dataset's
 distribution.  The `gf_density()` and `gf_dens()` functions produce these plots
-(in slightly different ways):
+(in slightly different ways).  To compare with a histogram apples-to-apples, we
+will use a **density histogram** (`gf_dhistogram()`).
 
-```{r}
-gf_histogram( ~ BPSysAve, data = NHANES) 
+```{r, hist-dens, exercise = TRUE}
+gf_dhistogram( ~ BPSysAve, data = NHANES) 
 gf_dens( ~ BPSysAve, data = NHANES) 
 ```
 
