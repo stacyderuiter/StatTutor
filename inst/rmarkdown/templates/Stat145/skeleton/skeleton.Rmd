@@ -1,0 +1,36 @@
+---
+title: "Stat 145 -- PS ??"
+author: "A. Student"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output: 
+  html_document:
+    fig_height: 2.2
+    fig_width: 4
+  pdf_document:
+    fig_height: 2.2
+    fig_width: 4
+  word_document:
+    fig_height: 2.2
+    fig_width: 4
+---
+
+```{r, setup, include = FALSE}
+# load packages that are going to be used
+require(mosaic)      # this loads ggformula, etc. too
+require(Lock5withR)  # this loads data sets from our book
+
+# Some customization. You can alter or delete as desired (if you know what you are doing).
+
+theme_set(theme_bw())     # change theme for ggplot2/ggformula
+
+knitr::opts_chunk$set(
+  tidy = FALSE,     # display code as typed (rather than reformatted)
+  size = "small")   # slightly smaller font for code
+```
+
+<!-- Put your work below here.  Put text in text chunks, code in R chunks. -->
+
+### Problem 0.0
+
+You will want to **delete this** and replace it with your *own work*.
+
