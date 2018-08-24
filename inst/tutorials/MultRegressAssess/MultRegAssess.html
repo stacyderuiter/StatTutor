@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="true" />
+<meta name="allow-skip" content="false" />
+
+<title>Multiple Regression - Model Assessment</title>
+
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<div id="section-fitting-a-model" class="section level2">
+<h2>Fitting a model</h2>
+<p>To fit a linear regression model in R, we will use the function <code>lm()</code>. Let’s try an example with the <code>lead</code> dataset from (<a href="http://www.calvin.edu/~sld33/data/FlintWaterTestJanMar2016.csv" class="uri">http://www.calvin.edu/~sld33/data/FlintWaterTestJanMar2016.csv</a>):</p>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["X"],"name":[1],"type":["int"],"align":["right"]},{"label":["ID"],"name":[2],"type":["fctr"],"align":["left"]},{"label":["Lead"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Copper"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["Alkalinity"],"name":[5],"type":["int"],"align":["right"]},{"label":["Fluoride"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["Iron"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["Cadmium"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["Calcium"],"name":[9],"type":["dbl"],"align":["right"]},{"label":["Sodium"],"name":[10],"type":["dbl"],"align":["right"]},{"label":["Aluminum"],"name":[11],"type":["dbl"],"align":["right"]},{"label":["Water_Filter"],"name":[12],"type":["fctr"],"align":["left"]},{"label":["Decimal_Date"],"name":[13],"type":["dbl"],"align":["right"]},{"label":["Month"],"name":[14],"type":["fctr"],"align":["left"]}],"data":[{"1":"1","2":"267.2016-02-23","3":"1.760647","4":"93.36000","5":"73","6":"0.57","7":"0.1074529","8":"2.000000","9":"26.38824","10":"4.744118","11":"0.2000000","12":"No Filter","13":"2016.074","14":"Jan","_rn_":"1"},{"1":"2","2":"272.2016-02-23","3":"2.930133","4":"22.30733","5":"77","6":"0.59","7":"0.2306667","8":"2.000000","9":"27.04667","10":"5.059333","11":"0.3543333","12":"No Filter","13":"2016.074","14":"Jan","_rn_":"2"},{"1":"4","2":"297.2016-02-26","3":"21.810667","4":"15.78067","5":"73","6":"0.57","7":"0.2570933","8":"2.110667","9":"26.94000","10":"4.758000","11":"0.2000000","12":"No Filter","13":"2016.074","14":"Jan","_rn_":"3"},{"1":"5","2":"285.2016-02-24","3":"1.516533","4":"94.01333","5":"72","6":"0.59","7":"0.1474267","8":"2.000000","9":"25.90000","10":"4.626667","11":"0.2000000","12":"No Filter","13":"2016.074","14":"Jan","_rn_":"4"},{"1":"6","2":"286.2016-02-24","3":"9.472778","4":"61.66667","5":"72","6":"0.58","7":"0.1044889","8":"2.000000","9":"26.90000","10":"4.696111","11":"0.2000000","12":"No Filter","13":"2016.080","14":"Jan","_rn_":"5"},{"1":"7","2":"288.2016-02-25","3":"2.757059","4":"106.50000","5":"73","6":"0.62","7":"0.0800000","8":"2.000000","9":"26.93529","10":"4.964706","11":"0.2000000","12":"No Filter","13":"2016.083","14":"Jan","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>The first input to <code>lm</code> is a formula of the form <span class="math inline">\(y \sim x_1 + x_2 + ...\)</span>, where y is the name of the response variable, and <span class="math inline">\(x_1\)</span>, <span class="math inline">\(x_2\)</span>, … <span class="math inline">\(x_n\)</span> are the predictor or explanatory variables. The second input to <code>lm</code> is <code>data</code>, the name of your dataset.</p>
+<p>Let’s try a model with response varialbe <code>Lead</code> and predictors <code>Fluoride</code>, <code>Water_Filter</code>, and <code>Month</code>.</p>
+<div class="tutorial-exercise" data-label="fit-lm" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>mr1 &lt;- lm(y ~ x1 + x2, data=lead)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":3.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<p>The R code above fits a linear regression model of the form:</p>
+<p><span class="math display">\[ y = \beta_0 + \beta_1*x_1 + \beta_2*x_2 + \epsilon,\]</span> where <span class="math inline">\(\epsilon \sim N(0, \sigma)\)</span>. (The residuals <span class="math inline">\(\epsilon\)</span> follow a normal distribution with mean 0 and some standard deviation <span class="math inline">\(\sigma\)</span>.)</p>
+</div>
+<div id="section-viewing-model-summary-and-coefficients" class="section level2">
+<h2>Viewing model summary and coefficients</h2>
+<p>To extract just the <em>coefficient</em> or <em>parameter</em> values (the “<span class="math inline">\(\beta\)</span>s”) from the fitted model object <code>mr1</code>, we can use <code>coef()</code>:</p>
+<div class="tutorial-exercise" data-label="get-coef" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>coef(mr1)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":3.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+To get a full summary, use <code>summary()</code>:
+<div class="tutorial-exercise" data-label="get-summ" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>summary(mr1)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":3.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<p>Notes about the summary:</p>
+<ul>
+<li>The fitted model parameters are in the “Estimate” column of the coefficient table.</li>
+<li>The last column of the coefficient table contains p-values. The first row is the p-value for a test of the null hypothesis that the true intercept, <span class="math inline">\(\beta_0\)</span>, is 0 (this is not usually of much interest). The second row is the p-value for a test of the hypothesis that <span class="math inline">\(\beta_1\)</span>, the slope for the first predictor variable, is 0. This <em>is</em> usually of interest, because it tells us whether there is a “real” linear relationship between the two variables.</li>
+<li><span class="math inline">\(\hat{\sigma}\)</span> (an estimate of the standard deviation of the residuals from the data) is near the bottom of the output, called “Residual standard error.”</li>
+<li>Also near the bottom of the summary output, the <span class="math inline">\(R^2\)</span> value is reported. (If there are more than one predictors in the model, we prefer to use the adjusted <span class="math inline">\(R^2\)</span> value instead of the standard one.)</li>
+</ul>
+<p>If there is only one predictor variable, we can also easily make a scatter plot of the response variable as a function of the predictor variable, with the best-fit line overlaid:</p>
+<pre class="r"><code>gf_point(Lead ~ Fluoride, data=lead) %&gt;%
+  gf_lm()</code></pre>
+<p><img src="MultRegAssess_files/figure-html/unnamed-chunk-2-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>To include a 95% confidence interval around the line (indicative of our uncertainty about the true values of the slope and intercept), we can add the input <code>interval='confidence'</code>:</p>
+<pre class="r"><code>gf_point(Lead ~ Fluoride, data=lead) %&gt;%
+  gf_lm(interval=&#39;confidence&#39;)</code></pre>
+<p><img src="MultRegAssess_files/figure-html/unnamed-chunk-3-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-regression-conditions" class="section level2">
+<h2>Regression conditions</h2>
+<p>For a linear regression model to be appropriate for a dataset, a few conditions have to be met:</p>
+<ol start="0" style="list-style-type: decimal">
+<li>The data are a representative sample of the population of interest.</li>
+<li>Linear relationship between each predictor and the response variable (or at least no apparent non-linear relationship).</li>
+<li>Independence of residuals</li>
+<li>Normality of residuals</li>
+<li>Error (residuals) variance is constant (this condition is also known as “homoscedasticity”)</li>
+</ol>
+</div>
+<div id="section-checking-linearity" class="section level2">
+<h2>Checking linearity</h2>
+<p>To verify that the relationship between our predictor variable(s) and our response variable is linear, we can examine a few plots.</p>
+<p>First, we can make scatter plots of the response variable as a function of each predictor variable. We want to verify that <strong>there are no apparent non-linear trends</strong> in the plot.</p>
+<div class="tutorial-exercise" data-label="y-vs-x" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>gf_point(Lead ~ Aluminum, data=lead )</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":3.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<p>Next, we can plot the <em>residuals from the fitted model</em> as functions of:</p>
+<ul>
+<li>The fitted values (predicted values <span class="math inline">\(\hat{y}\)</span> for each data point in the dataset)</li>
+<li>(Optionally) Each predictor</li>
+</ul>
+<p>In these plots, we should see <strong>no</strong> trends – linear or nonlinear. They should look like relatively random scatter.</p>
+<p>We can use the R function <code>resid()</code> to get the residuals from the fitted model object, and <code>fitted()</code> to get the predictions.</p>
+<div class="tutorial-exercise" data-label="resid-plots" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>xyplot(resid(mr1) ~ fitted(mr1))
+# the following will also work outside the tutorial:
+# gf_point(resid(mr1) ~ fitted(mr1))</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":3.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+</div>
+<div id="section-checking-independence" class="section level2">
+<h2>Checking Independence</h2>
+<p>Independence of residuals means that knowing the value of one residual does not help you to predict the value of the next residual.</p>
+<p>When data are collected over time and space, sometimes the residuals are <em>not</em> independent over time (or space) – for example, maybe series of positive residuals tend to occur together, or series of negative residuals together. How can we detect this kind of non-independence?</p>
+<p>First, make sure that your dataset is sorted in order of time (if you are worried about non-independence over time) or space (if you are worried about possible non-independence over space). (The <code>lead</code> dataset is already sorted in temporal order - you can verify this by looking at the variable <code>Decimal_Date</code>.)</p>
+<p>The autocorrelation function will help us.</p>
+<p>This function computes a value akin to a correlation coefficient for the dataset, indicating how much it is correlated <em>with itself</em> at different “lags”. What does this mean?</p>
+<p>Lag 0 is the correlation of the data with itself.</p>
+<p><img src="images/lag1.png" width="40%" style="display: block; margin: auto;" /></p>
+<p>Of course the correlation at lag 0 is ALWAYS 1: the dataset is identical with itself.</p>
+<p>What about larger lags?</p>
+<p>To compute the ACF at lag 1, we slide one copy of the dataset forward one observation, and compute the correlation again:</p>
+<p><img src="images/lag2.png" width="40%" style="display: block; margin: auto;" /></p>
+<p>This tells us how well we can predict one observation in the data, based on the preceding observation.</p>
+<p>Lag 2 scoots the data one more position:</p>
+<p><img src="images/lag3.png" width="40%" style="display: block; margin: auto;" /></p>
+<p>…And so on.</p>
+<p>We can plot the ACF for many lags using the function <code>acf()</code>.</p>
+<div class="tutorial-exercise" data-label="make-acf" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>acf(resid(mr1))</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":3.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<p>The horizontal dotted lines are approximate 95% confidence boundaries for how large the ACF values (for lags greater than 0) <em>should</em> be, if the data are really independent.</p>
+<p>In general, to verify the independence condition of linear regression, we want to confirm that not many of the ACF values for lags greater than 0 exceed those horizontal “fences” by very much. (One or two ACF values that just barely “poke above the fence” is not a major violation.)</p>
+<p>In the plot above, all the “spikes” are within the “fences”, so there is no indication of non-independence in the residuals.</p>
+</div>
+<div id="section-checking-normality-of-residuals" class="section level2">
+<h2>Checking Normality of Residuals</h2>
+<p>To check whether the residuals look like a sample from a normal distribution, look at a histogram:</p>
+<div class="tutorial-exercise" data-label="rhist" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>histogram(~resid(mr1))
+# the following will also work outside the tutorial:
+# gf_histogram(~resid(mr1))</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":3.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<p>Note: The distribution doesn’t have to look perfectly normal – it has to look like it might reasonably be a <em>sample</em> from a normal. Check out examples at (<a href="http://shiny.calvin.edu/sld33/NormSamps" class="uri">http://shiny.calvin.edu/sld33/NormSamps</a>).</p>
+</div>
+<div id="section-checking-error-variance" class="section level2">
+<h2>Checking Error Variance</h2>
+<p>For linear regression to be appropriate for data, there should be homoscedasticity, or constant variance of the residuals. This means that the spread of the data points around the best-fit line should be even.</p>
+<p>Or, alternatively (and easier to see visually), the spread of the residuals around a horizontal line at y=0 on a residuals vs fitted plot should be even.</p>
+<div class="tutorial-exercise" data-label="resid-error" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>xyplot(resid(mr1) ~ fitted(mr1))
+# the following will also work outside the tutorial:
+# gf_point(resid(mr1) ~ fitted(mr1))</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":3.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+If this condition does not hold, the most common pattern to see is a “trumpet” shape like the one above, where the residuals become more spread out for larger fitted values. However, any non-constant spread is a cause for concern. 
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(mosaic)
+theme_set(theme_bw())
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 3.5)
+lead <- read.csv(file='http://www.calvin.edu/~sld33/data/FlintWaterTestJanMar2016.csv')
+tutorial_options(exercise.eval = FALSE)
+mr1 <- lm(Lead ~ Fluoride + Water_Filter + Month, data=lead)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-fit-lm-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-fit-lm-code-editor`)), session)
+output$`tutorial-exercise-fit-lm-output` <- renderUI({
+  `tutorial-exercise-fit-lm-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-get-coef-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-get-coef-code-editor`)), session)
+output$`tutorial-exercise-get-coef-output` <- renderUI({
+  `tutorial-exercise-get-coef-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-get-summ-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-get-summ-code-editor`)), session)
+output$`tutorial-exercise-get-summ-output` <- renderUI({
+  `tutorial-exercise-get-summ-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-y-vs-x-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-y-vs-x-code-editor`)), session)
+output$`tutorial-exercise-y-vs-x-output` <- renderUI({
+  `tutorial-exercise-y-vs-x-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-resid-plots-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-resid-plots-code-editor`)), session)
+output$`tutorial-exercise-resid-plots-output` <- renderUI({
+  `tutorial-exercise-resid-plots-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-make-acf-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-make-acf-code-editor`)), session)
+output$`tutorial-exercise-make-acf-output` <- renderUI({
+  `tutorial-exercise-make-acf-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-rhist-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-rhist-code-editor`)), session)
+output$`tutorial-exercise-rhist-output` <- renderUI({
+  `tutorial-exercise-rhist-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-resid-error-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-resid-error-code-editor`)), session)
+output$`tutorial-exercise-resid-error-output` <- renderUI({
+  `tutorial-exercise-resid-error-result`()
+})
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap-3.3.5"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["5.0.13"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/fontawesome"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/fontawesome-all.min.js","js/fa-v4-shims.min.js"]},{"type":"character","attributes":{},"value":["css/fa-svg-with-js.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["localforage"]},{"type":"character","attributes":{},"value":["1.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/localforage"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["localforage.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">Multiple Regression - Model Assessment</h2>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+
+</html>

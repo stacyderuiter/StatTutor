@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="true" />
+<meta name="allow-skip" content="false" />
+
+<title>Creating Randomization Distributions</title>
+
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<div id="section-strategy-1-use-rflip" class="section level2">
+<h2>Strategy 1: <strong>Use rflip()</strong></h2>
+<div id="section-when-can-we-use-this-method" class="section level3">
+<h3><strong>WHEN</strong> can we use this method?</h3>
+<ul>
+<li><em>ONLY</em> if the parameter of interest is ONE PROPORTION.</li>
+</ul>
+</div>
+<div id="section-example" class="section level3">
+<h3>Example:</h3>
+<p>502 People were given 2 sets of photos of owner/dog pairs - one really owner-dog, and one just a random person + dog – and asked to choose the real pair. The sample statistic was the proportion correct which was 0.8. We want to test: <span class="math display">\[H_0: p = 0.5\]</span> <span class="math display">\[H_A: p \neq 0.5\]</span></p>
+<p>So we want many sample proportions from a hypothetical population that is like the real sample as much as possible, <em>except</em> that <span class="math inline">\(H_0\)</span> is true, so <span class="math inline">\(p=0.5\)</span>.</p>
+<p>So notice that the <em>prob</em> input to rflip matches the null hypothesis, and not the sample stat.</p>
+<pre class="r"><code>RSD1 &lt;- do(1000)*rflip(n = 502, prob=0.5)
+head(RSD1) #to see variable names</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["n"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["heads"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["tails"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["prop"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"502","2":"234","3":"268","4":"0.4661355","_rn_":"1"},{"1":"502","2":"264","3":"238","4":"0.5258964","_rn_":"2"},{"1":"502","2":"245","3":"257","4":"0.4880478","_rn_":"3"},{"1":"502","2":"253","3":"249","4":"0.5039841","_rn_":"4"},{"1":"502","2":"256","3":"246","4":"0.5099602","_rn_":"5"},{"1":"502","2":"242","3":"260","4":"0.4820717","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<pre class="r"><code>gf_histogram(~prop, data=RSD1)</code></pre>
+<p><img src="RandDists_files/figure-html/unnamed-chunk-1-1.png" width="576" style="display: block; margin: auto;" /> Once we have the randomization distribution, we need to find the p-value: the probability of getting a sample stat <span class="math inline">\(\hat{p}\)</span> at least as extreme as 0.8, from the samples in the randomization distribution.</p>
+<pre class="r"><code>p.value1 &lt;- prop(~prop &gt;= 0.8, data=RSD1)
+#because alternate is 2-sided:
+# we need both &quot;tails&quot;...
+# a value of 0.2 is as far from the H0 value of 0 as 0.8 is!
+p.value2 &lt;- prop(~prop &lt;= 0.2, data=RSD1)
+p.valueA &lt;- p.value1 + p.value2
+p.valueA</code></pre>
+<pre><code>## prop_TRUE 
+##         0</code></pre>
+<p>Alternatively, we could just double the one-sided p-value, because the sampling distribution (should be) symmetric:</p>
+<pre class="r"><code>p.valueB &lt;- 2*prop(~prop &gt;= 0.8, data=RSD1)
+p.valueB</code></pre>
+<pre><code>## prop_TRUE 
+##         0</code></pre>
+<p>The values should be almost the same. Here, what does it mean to get a p-value of 0? A value as extreme as the sample stat was <em>never</em> seen in the randomizations! However, we only did 1,000. So instead of reporting a p-value of 0, it would be better to say that the p-value is less than 0.001.</p>
+</div>
+</div>
+<div id="section-strategy-2-shuffle-category-labels" class="section level2">
+<h2>Strategy 2: Shuffle category labels</h2>
+<div id="section-when-can-we-use-this-method-1" class="section level3">
+<h3><strong>WHEN</strong> can we use this method?</h3>
+<ul>
+<li><em>Whenever</em> the parameter of interest involves a difference between groups.</li>
+</ul>
+</div>
+<div id="section-example-1" class="section level3">
+<h3>Example:</h3>
+<p>Is the proportion marmots who whistle different when they encounter hikers with dogs, rather than those without?</p>
+<p>We want to test: <span class="math display">\[H_0: p_{dog} - p_{no dog} = 0\]</span> <span class="math display">\[H_1: p_{dog} - p_{no dog} \neq 0\]</span></p>
+<p>First, we will read in the data and compute the sample stat.</p>
+<pre class="r"><code>marmot &lt;- read.csv(file=&#39;http://www.calvin.edu/~sld33/data/marmot.csv&#39;)
+#get a table of proportion whistles by hiker type:
+tally(~whistle | hiker, data=marmot, format=&#39;prop&#39;)</code></pre>
+<pre><code>##        hiker
+## whistle  dog nodog
+##     no  0.05  0.40
+##     yes 0.95  0.60</code></pre>
+<pre class="r"><code>#what about just the SECOND ROW of the table (where whistle=&#39;yes&#39;)?
+tally(~whistle | hiker, data=marmot, format=&#39;prop&#39;)[2,]</code></pre>
+<pre><code>##   dog nodog 
+##  0.95  0.60</code></pre>
+<pre class="r"><code>#so what is the sample difference in proportions
+# (from the real data)?
+diff(tally(~whistle | hiker, data=marmot, format=&#39;prop&#39;)[2,])</code></pre>
+<pre><code>## nodog 
+## -0.35</code></pre>
+<p>Now do the randomization, computing the same quantity (difference in proportion whistlers, by hiker type) but with shuffled dog/no dog hiker labels:</p>
+<pre class="r"><code>RSD2 &lt;- do(1000)*diff(tally(~whistle | shuffle(hiker), data=marmot, format=&#39;prop&#39;)[2,])
+#see variable names:
+head(RSD2)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["nodog"],"name":[1],"type":["dbl"],"align":["right"]}],"data":[{"1":"0.15","_rn_":"1"},{"1":"-0.05","_rn_":"2"},{"1":"0.15","_rn_":"3"},{"1":"0.05","_rn_":"4"},{"1":"-0.15","_rn_":"5"},{"1":"-0.05","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<pre class="r"><code>gf_histogram(~nodog, data=RSD2, bins=7)</code></pre>
+<p><img src="RandDists_files/figure-html/unnamed-chunk-5-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>p.value &lt;- 2*prop(~nodog &lt;= -0.35, data=RSD2)
+p.value</code></pre>
+<pre><code>## prop_TRUE 
+##     0.026</code></pre>
+</div>
+</div>
+<div id="section-strategy-3-re-center-data" class="section level2">
+<h2>Strategy 3: Re-center data</h2>
+<p><strong>WHEN</strong> can we use this strategy? It works when the parameter of interest is a single mean (or a median, or a standard deviation, or an IQR, or…ANY other single parameter <em>except</em> for a proportion. For a proportion, use the rflip() strategy instead.)</p>
+<div id="section-example-2" class="section level3">
+<h3>Example:</h3>
+<p>Subway claims to sell foot-long subs…but are they <em>really</em>? Some people brought a class-action lawsuit against Subway alleging that their subs were really less than a foot long. They might want to use data on the measured length of a bunch of Subway subs to test: <span class="math display">\[H_0: \mu = 12\]</span> <span class="math display">\[H_1: \mu &lt; 12\]</span></p>
+<p>(where <span class="math inline">\(\mu\)</span> is the true overall mean of all Subway subs in the world.) They chose a one-sided alternate because it won’t help the law suit at all if the subs are actually <em>bigger</em> than Subway claims – the claimants only care if they are shorter!</p>
+<pre class="r"><code>subway &lt;- read.csv(file=&#39;http://www.calvin.edu/~sld33/data/subway.csv&#39;)
+head(subway) #to see variable names</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["length"],"name":[1],"type":["dbl"],"align":["right"]}],"data":[{"1":"11.21575","_rn_":"1"},{"1":"10.72866","_rn_":"2"},{"1":"11.66826","_rn_":"3"},{"1":"11.29194","_rn_":"4"},{"1":"11.29561","_rn_":"5"},{"1":"11.16060","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<pre class="r"><code>mean(~length, data=subway)</code></pre>
+<pre><code>## [1] 11.2999</code></pre>
+<pre class="r"><code>#make a new dataset with mean length 12
+subway$length12 &lt;- subway$length + 0.7
+RSD3 &lt;- do(1000)*mean(~length12,
+                     data=sample(subway,
+                                 size=nrow(subway), replace=TRUE))
+head(RSD3)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["mean"],"name":[1],"type":["dbl"],"align":["right"]}],"data":[{"1":"12.01969","_rn_":"1"},{"1":"11.95970","_rn_":"2"},{"1":"12.01978","_rn_":"3"},{"1":"11.95059","_rn_":"4"},{"1":"11.98835","_rn_":"5"},{"1":"11.99054","_rn_":"6"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<pre class="r"><code>gf_histogram(~mean, data=RSD3)</code></pre>
+<p><img src="RandDists_files/figure-html/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#find p-value: one-sided
+prop(~mean &lt;= 11.3, data=RSD3)</code></pre>
+<pre><code>## prop_TRUE 
+##         0</code></pre>
+<pre class="r"><code>#find p-value: 2-sided
+2*prop(~mean &lt;= 11.3, data=RSD3)</code></pre>
+<pre><code>## prop_TRUE 
+##         0</code></pre>
+</div>
+</div>
+<div id="section-strategy-4-multiply-all-differences-randomly-by-1-or--1" class="section level2">
+<h2>Strategy 4: Multiply all differences randomly by +1 or -1</h2>
+<div id="section-when-can-we-use-this-method-2" class="section level3">
+<h3><strong>WHEN</strong> can we use this method?</h3>
+<ul>
+<li><em>Only</em> for <strong>paired data</strong>. This happens if the variable of interest is a difference between two observations of the same case or subject, and your parameter of interest is the mean (or some other summary) of these <em>differences</em>. For example, if you measure the weight of 100 women at the start of pregnancy and then one year after birth, and compute the difference for each person, you might be interested in the mean of those differences. Or if you study 50 bee hives and for each one, find the difference in proportion drones (male bees) in summer and winter, you might be interested in testing whether the mean seasonal difference in proportion drones, averaged over the 50 hives, is 0 or not.</li>
+</ul>
+<p>In class, we considered an experiment with marmots. Each marmot was tested in two experiments: once it was approached by a hiker without a dog, and once by a hiker with a dog. The researchers recorded the distance which the marmot ran away in each experiment. The variable of interest was the difference in flight distance with/without a dog; the parameter of interest was the true population mean difference in flight distance, <span class="math inline">\(D = \mu_{diff}\)</span> where <span class="math inline">\(\mu_{diff}\)</span> is the mean of differences in flight distance for all marmots in the population.</p>
+<pre class="r"><code>marmot2 &lt;- read.csv(file=&#39;http://www.calvin.edu/~sld33/data/marmot2.csv&#39;)
+#sample statistic
+mean(~ddist, data=marmot2)</code></pre>
+<pre><code>## [1] 47.21818</code></pre>
+<pre class="r"><code>#rand. dist
+RSD4 &lt;- do(1000)* mean(~ddist*
+      sample( c(-1,1) ,
+              size=60,
+              replace=TRUE),
+      data=marmot2)
+gf_histogram(~mean, data=RSD4)</code></pre>
+<p><img src="RandDists_files/figure-html/unnamed-chunk-7-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>#p-value:
+prop(~mean &gt;= 47, data=RSD4)*2</code></pre>
+<pre><code>## prop_TRUE 
+##         0</code></pre>
+<p>As usual, if the computed p-value is 0, we can report it to be “less than [1/number of randomizations we did]*[2 if H1 is 2-sided]&quot; so here, the p-value must be less than 2/10,000 = 0.0002.</p>
+</div>
+</div>
+<div id="section-reporting-results" class="section level2">
+<h2>Reporting Results</h2>
+<p>There are a few important things to include when reporting the results of a hypothesis test.</p>
+<ol start="0" style="list-style-type: decimal">
+<li>Somewhere in your answer, <strong>report the hypotheses you are testing, and also report the sample statistic</strong> from the data. This gives people a first impression for how large the difference between the sample stat and the <span class="math inline">\(H_0\)</span> value is, which helps them form opinions about whether results are <em>practically significant</em> as well as (possibly) <em>statistically significant</em>!</li>
+<li><strong>Report the p-value</strong> you obtained.**</li>
+<li><strong>State in words what the p-value tells you.</strong> For example, in the Subway example, if we got a p-value of 0.01, we might say: <em>The p-value of the test was 0.01, which means that if Subway subs were really 12 inches long on average, there would be only a 1% chance of getting a dataset like ours, where the sample mean sub length was only 11.3 inches.</em></li>
+<li>State your decision: do you <strong>reject the null hypothesis</strong> or <strong>fail to reject the null hypothesis</strong>? (Remember, small p-values are evidence <em>against</em> the null, so <strong>a small p-value leads you to reject <span class="math inline">\(H_0\)</span>.</strong>) If using a threshold <span class="math inline">\(\alpha\)</span>, the usual standard is to use <span class="math inline">\(\alpha = 0.05\)</span>, but 0.01 is also sometimes used. In this case, if the p-value is less than <span class="math inline">\(\alpha\)</span>, then reject the null. If you are using a weight-of-evidence approach rather than a threshold, then you need to make a judgment call about whether the p-value you found is “small” or not; if it is “small” then you reject the null.</li>
+<li><strong>Explain what the decision means in context.</strong> For example, for the Subway case, we might say: <em>Since the p-value is small, we reject the null hypothesis that the true mean sub length is 12 inches. The data provide evidence in favor of the alternate hypothesis, suggesting that Subway subs are less than 12 inches long.</em> If we had instead gotten a p-value of 0.45 in the Subway test, we might then say: <em>Since the p-value is large, we fail to reject the null hypothesis; the data provide no evidence against the idea that the true mean length of Subway subs is 12 inches.</em> 
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(mosaic)
+theme_set(theme_bw())
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+RSD1 <- do(1000)*rflip(n = 502, prob=0.5)
+marmot <- read.csv(file='http://www.calvin.edu/~sld33/data/marmot.csv')
+RSD2 <- do(1000)*diff(tally(~whistle | shuffle(hiker), data=marmot, format='prop')[2,])
+subway <- read.csv(file='http://www.calvin.edu/~sld33/data/subway.csv')
+subway$length12 <- subway$length + 0.7
+RSD3 <- do(1000)*mean(~length12, data=sample(subway,
+                                             size=nrow(subway),
+                                             replace=TRUE))
+
+marmot2 <- read.csv(file='http://www.calvin.edu/~sld33/data/marmot2.csv')
+
+RSD4 <- do(1000)* mean(~ddist*
+                          mosaic::sample( c(-1,1) ,
+                                  size=60,
+                                  replace=TRUE),
+                        data=marmot2)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap-3.3.5"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery-1.11.3"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["5.0.13"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/fontawesome"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/fontawesome-all.min.js","js/fa-v4-shims.min.js"]},{"type":"character","attributes":{},"value":["css/fa-svg-with-js.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["localforage"]},{"type":"character","attributes":{},"value":["1.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/localforage"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["localforage.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.9.2.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]}]}]}
+</script>
+<!--/html_preserve--></li>
+</ol>
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">Creating Randomization Distributions</h2>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+
+</html>
