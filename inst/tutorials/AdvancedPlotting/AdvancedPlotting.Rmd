@@ -195,7 +195,7 @@ gf_bar(~ 1 | Gender, fill=~Race1, data=NHANES, width=1,
 If you are interested in the relationship of three quantitative variables, one option is a contour plot, which can be made with `gf_contour`.  The formula for `gf_contour` is of the form $ z \sim x + y$.  For example, are there patterns in the number of babies born by month (1-12) and day of the month (1-31)?
 
 ```{r, echo=TRUE}
-gf_contour(births ~ day + month, data=Births1978)
+gf_contour(births ~ day_of_month + month, data=Births1978)
 ```
 
 Hmm...interesting, if hard to make sense of. (Think about weekends - do they always fall on the same numeric days of the month?)
@@ -203,14 +203,14 @@ Hmm...interesting, if hard to make sense of. (Think about weekends - do they alw
 Another way to visualize this relationship is with a density plot (heat map), created via `gf_raster`. Its formula is of the form $y \sim x$, with input `fill` indicating the variable to color by:
 
 ```{r, echo=TRUE}
-gf_raster(month ~ day, fill=~births, data=Births1978)
+gf_raster(month ~ day_of_month, fill=~births, data=Births1978)
 ```
 
 And if we combine them?
 
 ```{r, echo=TRUE}
-gf_raster(month ~ day, fill=~births, data=Births1978) %>%
-  gf_contour(births ~ day + month, data=Births1978, color='white')
+gf_raster(month ~ day_of_month, fill=~births, data=Births1978) %>%
+  gf_contour(births ~ day_of_month + month, data=Births1978, color='white')
 ```
 
 ### Your Turn!

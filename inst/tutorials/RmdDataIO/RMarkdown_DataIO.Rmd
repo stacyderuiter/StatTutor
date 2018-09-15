@@ -209,6 +209,29 @@ bees <- read.csv('http://www.calvin.edu/~sld33/data/FlyingBees.csv')
 
 Note that we assigned the name **bees** to the dataset we read in using <- (the "arrow" points from the object toward the name being assigned to the object). 
 
+## Reading in data from Google Sheets
+There's also a simple way to read in data from a Google Sheet.
+
+First, go to the Google Sheet online to prepare it by "publishing it online". 
+
+In the **File** menu, choose "Publish to the Web":
+```{r, echo=FALSE, out.width = '500px'}
+knitr::include_graphics(path="images/publish-to-web.png")
+```
+
+In the pop-up window, choose to publish your "Entire Document" as a .csv file:
+```{r, echo=FALSE, out.width = '500px'}
+knitr::include_graphics(path="images/publish-as-csv.png")
+```
+
+Finally, copy the resulting link. 
+
+```{r, echo=FALSE, out.width = '500px'}
+knitr::include_graphics(path="images/get-link.png")
+```
+
+You can use `read.csv()` with this link as input to read your data into R.
+
 ## A few (very) basic R functions
 After reading the data in, you can use R functions to have a look at it, for example:
 
