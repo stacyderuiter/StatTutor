@@ -1,5 +1,5 @@
 ---
-title: "Stat 145 -- Homework ??"
+title: "Stat 241 -- Homework ??"
 author: "Put your name here (keep the quotes)"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 

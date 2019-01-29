@@ -154,7 +154,7 @@ Construct the URL to your current app and use a web browser to view it.
 Next, let's think about making some modifications to the app.
 
 ## Reading in Data
-The template app uses the `faithful` dataset, which is built in to base R.  For your own app, you will want to use another dataset. The data file must be hosted online or stored in the app's folder.
+The template app uses the `faithful` dataset, which is built in to base R.  For your own app, you will want to use another dataset. For easiest results, the data file must be hosted online or stored in the app's folder.
 
 To read in a data file for use in your app, just include the R code to read in the file near the beginning of the file (after the `library()` command(s) on line 10).  So, if you wanted to use the DPiD student survey data, starting at line 10, your file would look like:
 
@@ -172,6 +172,180 @@ ui <- fluidPage(
 *Note: in R code, any line preceded by \# is a comment (explanatory text that is not executed by R).*
 
 (Of course, if you are really going to use the DPiD data, you will also need to include more lines of code to "tidy" up the dataset as discussed earlier.)
+
+## Allowing the user to upload data
+If you are trying to create an app that makes a "reproducible report," you may want it to be possible for the user to upload a data file (and then have the app make figures and tables from the data in the file).
+
+### When to use this technique
+This will really only work well if the *format* of the data file stays the same over time, but new data are added as time goes by. If the variable names, etc. are not consistent with a file you already have, this won't work very well.  But if you do know the *form* the data will have (what variables are included in the dataset, what the variable names are, etc.), read on!
+
+### fileInput() function - basic example
+You will use the `fileInput()` function to allow the user to upload a file.  There is [a bit of help for this function online](https://shiny.rstudio.com/reference/shiny/0.14/fileInput.html).
+
+Here is a small example. If you put the code below in an app.R file, it will create a very simple app that allows the user to upload a file, then displays the contents on the screen.
+
+```{r, eval=FALSE, echo=TRUE}
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      fileInput("file1", "Choose CSV File",
+        accept = c(
+          "text/csv",
+          "text/comma-separated-values,text/plain",
+          ".csv")
+        ),
+      tags$hr(),
+      checkboxInput("header", "Header", TRUE)
+    ),
+    mainPanel(
+      tableOutput("contents")
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$contents <- renderTable({
+    # input$file1 will be NULL initially. After the user selects
+    # and uploads a file, it will be a data frame with 'name',
+    # 'size', 'type', and 'datapath' columns. The 'datapath'
+    # column will contain the local filenames where the data can
+    # be found.
+    inFile <- input$file1
+
+    if (is.null(inFile))
+      return(NULL)
+
+    read.csv(inFile$datapath, header = input$header)
+  })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+In your own app, you probably want to display figures and tables created from the file, rather than just displaying the contents to the screen. For example, if you place the code below in an app.R file, it tries to make a histogram of the first column of data from whichever file the user uploads. (Note, in your app, you should refer to variables by theirs name, which hopefully you know in advance, so you won't have to bother with extracting the "names" from the dataset...here, I have no idea what file you might upload, so I tried to make it relatively flexible. If you know the variable names, then you don't have to mess with the `names()` and `as.formula()` nonsense in your code.)
+
+```{r, eval=FALSE, echo=TRUE}
+library(shiny)
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      fileInput("file1", "Choose CSV File",
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values,text/plain",
+                  ".csv")
+      ),
+      tags$hr(),
+      checkboxInput("header", "Header", TRUE)
+    ),
+    mainPanel(
+      plotOutput("histogram")
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$histogram <- renderPlot({
+    # input$file1 will be NULL initially. After the user selects
+    # and uploads a file, it will be a data frame with 'name',
+    # 'size', 'type', and 'datapath' columns. The 'datapath'
+    # column will contain the local filenames where the data can
+    # be found.
+    inFile <- input$file1
+    
+    if (is.null(inFile))
+      return(NULL)
+    
+    dat <- read.csv(inFile$datapath, header = input$header)
+    vars <- names(dat)
+    ggformula::gf_histogram(as.formula(paste("~", vars[2])), data=dat)
+  })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+## Downloading Graphics
+You may wish to allow a user to export a figure file as an image.
+
+This example is based on [https://stackoverflow.com/questions/14810409/save-plots-made-in-a-shiny-app](https://stackoverflow.com/questions/14810409/save-plots-made-in-a-shiny-app).
+
+It still has a flaw: when the user saves the file, they need to add the file extension '.png' manually or the file won't be readable.
+
+This example is a work in progress and should be updated to:
+
+- Allow user to select the format in which to save the file (PDF, jpeg, png, etc.)
+- Correct the above-mentioned issue with the file extension.
+
+```{r, echo=TRUE, eval=FALSE}
+#
+# This is a Shiny web application. You can run the application by clicking
+# the 'Run App' button above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      fileInput("file1", "Choose CSV File",
+                accept = c(
+                  "text/csv",
+                  "text/comma-separated-values,text/plain",
+                  ".csv")
+      ),
+      tags$hr(),
+      checkboxInput("header", "Header", TRUE),
+      downloadButton('downloadFigA')
+    ),
+    mainPanel(
+      plotOutput("histogram")
+    )
+  )
+)
+
+server <- function(input, output) {
+  # creating the plot
+  # input$file1 will be NULL initially. After the user selects
+  # and uploads a file, it will be a data frame with 'name',
+  # 'size', 'type', and 'datapath' columns. The 'datapath'
+  # column will contain the local filenames where the data can
+  # be found.
+  plotA <- reactive({
+    inFile <- input$file1
+    
+    if (is.null(inFile))
+      return(NULL)
+    
+    dat <- read.csv(inFile$datapath, header = input$header)
+    vars <- names(dat)
+    FA <- ggformula::gf_histogram(as.formula(paste("~", vars[2])), data=dat)
+    
+  })
+  
+  # displaying the plot on screen
+  output$histogram <- renderPlot({
+    print(plotA())
+  })
+  # downloading the plot
+  output$downloadFigA <- downloadHandler(
+    filename = 'saved_plot.png' ,
+    content = function(file) {
+      ggplot2::ggsave(file, plot = plotA(), device = "png")
+    }
+  )
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
 
 ## Editing the Plot
 The plot in the template app is a histogram created with "base R" graphics.  How would we change it to a similar histogram, but using our function `gf_histogram()` from the `ggformula` package?
@@ -311,6 +485,88 @@ The new code should look like:
 ```
 
 *Note: If you want to know why this works, and why it doesn't work to just do `gf_histogram(~input$variable, ...)` ask Prof DR and she'll be happy to explain...*
+
+## Tables
+What if you want to display a table in your app, instead of (or in addition to) figures?
+
+First, we have to construct a table to display.  One common way to do this is by `summarise()`ing variables in our dataset. For example, there is a dataset built in to R called `mtcars` that gives some data about different models of cars. Some of the variables are `mpg` (fuel efficiency), `cyl` (how many cylinders the engine has), `hp` (horsepower), and `wt` (weight in tons).  The code below will group the cars in the dataset by `cyl` (so all the 4 cylinder cars are one group, the 6 cylinders another group, and the 8 cylinders another), then compute the mean `mpg`, `hp`, and `wt` for each group (and also report the number of cars in each group, `n()`).
+
+```{r, echo=TRUE, results = 'markup'}
+my_table <- mtcars %>% 
+  mutate(Cylinders = factor(cyl)) %>%
+     group_by(Cylinders) %>%      
+  summarise(`Mean MPG` = mean(mpg),
+            `Mean Horsepower` = mean(hp),
+            `Mean Weight` = mean(wt),
+            n = n()) 
+my_table
+```
+
+### kable tables
+OK, that's our table, but we want to display it in a prettier way.  The package `knitr` has a function `kable()` that makes a data frame in to a pretty html table:
+
+```{r, echo=TRUE}
+my_table <- mtcars %>% 
+  mutate(Cylinders = factor(cyl)) %>%
+     group_by(Cylinders) %>%      
+  summarise(`Mean MPG` = mean(mpg),
+            `Mean Horsepower` = mean(hp),
+            `Mean Weight` = mean(wt),
+            n = n()) 
+
+my_table %>% knitr::kable()
+```
+
+### Customizing kable tables
+If you need more options for formatting and customization, check out the companion package `kableExtra` - references online at: [https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html](https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html)
+
+
+
+### pander tables
+There is another function `pander()`, from package `pander`, that can print out almost anything "nicely", but you dont' have as much control and customization. For example, you can use `pander()` to print out a summary of a regression model nicely:
+
+```{r}
+my_model <- lm(hp ~ cyl + mpg, data=mtcars)
+
+my_model %>% pander::pander()
+```
+
+
+### Getting a table into your app
+The similar table output can be displayed easily in your app using the ui function `tableOutput()` or, for an *interactive* table, `dataTableOutput()`.
+
+First, create the table in the server part of your app; a simple example is below. Notice we are now using `tableOutput()` (which is specific for shiny apps) instead of `kable()` or `pander()` to make the table.
+
+```{r, echo=TRUE, eval=FALSE}
+server <- function(input, output) {
+  #this is the same table created earlier as an example
+  output$mtcars_kable <- renderDataTable(
+    mtcars %>% 
+      mutate(Cylinders = factor(cyl)) %>%
+      group_by(Cylinders) %>%
+      summarise(`Mean MPG` = mean(mpg),
+                `Mean Horsepower` = mean(hp),
+                `Mean Weight` = mean(wt),
+                n = n())  
+  )
+}
+```
+
+Then, add a `tableOutput()` to the ui part of your app to display your table, for example if you had a simple app with JUST this table it might look like:
+
+```{r, echo=TRUE, eval=FALSE}
+ui <- fluidPage(
+  
+  # Application title
+  titlePanel("mtcars"),
+  
+     mainPanel(
+      dataTableOutput("mtcars_kable")
+    )
+  )
+```
+
+
 
 ## Adding a Theme
 The package `shinythemes` lets you easily customize the color scheme of your app.
