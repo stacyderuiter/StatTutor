@@ -1,0 +1,533 @@
+---
+title: "Practice with Hypothesis Tests via Randomization Distributions"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(mosaic)
+library(beepr)
+library(emoGG)
+knitr::opts_chunk$set(echo = FALSE)
+penguins <- read.csv('http://www.calvin.edu/~sld33/data/bandedPenguins.csv')
+# reindeer data: ROS (rain on snow) is bad for reindeer, so ROS High is Poor conditions
+reindeer <- read.csv('http://www.calvin.edu/~sld33/data/reindeer.csv') %>%
+  mutate(WeatherConditions = ifelse(ROS == 'High', 'Poor', 'Good'))
+
+obscene <- read.csv('http://www.calvin.edu/~sld33/data/obscenity.csv') %>%
+  mutate_if(is.numeric, round)
+
+robins <- read.csv('http://www.calvin.edu/~sld33/data/robins.csv') %>%
+  mutate(DiurnalDiff = DayNoise - NightNoise)
+```
+
+## Survival of Banded Penguins: The Study
+[A paper by Claire Saraux and colleagues](https://www.nature.com/articles/nature09630) showed that "banding of free-ranging king penguins (*Aptenodytes patagonicus*) impairs both survival and reproduction, ultimately affecting population growth rate."  To explore their results, we will use the dataset `penguins` with variables:
+
+- `tag.type` ("band" or "no band") -- whether or not a penguin had a metal flipper band ([photo](https://www.npr.org/2011/01/12/132859946/flipper-bands-can-harm-king-penguin-population))
+- `survived` ("died" or "lived") -- whether or not the penguin died during the 10-year study period
+- `foraging.duration` -- mean duration of foraging trips (in days) by the penguin during the study period
+
+*Note: the dataset is simulated based on summary statistics reported in the paper.*
+
+
+## Penguin Survival: Setup
+
+### Parameter
+Was the probability of survival different for penguins with and without bands? 
+
+```{r quiz-peng-surv-param}
+quiz(
+  question("The main parameter of interest is:",
+    answer('$p_b$, the probability of a banded penguin surviving'),
+    answer("$\\hat{p}_b = \\hat{p}_0$, the difference in proportion banded and non-banded penguins who lived in the study"),
+    answer("$p_b - p_0$, the difference in proportion banded and non-banded penguins who live", correct = TRUE),
+    answer("$p$, the proportion penguins who survived"),
+    random_answer_order = TRUE, type = 'single'
+  ))
+```
+  
+### Hypotheses
+Let $p_b$ be the true population proportion survival with a band, and $p_0$ without; $\hat{p}_b$ and $\hat{p}_0$ are the corresponding sample statistics.
+
+```{r quiz-peng-surv-hyp}
+quiz(
+  question("Which null hypothesis might you test to answer this question?",
+    answer('$p_b = p_0$', correct = TRUE),
+    answer("$\\hat{p}_b = \\hat{p}_0$"),
+    answer("$p_b - p_0 = 0$", correct = TRUE),
+    answer("$\\hat{p}_b \\neq \\hat{p}_0$"),
+    random_answer_order = TRUE, type = 'single'
+  ),
+  question("What is the best corresponding alternate hypothesis?",
+    answer("$p_b \\neq p_0$", correct = TRUE),
+    answer("$p_b < p_0$"),
+    answer("$p_b > p_0$"),
+    answer("$\\hat{p}_0 \\neq \\hat{p}_b$"),
+    random_answer_order = TRUE, type = 'single'
+  )
+)
+```
+
+
+### Randomization Strategy
+
+Considering your answers so far, what randomization strategy would you use to test your hypotheses?  You may want to look at the dataset with `glimpse()`, `head()`, or another similar function to see how it is set up before you answer.
+
+```{r view, exercise=TRUE}
+
+```
+
+```{r view-hint, eval=FALSE, results = 'hide'}
+glimpse( dataset_name_goes_here )
+```
+
+```{r quiz-peng-surv-strat}
+quiz(
+  question("Which of our randomization strategies would be most appropriate to solve this problem",
+    answer('Shuffle category labels', correct = TRUE),
+    answer("Randomly switch signs"),
+    answer("Recenter and resample"),
+    answer("rflip()"),
+    random_answer_order = TRUE
+  )
+)
+```
+
+### Penguin Survival: Sample Stat
+Before doing our test, we need to **plot the data** and **compute the sample statistic**.
+
+Which of the plots do you think best shows the proportion penguins that survived with and without bands? (There are reasons to prefer each of them.) Feel free to edit the code to make further customizations to the plots.
+
+```{r peng-surv-explore, exercise = TRUE, exercise.eval=TRUE}
+gf_percents(~tag.type, fill=~survived, data=penguins)
+```
+
+```{r peng-surv-explore2, exercise = TRUE, exercise.eval=TRUE}
+gf_percents(~tag.type, fill=~survived, data=penguins, position=position_fill())
+```
+
+How would you compute the sample statistic (difference in proportion surviving, by `tag.type`)?
+
+```{r, peng-surv-stat, exercise = TRUE}
+
+```
+
+```{r, peng-surv-stat-hint-1, eval=FALSE}
+tally(~ variable | groups, data = dataset_name, format = 'prop')
+```
+
+```{r, peng-surv-stat-hint-2, eval=FALSE}
+tally(~ variable | groups, data = dataset_name, format = 'prop')
+```
+
+```{r, peng-surv-stat-hint-3, eval=FALSE}
+tally(~ survived | tag.type, data = penguins, format = 'prop')
+```
+
+```{r, peng-surv-stat-hint-4, eval=FALSE}
+diff(tally(~ survived | tag.type, data = penguins, format = 'prop')[2,])
+```
+
+A more concise alternate method we have not yet seen:
+
+```{r, echo=TRUE}
+diff(prop(~survived == 'lived' | tag.type, data=penguins))
+```
+
+## Penguin Survival: Randomization Distribution
+
+Generate the randomization distribution.
+
+```{r, peng-surv-rd, exercise = TRUE}
+
+```
+
+```{r, peng-surv-rd-hint-1, eval=FALSE}
+PRD <- do(____)*diff(____(~__________ | _________, data=____________))
+```
+
+```{r, peng-surv-rd-hint-2, eval=FALSE}
+PRD <- do(1000)*diff(prop(~__________ | shuffle(_________), data=____________))
+```
+
+```{r, peng-surv-rd-hint-3, eval=FALSE}
+PRD <- do(1000)*diff(prop(~__________ | shuffle(tag.type), data=penguins))
+```
+
+
+```{r, peng-surv-rd-hint-4, eval=FALSE}
+PRD <- do(1000)*diff(prop(~survived == 'lived' | shuffle(tag.type), data=penguins))
+```
+
+**We did it!** Nice work. Wouldn't it be nice if we could celebrate the successful completion of the task with an awesome sound effect?
+
+```{r, beepr, exercise=TRUE}
+PRD <- do(1000)*diff(prop(~survived == 'lived' | shuffle(tag.type), data=penguins))
+beep(sound = 8)
+```
+
+There are 11 options (numbers 1-11) for the sound. *You may want to try them all.* This will only work when running code in the console, not when knitting a file. If you want to use it in your own code, make sure to add the line
+
+```{r}
+require(beepr)
+```
+
+to your setup r code chunk.
+
+### Penguin Survival: Randomization Distribution, again
+
+Here is another way of doing the same thing, that we haven't seen yet.  What if we didn't compute the diff, but just found the proportions by groups? What would `do()` do with that?
+
+```{r, echo=TRUE}
+PRD2 <- do(1000)*prop(~survived == 'lived' | shuffle(tag.type), data=penguins)
+head(PRD2)
+```
+
+Aha. Then, we could use our `mutate()` skills to compute the difference afterward:
+
+```{r, setup-prd, echo=FALSE}
+PRD2 <- do(1000)*prop(~survived == 'lived' | shuffle(tag.type), data=penguins)
+
+PRD2 <- PRD2 %>%
+  mutate(surv_diff = prop_TRUE.no.band - prop_TRUE.band)
+
+samp_surv_diff <- diff(prop(~survived == 'lived' | tag.type, data=penguins))
+```
+
+```{r, pengdiff, exercise=TRUE, exercise.setup = 'setup-prd'}
+PRD2 <- PRD2 %>%
+  mutate(surv_diff = prop_TRUE.no.band - prop_TRUE.band)
+
+head(PRD2)
+```
+
+```{r, pengdiff-hint-1, eval=FALSE}
+PRD2 <- PRD2 %>%
+  mutate(_____ = _______ - _________)
+```
+
+```{r, pengdiff-hint-2, eval=FALSE}
+PRD2 <- PRD2 %>%
+  mutate(surv_diff = prop_TRUE.no.band - prop_TRUE.band)
+
+head(PRD2)
+```
+
+### Penguin Survival: Histogram of RD
+
+Plot a histogram of the randomization distribution. Use the `PRD2` randomization distribution we just made - use `head()` or `glimpse()` or `names()` if you need to check the variable name(s).
+
+```{r, prd-hist, exercise = TRUE, eval=FALSE, exercise.setup = 'setup-prd'}
+gf_histogram(~ _______ , data = ___________)
+```
+
+```{r, prd-hist-hint-1, eval=FALSE}
+gf_histogram(~ _______ , data = PRD2)
+```
+
+```{r, prd-hist-hint-2, eval=FALSE}
+gf_histogram(~ surv_diff , data = PRD2)
+```
+
+### Adding the Sample Stat
+Wouldn't it be nice to add the sample stat to our histogram?
+
+```{r, add-stat, exercise=TRUE, exercise.setup='setup-prd'}
+gf_histogram(~ surv_diff , data = PRD2) %>%
+  gf_vline(xintercept = samp_surv_diff, color = 'darkred', linetype = 'dashed')
+```
+
+Even better: What if we could add the sample stat to the histogram *as a penguin emoji*?
+
+```{r, add-stat0, exercise=TRUE, exercise.setup='setup-prd'}
+ss <- data.frame(samp_surv_diff = samp_surv_diff, height=0)
+
+gf_histogram(~ surv_diff , data = PRD2) %>%
+  gf_vline(xintercept = samp_surv_diff, color = 'darkred', linetype = 'dashed')%>%
+  gf_point(height ~ samp_surv_diff, data=ss, size=3) 
+```
+
+Hey, *that's not a penguin emoji.* **That's just a dot.** How do I turn it into a penguin?
+
+```{r, add-stat1, exercise=TRUE, exercise.setup='setup-prd'}
+ss <- data.frame(samp_surv_diff = samp_surv_diff, height=0)
+gf_histogram(~ surv_diff , data = PRD2)  %>%
+  gf_refine(geom_emoji(emoji = '1f427', mapping = aes(samp_surv_diff, height), data=ss, size=0.07))
+```
+
+Adjust the `size` to make the emoji bigger or smaller, and change the '1f427' to change the emoji. How can you find the code for the emoji you want? Here's a way to search:
+
+```{r, find-emoji, exercise = TRUE, echo=TRUE, exercise.eval=TRUE}
+emoji_search('penguin')
+```
+
+If you want to use emojis as plotting symbols in your own work, make sure to add:
+
+```{r, echo=TRUE, eval=FALSE}
+require(emoGG)
+```
+
+To your settings R code chunk.
+
+### Penguin Survival: P-value and Conclusions
+To find the p-value, we have to compute the proportion of randomization sample stats that were at least as extreme as our real sample stat, which was:
+
+```{r, peng-surv-samp-stat, echo=TRUE}
+samp_surv_diff <- diff(prop(~survived == 'lived' | tag.type, data=penguins))
+samp_surv_diff
+```
+
+We will use `prop1()` to ensure we don't get a p-value that is exactly 0. What code would you use find the p-value?
+
+```{r, peng-p, exercise = TRUE, eval=FALSE, exercise.setup = 'setup-prd'}
+2*prop1(~ __________, data = ___________)
+```
+
+```{r, peng-p-hint-1, eval=FALSE}
+2*prop1(~surv_diff _________ , data = PRD2  )
+```
+
+```{r, peng-p-hint-2, eval=FALSE}
+2*prop1(~surv_diff >= 0.1016063 , data = PRD2  )
+```
+
+```{r, surv-concl}
+quiz(
+  question("What can you conclude?",
+    answer('The p-value is pretty small, so we reject the null hypothesis; the data support the idea that penguins with bands survive less often.', correct = TRUE),
+    answer("The p-value is pretty small, so we reject the null hypothesis; the data support the idea that penguins with bands survive more often."),
+    answer("The p-value is large, so we reject the null hypothesis; the data support the idea that penguins with bands survive less often."),
+    answer('The p-value is pretty small, so we fail to reject the null hypothesis; the data do not provide any evidence against the idea that survival is the same with and without tags.'),
+    random_answer_order = TRUE
+))
+```
+
+Do you think this difference is big enough to be, not just potentially *statistically* significant, but *biologically* meaningful? Is a 10% decrease in chance of survival big enough to worry about, and perhaps motivate scientists to think twice before putting bands on penguins?
+
+## Penguin Foraging: Setup
+Next, let's use the same dataset, but answer an new question: Was the duration of foraging trips made by banded penguins different from that of non-banded penguins?
+
+### Exploring the data
+First, a look at the data. Make a plot that shows `foraging.duration` by `tag.type`. The hints show a couple of options (there are probably even more).
+
+```{r, pfe, exercise=TRUE}
+
+```
+
+```{r, pfe-hint-1, eval=FALSE}
+gf_density(~foraging.duration, fill = ~tag.type, data=penguins)
+```
+
+```{r, pfe-hint-2, eval=FALSE}
+gf_histogram(~foraging.duration | tag.type, data=penguins)
+```
+
+```{r, pfe-hint-3, eval=FALSE}
+gf_boxplot(foraging.duration ~ tag.type, data=penguins)
+```
+
+### Parameters
+Next, identify potential parameter(s) of interest. Let's let $\mu_{tag}$ and $\mu_{no-tag}$ be the true mean foraging durations (with and without tags) for all penguins in this population, and $\bar{x}_{tag}$ and $\bar{x}_{no-tag}$ the sample mean foraging durations with and without tags, from the data. *(Note, there are other possibilities - for example, we could use medians instead of means.  Think about why it is OK to use means here.)*
+
+```{r, forage-param}
+quiz(
+  question("What is the parameter of interest?",
+           answer('$\\mu_{tag}$'),
+           answer('$\\mu_{tag} - \\mu_{no-tag}$', correct = TRUE),
+           answer('$\\bar{x}_{tag}$'),
+           answer('$\\bar{x}_{tag} - \\bar{x}_{no-tag}$'),
+           random_answer_order = TRUE )
+)
+```
+
+### Hypotheses
+
+
+
+```{r, which-alt}
+quiz(
+  question('What kind of alternate hypothesis would be best for this scenario?',
+           answer('One-sided, because the foraging trips were much longer for banded penguins.'),
+           answer('Two-sided, because we would be interested if the foraging trips were either longer OR shorter for banded penguins', correct=TRUE),
+           random_answer_order = TRUE,
+           correct = 'Yes!',
+           incorrect = 'No, remember: you should be able to choose whether you want a one- or two-sided alternate hypothesis *without* first looking at the data. The direction of the observed difference in the data should *not* be considered.'),
+  question('Which hypotheses could you test to answer this question? Choose all correct answers.',
+           answer('$H_0: \\mu_{tag} = \\mu_{no-tag}; H_1: \\mu_{tag} \\neq \\mu_{no-tag}$', correct=TRUE),
+           answer('$H_0: \\mu_{tag} - \\mu_{no-tag} = 0; H_1: \\mu_{tag} - \\mu_{no-tag} \\neq 0$', correct=TRUE),
+           answer('$H_0: \\bar{x}_{tag} = \\bar{x}_{no-tag}; H_A: \\bar{x}_{tag} \\neq \\bar{x}_{no=tag}$'),
+           random_answer_order = TRUE)
+  )
+
+```
+
+### Sample Statistic
+
+Compute the statistic of interest using the `penguins` data and variables `foraging.duration` and `tag.type`.
+
+```{r, forage-sstat, exercise = TRUE, eval=FALSE}
+diff(_____________)
+```
+
+```{r, forage-sstat-hint-1, eval=FALSE}
+diff(mean(~____________, data = _________))
+```
+
+```{r, forage-sstat-hint-2, eval=FALSE}
+diff(mean(~________ | _________ , data = _________))
+```
+
+```{r, forage-sstat-hint-3, eval=FALSE}
+diff(mean(~ foraging.duration | _________ , data = penguins))
+```
+
+```{r, forage-sstat-hint-4, eval=FALSE}
+diff(mean(~ foraging.duration | tag.type , data = penguins))
+```
+
+
+### Randomization Strategy
+
+```{r, forage-which-strategy}
+quiz(question('What randomization strategy could you use in this scenario?',
+              answer('rflip()'),
+              answer('Shuffle group labels', correct = TRUE),
+              answer('Randomly change signs of differences'),
+              answer('Re-center data distribution'),
+              random_answer_order = TRUE
+              )
+     )
+```
+
+## Penguin Foraging: Randomization Distribution
+
+Generate the randomization distribution for this scenario.
+
+```{r, forage-rd, exercise = TRUE, eval=FALSE}
+FRD <- do(____)*...
+```
+
+```{r, forage-rd-hint-1, eval=FALSE}
+FRD <- do(1000)*diff(mean(~ ______ | __________, data = penguins))
+```
+
+```{r, forage-rd-hint-2, eval=FALSE}
+FRD <- do(1000)*diff(mean(~ foraging.duration | __________, data = penguins))
+```
+
+```{r, forage-rd-hint-3, eval=FALSE}
+FRD <- do(1000)*diff(mean(~ foraging.duration | shuffle(tag.type), data = penguins))
+```
+
+
+### Plot it!
+Next, make a histogram of the randomization distribution.  Do you remember how to add the sample stat (which was -1.086)? As an emoji?
+
+```{r, make-frd, echo=FALSE}
+FRD <- do(1000)*diff(mean(~ foraging.duration | shuffle(tag.type), data = penguins))
+```
+
+```{r, frd-hist, exercise = TRUE, exercise.setup = 'make-frd', eval=FALSE}
+head(FRD) # to see what variable names are
+gf_histogram( ... )
+```
+
+
+```{r, frd-hist-hint-1, eval=FALSE}
+gf_histogram(~no.band, data=FRD)
+```
+
+```{r, frd-hist-hint-2, eval=FALSE}
+gf_histogram(~no.band, data=FRD) %>%
+  gf_vline(xintercept = -1.086, color='hotpink')
+```
+
+```{r, frd-hist-hint-3, eval=FALSE}
+ss <- data.frame(x = -1.086, y = 0)
+gf_histogram(~no.band, data=FRD)%>%
+  gf_vline(xintercept = -1.086, color='hotpink') %>%
+  gf_refine(geom_emoji(emoji = '1f41f', mapping = aes(x,y), data=ss, size=0.1))
+```
+
+### Penguin Foraging: P-value
+
+```{r, guess-p}
+quiz(
+  question('What do you think the p-value of the test will be, based on what you have seen so far?',
+           answer('Impossible to tell - I do not have enough information yet.'),
+           answer('It will be very small - nearly 0.', correct=TRUE),
+           answer('It will be very large, but the exact value is hard to estimate.'),
+           random_answer_order = TRUE
+))
+```
+
+Compute the p-value of the test: find the proportion of randomizations for which the randomization sample statistic was at least as extreme as what we found in the real data (-1.086).
+
+```{r, peng-p-calc, exercise = TRUE, exercise.setup = 'setup-frd', eval=FALSE}
+prop1(...)
+```
+
+```{r, peng-p-calc-hint-1, eval=FALSE}
+2*prop1(~no.band ____, data=FRD)
+```
+
+```{r, peng-p-calc-hint-2, eval=FALSE}
+2*prop1(~no.band ____ -1.086, data=FRD)
+```
+
+```{r, peng-p-calc-hint-3, eval=FALSE}
+2*prop1(~no.band <= -1.086, data=FRD)
+```
+
+
+
+```{r, forage-concl}
+quiz(
+  question('What can you conclude, in context?',
+           answer('I can not draw a conclusion because the sample size is too small.'),
+           answer('The p-value is very small, so the data support the alternate hypothesis. Foraging trip duration is longer for banded penguins.', correct=TRUE),
+           answer('The p-value is very small, so we can reject the alternate hypothesis. Penguin foraging trips are longer for banded penguins.'),
+           answer('The p-value is very small, so we can accept the null. Penguin foraging tirps are longer for banded penguins.'),
+           answer('The p-value is very small, so we can reject the null hypothesis. Penguin foraging trips are different for banded penguins, but we cannot estimate whether they are longer or shorter.'),
+           random_answer_order = TRUE)
+)
+```
+
+What does this mean, biologically? One interpretation is that the penguins are less successful at finding or capturing food, so they have to stay out longer on foraging trips before returning to their colony to rest or breed.
+
+The difference in average foraging trip duration is about a day.  Do you think this difference is big enough to be, not just *statistically* significant, but *biologically* meaningful? (A statisticaly significant difference that is biologically meaningless is not worth making a big deal of -- for example, if the difference in foraging trip durations was 1 second (but was "statistically significant") it would probably be a mistake to think such a small difference *really* mattered to the penguins. But what about this one-day difference? Could it affect their fitness?  (For example, what might be an advantage of getting back to the colony a day earlier at breeding time?)
+
+
+## Robins and Noise: Setup
+
+## Robins and Noise: Randomization Distribution
+
+## Extra Practice: Bad(?) Words
+
+[Cory Scherer and Brad Sagarin](https://www.tandfonline.com/doi/abs/10.1080/15534510600747597) published a paper with abstract: 
+
+*This experiment examined the effects of judicious swearing on persuasion in a pro‐attitudinal speech. Participants listened to one of three versions of a speech about lowering tuition that manipulated where the word “damn” appeared (beginning, end, or nowhere). The results showed that obscenity at the beginning or end of the speech significantly increased the persuasiveness of the speech and the perceived intensity of the speaker. Obscenity had no effect on speaker credibility.*
+
+Use the data at [http://www.calvin.edu/~sld33/data/obscenity.csv](http://www.calvin.edu/~sld33/data/obscenity.csv) and try to carry out tests to verify the findings reported in the abstract. Note: You will have to compare no more than two conditions at a time (for example, sweating at beginning or nowhere) because we haven't yet invented a great sample stat for comparing three groups.
+
+If you want to work here in the tutorial, the data are already loaded for you in the dataset `obscenity`.
+
+```{r, obscenity, exercise = TRUE}
+```
+
+## Extra Practice: Reindeer
+
+Mathieu Douhard and colleagues studied the effects of weather on reproductive success in reindeer. For reindeer, frequent rain-on-snow (ROS) is *bad* weather. Using the dataset `reindeer` (already loaded for you in this tutorial, or accessible at [http://www.calvin.edu/~sld33/data/reindeer.csv](http://www.calvin.edu/~sld33/data/reindeer.csv)), try to answer:
+
+- Does the proportion of pregnant reindeer depend on the ROS (weather conditions)?
+- Is the average physical `Condition` of reindeer who are pregnant different from those who are not?
+- Does the average physical `Condition` of reindeer go down when weather conditions are poor (lots of `ROS`)?
+- *challenge* Is the prevalence of poor weather (lots of ROS) increasing over time? (You will have to figure out and/or create a variable and sample stat to measure this -- once you have the sample stat, the rest won't be too hard...)
+
+```{r, reindeer, exercise = TRUE}
+```
