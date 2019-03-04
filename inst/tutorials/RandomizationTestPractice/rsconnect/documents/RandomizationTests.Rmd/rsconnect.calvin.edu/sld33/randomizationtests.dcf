@@ -1,0 +1,12 @@
+name: randomizationtests
+title: RandomizationTests
+username: sld33
+account: sld33
+server: rsconnect.calvin.edu
+hostUrl: http://rsconnect.calvin.edu:3939/__api__
+appId: 96
+bundleId: 353
+url: http://rsconnect.calvin.edu:3939/content/96/
+when: 1551657819.14354
+asMultiple: FALSE
+asStatic: FALSE

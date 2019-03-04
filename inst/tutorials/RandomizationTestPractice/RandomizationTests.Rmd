@@ -504,8 +504,171 @@ The difference in average foraging trip duration is about a day.  Do you think t
 
 
 ## Robins and Noise: Setup
+When, and how much, do robins sing in relation to noise? We can address these questions using a dataset on English robins from a 2007 paper by R. Fuller and colleagues, [Daytime noise predicts nocturnal singing in urban robins](https://royalsocietypublishing.org/doi/full/10.1098/rsbl.2007.0134). This dataset includes the variables below, observed at n=121 different urban sites in Sheffield, England:
 
-## Robins and Noise: Randomization Distribution
+- `DaySong` Whether robin song was Present or Absent during the day
+- `NightSong` Whether robin song was Present or Absent during the night
+- `Year` of data collection (2005 or 2006)
+- `DayNoise` Noise level recorded during the day
+- `NightNoise` Noise level recorded during the night
+- `DiurnalDiff` For each site, the night time noise level minus the day time noise level
+
+Before starting to investigate the differences in song presence in relation to noise, it seems like a good idea to try to determine if the noise levels vary diurnally (Day vs. Night).   Let $\mu_{night}$ be the mean night noise level, $\mu_{day}$ be the mean daytime noise level, and $\mu_D$ be the mean of the sitewise day-night differences. 
+
+```{r, diurn-hyp}
+quiz(
+  question("What null and alternate hypotheses would you test in this scenario?",
+           answer('$H_0: \\mu_{night} = \\mu_{day}; H_1: \\mu_{night} \\neq \\mu_{day}$'),
+           answer('$H_0: \\mu_D = 0; H_1: \\mu_D \\neq 0$', correct = TRUE),
+           answer('$H_0: \\mu_{night} - \\mu_{day} = 0; H_1: \\mu_{night} - \\mu_{day} \\neq 0$'),
+           random_answer_order = TRUE)
+)
+```
+
+In this case, since there are some overall noisy sites and some overall quiet sites, it's important to treat the data as *paired* -- so we are looking at the average of the Day-Night differences by site, rather than the difference of average Day noise vs average Night noise. This reduces the influence of lurking variables (such as overall noisiness of the site) and gives the test more power, potentially, to detect small differences between day and night even if there are large site-to-site differences.
+
+### Robins and Noise: Sample Stat
+According to the hypotheses we just posed, our sample statistic will be the mean of the site-wise day-night differences. How would you compute it in R?
+
+```{r, robin-stat, exercise=TRUE}
+
+```
+
+```{r, robin-stat-hint-1, eval=FALSE}
+mean(~ _______, data= ________)
+```
+
+```{r, robin-stat-hint-2, eval=FALSE}
+mean(~ DiurnalDiff, data= robins)
+```
+
+## Robins and Noise: Randomization 
+
+### Strategy
+To create the randomization distribution, we have to resample from a sample as much like the real data as possible, except that it must also be consistent with the null hypothesis.
+
+The null hypothesis says $\mu_D$ should be 0, but the actual sample stat is about 8.5.
+
+```{r, robin-strategy}
+quiz(question('What randomization strategy could you use in this scenario?',
+              answer('rflip()'),
+              answer('Shuffle group labels'),
+              answer('Randomly change signs of differences', correct = TRUE),
+              answer('Re-center data distribution', correct = TRUE),
+              random_answer_order = TRUE, type='single'
+              )
+     )
+```
+
+### Generate Randomization Distribution
+Apply the "randomly change signs of differences" strategy to create the randomization distribution.
+
+```{r, robin-rd, exercise = TRUE}
+
+```
+
+```{r, robin-rd-hint-1, eval=TRUE}
+RRD <- do(1000)*mean( ~( sample(...)*DiurnalDiff ), data=robins)
+```
+
+```{r, robin-rd-hint-2, eval=TRUE}
+RRD <- do(1000)*mean( ~( sample(c(-1,1),  size= _____, replace = ______)*DiurnalDiff ),
+                      data=robins)
+```
+
+```{r, robin-rd-hint-3, eval=TRUE}
+RRD <- do(1000)*mean( ~( sample(c(-1,1), size= nrow(robins), replace = TRUE)*DiurnalDiff ),
+                      data=robins)
+```
+
+```{r, rrd-setup, echo=FALSE}
+RRD <- do(1000)*mean( ~( sample(c(-1,1), size= nrow(robins), replace = TRUE)*DiurnalDiff ),
+                      data=robins)
+```
+
+### Robins and Noise: Histogram of RD
+Next, we need to plot a histogram of the randomization distribution `RRD`. (We probably need to check the name of the variable inside, first).
+
+```{r, rrd-hist, exercise = TRUE, exercise.setup="rrd-setup"}
+
+```
+
+```{r, rrd-hist-help-1, eval=FALSE}
+head(dataset_name)
+gf_histogram(~variable, data = dataset_name)
+```
+
+```{r, rrd-hist-help-2, eval=FALSE}
+head(RRD)
+gf_histogram(~variable, data = dataset_name)
+```
+
+```{r, rrd-hist-help-3, eval=FALSE}
+head(RRD)
+gf_histogram(~variable, data = RRD)
+```
+
+```{r, rrd-hist-help-4, eval=FALSE}
+head(RRD)
+gf_histogram(~mean, data = RRD)
+```
+
+### Robins and Noise: P-value and Conclusions
+Just looking at the histogram, and remembering the sample stat was about 8.5, you have a pretty good idea what the conclusion is going to be, right?
+
+Use `prop1()` to compute the p-value, just for practice.
+
+```{r, robin-pval, exercise=TRUE, exercise.setup="rrd-setup"}
+
+```
+
+```{r, robin-pval-hint-1, eval=FALSE}
+prop1(~variable ___________, data = dataset_name)
+```
+
+```{r, robin-pval-hint-2, eval=FALSE}
+prop1(~mean ___________, data = RRD)
+```
+
+```{r, robin-pval-hint-3, eval=FALSE}
+prop1(~mean __ sample_stat_value, data = RRD)
+```
+
+```{r, robin-pval-hint-4, eval=FALSE}
+robin_stat <- mean(~DiurnalDiff, data=robins)
+robin_stat
+prop1(~mean __ robin_stat, data = RRD)
+```
+
+```{r, robin-pval-hint-5, eval=FALSE}
+robin_stat <- mean(~DiurnalDiff, data=robins)
+robin_stat
+prop1(~mean >= robin_stat, data = RRD)
+```
+
+
+
+```{r, robin-concl}
+quiz(
+  question('The p-value is small. What does this mean? Choose all correct answers.',
+           answer('We can reject the null hypothesis', correct = TRUE),
+           answer('The data provide strong evidence against the null hypothesis', correct=TRUE),
+           answer('The data prove the null hypothesis'),
+           answer('The data prove the alternate hypothesis'),
+           answer('We can reject the alternate hypothesis'),
+           answer('We fail to reject the null hypothesis'),
+           answer('The data provide no evidence against the null hypothesis'),
+           answer('Based on this dataset, we conclude that there is a difference in in day and night noise levels', correct=TRUE),
+           answer('Based on this dataset, we conclude that there is NOT a difference in day and night noise levels'))
+)
+```
+
+Sorry, I know that was probably painful to think through! Remember we can only *reject the null* or *fail to reject it*. Neither hypothesis is ever proven, and we never talk in terms of "rejecting" the alternate.
+
+Now that we have shown that there *is* a difference between day and night, we might try further tests to determine whether the proportion sites with robin song also has day/night differences, and whether the day (or night) noise level is different on average at sites where song is present vs sites where it is absent.
+
+```{r, more-robins, exercise=TRUE}
+```
 
 ## Extra Practice: Bad(?) Words
 
