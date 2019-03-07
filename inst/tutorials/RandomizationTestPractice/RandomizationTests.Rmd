@@ -468,7 +468,7 @@ quiz(
 
 Compute the p-value of the test: find the proportion of randomizations for which the randomization sample statistic was at least as extreme as what we found in the real data (-1.086).
 
-```{r, peng-p-calc, exercise = TRUE, exercise.setup = 'setup-frd', eval=FALSE}
+```{r, peng-p-calc, exercise = TRUE, exercise.setup = 'make-frd', eval=FALSE}
 prop1(...)
 ```
 
@@ -567,16 +567,16 @@ Apply the "randomly change signs of differences" strategy to create the randomiz
 
 ```
 
-```{r, robin-rd-hint-1, eval=TRUE}
+```{r, robin-rd-hint-1, eval=FALSE}
 RRD <- do(1000)*mean( ~( sample(...)*DiurnalDiff ), data=robins)
 ```
 
-```{r, robin-rd-hint-2, eval=TRUE}
+```{r, robin-rd-hint-2, eval=FALSE}
 RRD <- do(1000)*mean( ~( sample(c(-1,1),  size= _____, replace = ______)*DiurnalDiff ),
                       data=robins)
 ```
 
-```{r, robin-rd-hint-3, eval=TRUE}
+```{r, robin-rd-hint-3, eval=FALSE}
 RRD <- do(1000)*mean( ~( sample(c(-1,1), size= nrow(robins), replace = TRUE)*DiurnalDiff ),
                       data=robins)
 ```
