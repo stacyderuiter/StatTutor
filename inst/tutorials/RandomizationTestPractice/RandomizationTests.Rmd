@@ -133,7 +133,7 @@ tally(~ survived | tag.type, data = penguins, format = 'prop')
 diff(tally(~ survived | tag.type, data = penguins, format = 'prop')[2,])
 ```
 
-A more concise alternate method we have not yet seen:
+A more concise alternate method:
 
 ```{r, echo=TRUE}
 diff(prop(~survived == 'lived' | tag.type, data=penguins))
