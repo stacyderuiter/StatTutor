@@ -276,14 +276,3 @@ Go to the *Files* tab in RStudio (lower right).  Click *Upload* and browse to se
 ## A note about printing
 When you knit a Rmd file, it will probably automatically open in RStudio's built-in PDF pre-viewer. If you print from there, it will look awful (blurry). But when you knit, a PDF of the output is also saved in your *Files* tab. If you go to the *Files* tab and double click the PDF, it should open in your computer's normal PDF viewer and you can print it from there...and it will look good.
 
-## Practice what you've learned
-Start with the Rmd file you've been working with so far.  Make sure it has an informative title, the names of everyone in your group, and the date.
-
-Add answers to the following questions in the text part of the file, as well as R code chunks containing all R code that you used to answer them. If you used a ? (help) command, explain how/why in the text (since its results will not appear in the PDF). To answer the questions, you will need to use things you learned in the R Basics tutorial as well as this slide show.
-
-1. The mosaic package contains a dataset called HELPrct. How many cases are in the HELPrct dataset, and what are they (about what or whom were data being collected)?  
-2. How many females participated in the HELPrct study?
-3. Display the first few rows of the marmot dataset you created. In a few sentences, explain how you set up the data table and how you chose the variable names and values.
-4. How many bees were in the bee maze study?
-5. What was the median size of the bees in the study?
-

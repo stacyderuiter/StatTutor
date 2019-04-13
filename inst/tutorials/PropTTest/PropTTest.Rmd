@@ -3,6 +3,7 @@ title: "Tests for Proportions and Means in R"
 output: 
   learnr::tutorial:
     progressive: TRUE
+    allow_skip: TRUE
 runtime: shiny_prerendered
 ---
 
