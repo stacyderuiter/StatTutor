@@ -2,7 +2,8 @@
 title: "R Basics"
 output: 
   learnr::tutorial:
-    progressive: TRUE
+    progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
 ---
 
@@ -10,7 +11,7 @@ runtime: shiny_prerendered
 library(learnr)
 # library(checkr)
 # library(statPREP)
-library(tibble)
+library(tidyverse)
 library(ggformula)
 library(mosaic)
 theme_set(theme_bw())
@@ -19,7 +20,7 @@ knitr::opts_chunk$set(
   echo = TRUE,
   fig.align = "center",
   fig.width = 6, fig.height = 2.5)
-baseball <- read.csv(file='http://www.calvin.edu/~sld33/data/Baseball.csv')
+MI_lead <- read.csv(file='http://sldr.netlify.com/data/MI_lead.csv')
 tutorial_options(exercise.eval = FALSE)
 ```
 
@@ -44,11 +45,22 @@ table, td, th { border:0px; }
 
 </style>
 
+## Your Mission
+The purpose of this tutorial is to help you start to get familiar with the way R works, and some basic R commands.
+
+But you may have noticed that *you are not even using R.* At least, you haven't logged in to the RStudio server.
+
+This tutorial environment lets you read some helpful information, then practice writing and running your own R code, *without* tabbing back and forth between the tutorial website and RStudio. Here's hoping it provides a nice, gentle introduction in a controlled environment!
+
+Tutorials can also serve as helpful reference guides later on, if you need reminders or more practice. We will keep using them to learn and practice R throughout the semester, and links to all our tutorials will be on the course Moodle page ("R Tutorials" section).
+
 ## Communicating with R
   You will do most of your work in R with *code* or *commands*. Instead of pointing and clicking, you will type one or more lines of code, which R will *execute* (doing the work you have asked it to do). Then, R will return the results of whatever operation you asked it to do - sometimes producing a plot, other times creating a plot. Sometimes executing code has almost no visible effect (no plot or text output is produced), but instead some object is created and stored in R's *environment* for later use.
+
   
-###Two key questions
-  To get R (or any software) to do something for you,
+### Two Key Questions
+
+To get R (or any software) to do something for you,
 there are two important questions you must be able to answer.  Before
 continuing, think about what those questions might be.
   
@@ -65,9 +77,9 @@ important questions you must be able to answer:
   
   R *functions* provide R with the answer to the first question: what do you want the computer to do?
   
-  Most functions in R have short, but descriptive names that describe what they do.  For example, R has some functions to do basic mathematical operations:  the function `sqrt` computes the square root of a number, and the function `round` rounds a number (by default, it rounds to the nearest integer).
+  Most functions in R have short, but descriptive names that describe what they do.  For example, R has some functions to do basic mathematical operations:  the function `sqrt()` computes the square root of a number, and the function `round()` rounds a number (by default, it rounds to the nearest integer).
   
-  But just giving R a function is not enough: you also need to answer the second question (what information does R need to do the job?). For example, if you want to use the function `round`, you also need to provide R with the number you want to round!
+  But just giving R a function is not enough: you also need to answer the second question (what information does R need to do the job?). For example, if you want to use the function `round()`, you also need to provide R with the number you want to round!
   
   We will provide answers to our two questions by filling in
 the boxes of a basic template:
@@ -81,11 +93,20 @@ the boxes of a basic template:
   eventually. Some functions need only one input, but if a function takes more than one argument, they are separated by commas.)
 
 ###Using simple functions
-Let's practice what you just learned, trying out the `sqrt` and `round` functions. 
+Let's practice what you just learned, trying out the `sqrt()` and `round()` functions. 
 
 Edit the code below to compute the square root of 64:
+
 ```{r find-sqrt, exercise=TRUE}
 function(information_R_needs)
+```
+
+```{r find-sqrt-hint-1}
+sqrt(information_R_needs)
+```
+
+```{r find-sqrt-hint-2}
+sqrt(64)
 ```
 
 Now try computing the square root of 44, then rounding it to the nearest integer:
@@ -93,6 +114,26 @@ Now try computing the square root of 44, then rounding it to the nearest integer
 ```{r round-sqrt, exercise=TRUE}
 function1(information_R_needs)
 function2(information_R_needs)
+```
+
+```{r round-sqrt-hint-1}
+sqrt(information_R_needs)
+function2(information_R_needs)
+```
+
+```{r round-sqrt-hint-2}
+sqrt(44)
+function2(information_R_needs)
+```
+
+```{r round-sqrt-hint-3}
+sqrt(44)
+round(information_R_needs)
+```
+
+```{r round-sqrt-hint-4}
+sqrt(44)
+round(sqrt(44)) # yes, you can nest functions. sometimes (not always) a good idea.
 ```
 
 ### Storing information in R: variables
@@ -168,16 +209,41 @@ You will have chances to practice making your own data files and importing them 
 ## Using built-in datasets in R
   R has a number of built-in datasets that are accessible to you as soon as you start RStudio.
   
-  In addition to the datasets that are included with base R, there are add-on *packages* for R that contain additional software tools and sometimes datasets.  To use datasets contained in a package, you have to load the package by running the command library(packagename) (or equivalently, require(packagename)).  For example, we will practice looking at a dataset from the package `mosaic`. Before we can access the data, we have to load the package.  Edit the code below to load the `mosaic` package and then click "run code" to run it. (Nothing obvious will happen...but R will have access to the tools and data in the `mosaic` package once you run the code!)
+  In addition to the datasets that are included with base R, there are add-on *packages* for R that contain additional software tools and sometimes datasets.  
+  
+  To use datasets contained in a package, you have to load the package by running the command:
+  
+```{r library-example, eval=FALSE}
+library(packagename) 
+```
+
+The command `require()` does basically the same thing as `library()`. You can use whichever one you prefer.
+
+```{r require-example, eval=FALSE}
+require(packagename)
+```
+
+### Example of loading a package
+For example, we will practice looking at a dataset from the package `mosaic`. 
+
+Before we can access the data, we have to load the package.  
+
+Edit the code below to load the `mosaic` package and then click "run code" to run it.
+
+**(Nothing obvious will happen...this command just gives R permission to access the package, without asking it to actually DO anything.)**
 
 ```{r require-package, echo = FALSE, exercise=TRUE}
 library()
 ```
 
-### Viewing a dataset
-The mosaic package includes a dataset called HELPrct.
+```{r require-package-hint-1}
+library(mosaic)
+```
 
-If you just enter the dataset name (HELPrct) as a command, R will print (most of) the dataset out to the screen:
+### Viewing a dataset
+The mosaic package includes a dataset called `HELPrct`.
+
+If you just enter the dataset name (`HELPrct`) as a command, R will print some of the dataset out to the screen:
 
 ```{r}
 HELPrct
@@ -191,20 +257,31 @@ That's not really useful...how can we extract selected, useful information about
 There are a few functions that make it easier to take a quick look at a dataset:
 
 - `head` prints out the first few rows of the dataset.
-- `str` shows the *str*ucture of the dataset
+- `glimpse` gives an overview of the dataset
 - `names` prints out the names of the variables (columns) in the dataset
 - `summary` prints out a summary of all the variables (columns) in the dataset
 - `nrow` reports the number of rows (observations or cases) in the dataset
 - `ncol` reports the number of columns (variables) in the dataset
 
-Try applying each of these functions to the HELPrct data and see what the output looks like each time:
+Try applying each of these functions to the `HELPrct` data and see what the output looks like each time:
 
 ```{r check-out-data, exercise=TRUE}
 HELPrct
 ```
 
-```{r check-out-data-hint, results='hide'}
+```{r check-out-data-hint-1}
 head(HELPrct)
+```
+
+```{r check-out-data-hint-2}
+glimpse(HELPrct)
+```
+
+```{r check-out-data-hint-3}
+names(HELPrct)
+summary(HELPrct)
+nrow(HELPrct)
+ncol(HELPrct)
 ```
 
 ### Getting more help
@@ -220,16 +297,47 @@ You can get help related to R function, and built-in R datasets, using a special
 
 
 ## Reading in data from a file
-For this class, you will often be asked to analyze data that is stored in files that are available online - usually in csv format. It's simple to read them into R. For example, we can read in the file Baseball.csv, which is stored at <http://www.calvin.edu/~sld33/data/Baseball.csv>:
+For this class, you will often be asked to analyze data that is stored in files that are available online - usually in csv format. It's simple to read them into R. For example, we can read in the file MI_lead.csv, which is stored at <http://sldr.netlify.com/data/MI_lead.csv>:
 
 ```{r}
-baseball <- read.csv(file='http://www.calvin.edu/~sld33/data/Baseball.csv')
+MI_lead <- read.csv(file='http://sldr.netlify.com/data/MI_lead.csv')
+```
+
+### The most common mistakes
+The code below contains a couple of the **most common mistakes** students make when they try to read in a data file. See if you can find and correct them.
+
+The code below should read in some baseball statistics from the file <http://sldr.netlify.com/data/baseball.csv>.
+
+```{r baseball-mistakes, exercise = TRUE}
+read.csv(http://sldr.netlify.com/data/baesball)
+```
+
+```{r baseball-mistakes-hint-1}
+read.csv(http://sldr.netlify.com/data/baseball)
+```
+
+```{r baseball-mistakes-hint-2}
+read.csv(http://sldr.netlify.com/data/baseball.csv)
+```
+
+```{r baseball-mistakes-hint-3}
+read.csv('http://sldr.netlify.com/data/baseball.csv')
+```
+
+```{r baseball-mistakes-hint-4}
+ <- read.csv('http://sldr.netlify.com/data/baseball.csv')
+```
+
+```{r baseball-mistakes-hint-5}
+baseball <- read.csv('http://sldr.netlify.com/data/baseball.csv')
 ```
 
 ### What about local files?
-The same function, `read.csv`, can be used to read in a local file.  You just need to change the input file from the URL (in quotes) to the file path and name (in quotes).  For example, the input file='http://www.calvin.edu/~sld33/data/Baseball.csv' might become file='C:\\Data\\Baseball.csv'.
+The same function, `read.csv()`, can be used to read in a local file.  You just need to change the input to `read.csv()` -- instead of a URL, you provide a path and filename (in quotes).  For example, the input file='http://sldr.netlify.com/data/MI_lead.csv' might become file='C:\\Data\\MI_lead.csv'.
 
 We won't do an example in this tutorial because there isn't a way to work with local files within a tutorial environment, but you can practice it once you are working independently in RStudio.
+
+If you are working on the server rstudio.calvin.edu, you will have to *upload* files to your cloud space on the server before you can read them in (RStudio on the server cannot access files on your computer's hard drive).
 
 ### Side note: named input arguments
 The input argument we provided to R is the URL (in quotes -- either single or double quotes are fine).  But notice that this time, we gave the input argument a *name*, "file", and specified its value with an equal sign.
@@ -237,33 +345,50 @@ The input argument we provided to R is the URL (in quotes -- either single or do
 This is not *required* - the command works fine without it:
 
 ```{r}
-baseball <- read.csv('http://www.calvin.edu/~sld33/data/Baseball.csv')
+MI_lead <- read.csv('http://sldr.netlify.com/data/MI_lead.csv')
 ```
 
-However, if a function has *more than just one* input argument, it's good to get in the habit of providing names for the inputs.  If you provide names, then the order in which you list the inputs doesn't matter; without names, the order matters and you have to use ? to figure out what order R expects!
+However, if a function has *more than just one* input argument, it's good to get in the habit of providing names for the inputs.  If you provide names, then the order in which you list the inputs doesn't matter; without names, **the order matters** and you have to use ? to figure out what order R expects!
 
 ### Your turn
-Use one of the functions you learned earlier to find out how many variables are in the baseball dataset, and what their names are. 
+Use one of the functions you learned earlier to find out how many variables are in the MI_lead dataset, and what their names are. 
 
-```{r baseball-info, exercise=TRUE}
+```{r MI_lead-info, exercise=TRUE}
 ```
 
-```{r baseball-info-hint, results='hide', echo=FALSE}
-names(baseball)
+```{r MI_lead-info-hint, results='hide', echo=FALSE}
+names(MI_lead)
 ```
 
 ### Renaming variables in a dataset
 
-Those variable names are awful!  We can actually use `names` and `c` to assign replacement names, if we want.  Since the variable names are strings (words), they should be enclosed in quotes. Choose sensible new names for each variable and modify the code below to assign them to the baseball dataset.
+This is an advanced topic, so don't worry if it seems complicated; for now, it just nice to realize some of the power R has to clean up and reorganize data.
 
-```{r, rename-baseball, exercise=TRUE}
-names(baseball) <- c('new_name_1', 'new_name_2', ...)
+What if we didn't like the names of the `MI_lead` variables?  For example, a new user of the dataset might not know that that ELL stands for "elevated lead levels" and that ELL2005 gives the *proportion* of tested kids who had elevated lead levels in the year 2005.
+
+If we wanted to use a clearer (though longer) variable name, we might prefer "prop_elevated_lead_2005" instead of "ELL2005" -- more letters to type, but a bit easier to understand for a new user.  How can we tell R we want to rename a variable?
+
+We use the code:
+
+```{r, rename-MI_lead, echo=TRUE}
+MI_lead <- MI_lead %>%
+  rename(prop_elevated_lead_2005 = ELL2005)
+
+glimpse(MI_lead)
 ```
 
-### Check out the data
-Finally, use one of the functions you have learned so far to extract some information about the baseball dataset. *Remember, `?` won't work on baseball because it's not a built-in R dataset.*
+The code above uses some tools you've seen, and some more advanced ones you haven't seen yet.  Translated into words, it tells R:
 
-```{r look-at-baseball, exercise=TRUE}
+"Make a dataset called `MI_lead` by starting with the dataset `MI_lead`. Send (%>%) the `MI_lead` dataset to the function rename(). What I want to rename is the variable `ELL2005`. Its new name should be `prop_elevated_lead_2005`."
+
+*See...you can already start to make sense of even some pretty complicated (and useful) code.*
+
+### Check out the data
+OK, back to business - simple functions and datasets in R.
+
+It's your turn to practice now. Use one of the functions you have learned so far to extract some information about the MI_lead dataset. *Remember, `?` won't work on MI_lead because it's not a built-in R dataset.*
+
+```{r look-at-MI_lead, exercise=TRUE}
 
 ```
 
@@ -285,4 +410,7 @@ You've practiced creating variables in R using `c`, and saving information (or t
 
 ### Datasets in R
 You've considered several different ways to get datasets to work with in R: you can use datasets that are built in to R or R packages, or you can use `read.csv` to read in data files stored in .csv format.
+
+## Congratulations!
+You just completed your first tutorial on R, and wrote some of your own R code. I *knew* you could do it...
 
