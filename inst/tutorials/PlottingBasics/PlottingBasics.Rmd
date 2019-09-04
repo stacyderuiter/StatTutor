@@ -357,7 +357,11 @@ for people to read.
   * Always put at space around things like `+`, `*`, `~` etc. (This is a place
   where R doesn't care whether you have a space or not, but I recommend you do.)
   
-  * Feel free to use extra spaces to "line things up" to make them easier to read.
+  * Always put a space after each comma
+  
+  * Never put a space between a function name and its parentheses (write `head(data)` not `head (data)`)
+  
+  * Use spaces and line breaks to make your code easy to read.
 
 Mimic the examples you see in this tutorial.
 
@@ -381,7 +385,7 @@ apropos("gf_")
 ## Variety is the Spice of Life
 
 In addition to a traditional scatterplot, there are other ways to represent
-the relationship between two quantitative variables.  To make a differnt
+the relationship between two quantitative variables.  To make a different
 kind of plot, we simply replace `gf_point()` with a different goal.
 
 ### Give it a try
@@ -395,6 +399,8 @@ Replace the second `gf_point()` with one of the following and see what happens:
   
 Which do you like best? Why?
 
+*For the moment, many of these are probably dangerous plot types. Why? Because the picture may look pretty, but you may not understand exactly what the function is doing with your dataset to get the picture. And you have to know what is being done to be sure it's appropriate!* 
+
 ```{r spice, exercise = TRUE}
 gf_point(births ~ date, data = Births1978)
 gf_point(births ~ date, data = Births1978)
@@ -407,6 +413,8 @@ one on a separate line.  Then you can see multiple plots at once and compare the
 
 Want to see two (or more) plots one "on top of" the other?  Just add `%>%` at 
 the end of one plot, and the next will be layered on top of it.
+
+The symbol `%>%` is called a "pipe" because it lets you "send" the results of one operation to another operation. It comes in handy often!
 
 ```{r spice-layers, exercise = TRUE}
 gf_point(births ~ date, data = Births1978) %>%
@@ -905,10 +913,7 @@ head(KidsFeet)
 
 Post your favorite plot here by making a new slide in this google presentation:
 
- * [Favorite Plots Google Slides](https://docs.google.com/presentation/d/1BPNAz5IkbSqzrI05Aaad73VwnE-FFw_mjP8ZCLZD8oo/edit?usp=sharing)
-
-If you like you plots "just so", keep reading to learn some ways to 
-customize your plots.  Then come back and tweak your plots.
+ * [Favorite Plots Google Slides](https://docs.google.com/presentation/d/1O7BMi28lDktfhefdPS9TLbmmAeg4FKvuPwVoOA2gM2w/edit?usp=sharing)
 
 ## More Customization
 
@@ -985,6 +990,8 @@ gf_bar(~ Race1, data = NHANES) %>%
 
 Choose some different themes in place of `theme_wsj()` and see how the resulting plot changes.
 
+Remember, options include `theme_minimal()`, `theme_classic()`, `theme_gray()`, `theme_light()`, `theme_map()`, and `theme_quickmap()`. The ggthemes package includes some additional themes, including `theme_economist()`, `theme_economist_white()`, `theme_excel()`,  `theme_fivethirtyeight()`, `theme_stata()`, `theme_tufte()`, and `theme_wsj()`.
+
 ```{r gf_theme-example2, exercise=TRUE}
 gf_bar(~ Race1, data = NHANES) %>%
   gf_theme(theme = theme_wsj())
@@ -1012,78 +1019,78 @@ gf_boxplot(BPSysAve ~ TVHrsDay, data = NHANES)
       mean(BPSysAve ~ TVHrsDay, data = NHANES)
 ```
 
-### Your turn
+<!-- ### Your turn -->
 
-Try replaceing `mean()` with some other functions:
+<!-- Try replaceing `mean()` with some other functions: -->
 
-  * `median()`
-  * `max()`
-  * `min()`
-  * `sd()` (standard deviation)
-  * `iqr()` (interquartile range)
+<!-- * `median()` -->
+<!-- * `max()` -->
+<!-- * `min()` -->
+<!-- * `sd()` (standard deviation) -->
+<!-- * `iqr()` (interquartile range) -->
 
-### Summaries of one variable  
+<!-- ### Summaries of one variable   -->
 
-If we only have one variable, we can mimic histograms or barplots.
+<!-- If we only have one variable, we can mimic histograms or barplots. -->
 
-#### 1 Quantitative variable
+<!-- #### 1 Quantitative variable -->
 
-```{r numbers2, exercise = TRUE}
-gf_histogram( ~ BPSysAve, data = NHANES)
-        mean( ~ BPSysAve, data = NHANES)
-```
+<!-- ```{r numbers2, exercise = TRUE} -->
+<!-- gf_histogram( ~ BPSysAve, data = NHANES) -->
+<!--         mean( ~ BPSysAve, data = NHANES) -->
+<!-- ``` -->
 
-#### 1 Categorical variable
+<!-- #### 1 Categorical variable -->
 
-`tally()` is a useful function for tallying a categorical variable.  (It can
-handle two categorical variables, too.)
+<!-- `tally()` is a useful function for tallying a categorical variable.  (It can -->
+<!-- handle two categorical variables, too.) -->
 
-```{r, numbers3, exercise = TRUE}
-gf_bar( ~ Race1, data = NHANES)
- tally( ~ Race1, data = NHANES)
-```
+<!-- ```{r, numbers3, exercise = TRUE} -->
+<!-- gf_bar( ~ Race1, data = NHANES) -->
+<!--  tally( ~ Race1, data = NHANES) -->
+<!-- ``` -->
 
 
-### Multi-tasking
+<!-- ### Multi-tasking -->
 
-The `df_stats()` function allows us to compute multiple summaries simultaneously
--- great for all you multi-taskers out there. (It also saves paper if you are
-printing your work.)
+<!-- The `df_stats()` function allows us to compute multiple summaries simultaneously -->
+<!-- -- great for all you multi-taskers out there. (It also saves paper if you are -->
+<!-- printing your work.) -->
 
-```{r, numbers4, exercise = TRUE}
-df_stats( ~ BPSysAve, data = NHANES, mean, median)
-```
+<!-- ```{r, numbers4, exercise = TRUE} -->
+<!-- df_stats( ~ BPSysAve, data = NHANES, mean, median) -->
+<!-- ``` -->
 
-#### Your turn
+<!-- #### Your turn -->
 
- 1. Add on `max`, and `min` to the list of summaries in the example above.
- 
- 2. Now delete all the summaries (get rid of `mean`, `median`, etc.) to see what
- the default summaries are.  (It's a pretty useful set of summaries.)
- 
- 3. Now create a boxplot on a separate line using the same formula and data.  Do
- you see how where the values corresponding to the edges of the boxes show up in
- the default summary of `df_stats()`?
+<!--  1. Add on `max`, and `min` to the list of summaries in the example above. -->
 
-### df-stats() for tallying
+<!--  2. Now delete all the summaries (get rid of `mean`, `median`, etc.) to see what -->
+<!--  the default summaries are.  (It's a pretty useful set of summaries.) -->
 
-The `counts()` and `props()` summaries compute counts and proportions for 
-categorical variables.
+<!--  3. Now create a boxplot on a separate line using the same formula and data.  Do -->
+<!--  you see how where the values corresponding to the edges of the boxes show up in -->
+<!--  the default summary of `df_stats()`? -->
 
-```{r, numbers5, exercise = TRUE}
-df_stats( ~ Race1, data = NHANES, counts)
-df_stats( SmokeNow ~ Race1, data = NHANES, counts)
-```
+<!-- ### df-stats() for tallying -->
 
-#### Your turn
+<!-- The `counts()` and `props()` summaries compute counts and proportions for  -->
+<!-- categorical variables. -->
 
- 1. Change `counts` to `props` to see what happens.
- 
- 2. What happens if you switch the order of `SmokeNow` and `Race1` with `counts`?
- 
- 3. What happens if you switch the order of `SmokeNow` and `Race1` with `props`?
- 
- 4. Can we get counts and proportions at the same time? Try it.
+<!-- ```{r, numbers5, exercise = TRUE} -->
+<!-- df_stats( ~ Race1, data = NHANES, counts) -->
+<!-- df_stats( SmokeNow ~ Race1, data = NHANES, counts) -->
+<!-- ``` -->
+
+<!-- #### Your turn -->
+
+<!--  1. Change `counts` to `props` to see what happens. -->
+
+<!--  2. What happens if you switch the order of `SmokeNow` and `Race1` with `counts`? -->
+
+<!--  3. What happens if you switch the order of `SmokeNow` and `Race1` with `props`? -->
+
+<!--  4. Can we get counts and proportions at the same time? Try it. -->
 
 ## One template to rule a lot
 
@@ -1095,5 +1102,5 @@ Not quite as good as Frodo's ring, but our template is pretty powerful.
 &nbsp;
 
 We can use it for all sorts of numerical and graphical summaries of data.  (And later
-in the course we will use it statistical modeling as well.)
+in the course we will use it for statistical modeling as well.)
 

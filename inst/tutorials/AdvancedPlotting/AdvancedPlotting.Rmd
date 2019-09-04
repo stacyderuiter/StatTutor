@@ -40,7 +40,7 @@ knitr::opts_chunk$set(
 ```
 
 ## Beyond Basics
-This tutorial continues where the "Plotting Basics" tutorial (<http://rsconnect.calvin.edu:3939/connect/#/apps/45/>) left off. It shows you how to make a few more subtle modifications to your plots, and demonstrates how to make a few additional types of figures.
+This tutorial continues where the "Plotting Basics" tutorial (<https://rsconnect.calvin.edu/content/8/>) left off. It shows you how to make a few more subtle modifications to your plots, and demonstrates how to make a few additional types of figures.
 
   
 ## Jitter plots
@@ -215,7 +215,7 @@ gf_raster(month ~ day_of_month, fill=~births, data=Births1978) %>%
 
 ### Your Turn!
 
-The dataset at <http://www.calvin.edu/~sld33/data/EIA.csv> contains simulated data from an environmental impact assessment to determine the effects of wind farms on duck abundance.  Variable `xcode` and `ycode` indicate the x and y positions at which each data point was collected.  Variable `count` indicates the number of ducks observed at each (x,y) location during the study. Variable `impact` is 0 before the wind farm was operational, and 1 when it was operating. Make a raster plot to explore this data.
+The dataset at <http://sldr.netlify.com/data/EIA.csv> contains simulated data from an environmental impact assessment to determine the effects of wind farms on duck abundance.  Variable `xcode` and `ycode` indicate the x and y positions at which each data point was collected.  Variable `count` indicates the number of ducks observed at each (x,y) location during the study. Variable `impact` is 0 before the wind farm was operational, and 1 when it was operating. Make a raster plot to explore this data.
 
 *Note: `gf_contour()` only works for data with a single observation of the variable to be contoured for each unique combination of the $x$ and $y$ variables, so it will not work on this dataset.*
 
