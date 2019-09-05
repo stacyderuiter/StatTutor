@@ -309,7 +309,7 @@ The code below contains a couple of the **most common mistakes** students make w
 The code below should read in some baseball statistics from the file <http://sldr.netlify.com/data/baseball.csv>.
 
 ```{r baseball-mistakes, exercise = TRUE}
-read.csv(http://sldr.netlify.com/data/baesball)
+read.csv(http://sldr.netlify.com/data/seball)
 ```
 
 ```{r baseball-mistakes-hint-1}
