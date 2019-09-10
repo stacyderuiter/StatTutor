@@ -42,6 +42,47 @@ knitr::opts_chunk$set(
 ## Beyond Basics
 This tutorial continues where the "Plotting Basics" tutorial (<https://rsconnect.calvin.edu/content/8/>) left off. It shows you how to make a few more subtle modifications to your plots, and demonstrates how to make a few additional types of figures.
 
+
+## Themes
+
+### Using predefined themes
+
+A number of predefined themes exist that control the appearance of non-data
+elements of plots. In this tutorial, we set the default theme using
+
+```{r, echo=TRUE, eval=FALSE}
+theme_set(theme_bw())
+```
+
+Other themes include `theme_minimal()`, `theme_classic()`, `theme_gray()`, `theme_light()`, `theme_map()`, and `theme_quickmap()`. The ggthemes package includes some additional themes, including `theme_economist()`, `theme_economist_white()`, `theme_excel()`,  `theme_fivethirtyeight()`, `theme_stata()`, `theme_tufte()`, and `theme_wsj()`. Many of these themes mimic the look of other software packages or of popular publications.
+
+The theme can be set for an individual plot using `gf_theme()` -- for example:
+
+```{r gf_theme-example, echo=TRUE}
+gf_bar(~ Race1, data = NHANES) %>%
+  gf_theme(theme = theme_wsj())
+```
+
+### Test some themes
+
+Choose some different themes in place of `theme_wsj()` and see how the resulting plot changes.
+
+Remember, options include `theme_minimal()`, `theme_classic()`, `theme_gray()`, `theme_light()`, `theme_map()`, and `theme_quickmap()`. The ggthemes package includes some additional themes, including `theme_economist()`, `theme_economist_white()`, `theme_excel()`,  `theme_fivethirtyeight()`, `theme_stata()`, `theme_tufte()`, and `theme_wsj()`.
+
+```{r gf_theme-example2, exercise=TRUE}
+gf_bar(~ Race1, data = NHANES) %>%
+  gf_theme(theme = theme_wsj())
+```
+
+## Changing text font sizes
+
+Themes have optional arguments. One of the most useful is `base_size`, which controls the base font size (in points). (*`base_size` is an input argument to the theme, so it goes inside the parentheses after the theme name...* ) Try adjusting the font size and theme in the figure below - what theme and size do you think are optimal?
+
+```{r gf_theme-example3, exercise=TRUE}
+gf_bar(~ Race1, data = NHANES) %>%
+  gf_theme(theme = theme_wsj(base_size = 6))
+```
+
   
 ## Jitter plots
 If you would like to display the values of a *quantitative* variable for a few different *groups*, it is sometimes preferable to simply show *all* the data points instead of showing box plots or histograms for each group. **Generally, this is a better idea for small datasets than for large ones!**
@@ -54,8 +95,10 @@ One (crude) way to do this is to just make a scatter plot of a quantitative vari
 gf_point(height ~ sex, data=Galton)
 ```
 
+So much is wrong with this. It's hard to see all the data points, because they are on top of each other, and the overall look of the plot is not pleasing.
+
 ### Transparency to Reduce Overplotting
-However, a lot of the data points are overplotted (on top of each other), so it's hard to see how many observations there really are near, say, females 65 inches tall.  
+When a lot of the data points are overplotted (on top of each other), so it's hard to see how many observations there really are near, say, females 65 inches tall.  
 
 Adding transparency might help a bit:
 
@@ -113,6 +156,8 @@ It's easier to show than to explain, perhaps.  Compare the boxplots and violin p
 ```{r, echo=TRUE}
 gf_boxplot(height ~ sex, data=Galton)
 ```
+
+Violin plots are only a good idea if you have enough data points in each category to get a pretty good idea of the shape of the distribution, and justify approximating that shape with a smooth curve. If you only have a few data points per category, violins are not an ideal choice.
 
 ### Violin + Jitter?
 Sometimes it might be desirable to overlay the actual data points (a jitter plot) atop a violin or boxplot, like so:
@@ -237,38 +282,6 @@ Along the diagonal of the matrix of plots, you see a distribution plot for each 
 Make a pairs plot for the `iris` dataset.  See any interesting patterns?
 
 ```{r iris-pairs, exercise=TRUE}
-```
-
-
-
-## Axis Labels that Don't Fit
-Sometimes - particularly for bar graphs of categorical variables with long category names - axis tick labels overlap in an ugly way. For example:
-
-```{r, echo=TRUE, fig.width=4}
-gf_bar(~Education, data=NHANES)
-```
-
-### Flip the Axes
-One simple way to solve this problem is to flip the x and y axes of the plot.
-
-```{r, echo=TRUE}
-gf_bar(~Education, data=NHANES) + coord_flip()
-```
-
-(Note the use of the `+` instead of the pipe `%>%` in this instance.)
-
-### Rotate the Labels
-Another solution is to rotate the axis labels. We can do that by modifying the `angle` and `hjust` values for the x tick labels in the plot's `theme`.  `angle` is the angle in degrees by which to rotate the labels, and `hjust` moves them up and down (positive `hjust` moves down, and negative moves up). For example:
-
-```{r, echo=TRUE}
-gf_bar(~Education, data=NHANES) %>% 
-    gf_theme(axis.text.x=element_text(angle=65, hjust=1))
-```
-
-### Your Turn!
-The dataset at <http://www.calvin.edu/~sld33/data/MammalMetabolicRates.csv> provides data on mammal metabolic rates.  Make a bar graph of the number of observations per Order (or per Family, Genus, or Species) with legible axis tick labels.
-
-```{r mmr, exercise=TRUE}
 ```
 
 ## Got Questions?

@@ -683,6 +683,30 @@ and we can create them with `gf_bar()`.
 gf_bar( ~ TVHrsDay, data = NHANES)
 ```
 
+### Percents and Proportions?
+What if we want to show the percent or proportion in each category, rather than the number of observations? `gf_percents()` and `gf_props()` to the rescue! Try changing the function from `gf_bar()` to `gf_percents()` or `gf_props()` and see what happens.
+
+You can also add an 'h' at the end of each function to make the plots 'horizontal' with `gf_barh()`, `gf_propsh()`, and `gf_percentsh()`. Try that too!
+
+
+```{r, prop-graphs, exercise=TRUE}
+gf_bar( ~ TVHrsDay, data = NHANES)
+```
+
+```{r, prop-graphs-hint-1}
+gf_props( ~ TVHrsDay, data = NHANES)
+```
+
+```{r, prop-graphs-hint-2}
+gf_percents( ~ TVHrsDay, data = NHANES)
+```
+
+```{r, prop-graphs-hint-3}
+gf_percentsh( ~ TVHrsDay, data = NHANES)
+```
+
+
+
 ### Your Turn
 
  1. Create a bar graph for a different (categorical) variable.
@@ -737,49 +761,49 @@ figure.
 head(NHANES)
 ```
 
-<!-- ## Bar graph with pre-tabulated data -->
+## Bar graph with pre-tabulated data
 
-<!-- Sometimes, you may be given data that is already tabulated. Instead of a dataset with one row for every case, you will have one row for every group, and a variable that gives the number of observations in each group.  For example, the simple dataset below is pre-tabulated: -->
+Sometimes, you may be given data that is already tabulated. Instead of a dataset with one row for every case, you will have one row for every group, and a variable that gives the number of observations in each group.  For example, the simple dataset below is pre-tabulated:
 
-<!-- ```{r, echo=FALSE} -->
-<!-- D <- data.frame( -->
-<!--   group = LETTERS[1:3], -->
-<!--   count = c(20, 25, 18) -->
-<!-- ) -->
-<!-- D -->
-<!-- ``` -->
+```{r, echo=FALSE}
+D <- data.frame(
+  group = LETTERS[1:3],
+  count = c(20, 25, 18)
+)
+D
+```
 
-<!-- We can use the function `gf_col` to make a bar graph of pre-tabulated data. -->
-<!-- This function always expects the counts as the `y` part of the formula, and the -->
-<!-- group names as `x` (after the tilde). -->
+We can use the function `gf_col` to make a bar graph of pre-tabulated data.
+This function always expects the counts as the `y` part of the formula, and the
+group names as `x` (after the tilde).
 
-<!-- ```{r col-plot, exercise=TRUE} -->
-<!-- gf_col(count ~ group, data = D) -->
-<!-- ``` -->
-
-
-<!-- ## Multiple layers with %>% -->
-
-<!-- We said that `gf_point()` creates a plot with points.  -->
-<!-- This isn't quite true. Technically, it creates a **layer** with points. -->
-<!-- A single plot may have multiple layers. For example, you might want a scatter plot with a trend line overlaid on it, or a histogram with a standard normal curve overlaid. -->
-
-<!-- To create a multi-layered plot, simply -->
-<!-- append `%>%` at the end of the code for one layer and follow that with -->
-<!-- another layer. *(The `%>%` symbol is called a "pipe" because it sends the results of one operation on to the next operation for further processing)* -->
-
-<!-- #### Exercise -->
-
-<!-- 1. If you run the following code as is, you will get two separate plots. -->
-<!-- 2. Combine these two layers into a single plot by appending `%>%` at -->
-<!-- the end of the first line. -->
-<!-- 3. Try adding another layer for a third variable. -->
+```{r col-plot, exercise=TRUE}
+gf_col(count ~ group, data = D)
+```
 
 
-<!-- ```{r multi-layers, exercise = TRUE} -->
-<!-- gf_density(~ BPSysAve, data = NHANES)  -->
-<!-- gf_density(~ BPDiaAve, data = NHANES, fill = "blue") -->
-<!-- ``` -->
+## Multiple layers with %>%
+
+We said that `gf_point()` creates a plot with points.
+This isn't quite true. Technically, it creates a **layer** with points.
+A single plot may have multiple layers. For example, you might want a scatter plot with a trend line overlaid on it, or a histogram with a standard normal curve overlaid.
+
+To create a multi-layered plot, simply
+append `%>%` at the end of the code for one layer and follow that with
+another layer. *(The `%>%` symbol is called a "pipe" because it sends the results of one operation on to the next operation for further processing)*
+
+#### Exercise
+
+1. If you run the following code as is, you will get two separate plots.
+2. Combine these two layers into a single plot by appending `%>%` at
+the end of the first line.
+3. Try adding another layer for a third variable.
+
+
+```{r multi-layers, exercise = TRUE}
+gf_density(~ BPSysAve, data = NHANES)
+gf_density(~ BPDiaAve, data = NHANES, fill = "blue")
+```
 
 <!-- #### Linear regression line -->
 
@@ -833,7 +857,7 @@ gf_point(births ~ day_of_year | wday, data = Births,
          size = 0.5, color = ~ year)
 ```
 
-## Facet Grids and Facet Wraps (Optional)
+## Facet Grids and Facet Wraps 
 
 The faceting we did on the previous page is called facet wrapping.  If the facets
 don't fit nicely in one row, the facets continue onto additional rows.
@@ -846,7 +870,7 @@ Notice that after the `|` there is now a *formula* instead of a single variable.
 gf_point(births ~ day_of_year | year ~ wday, data = Births, size = 0.5)
 ```
 
-## The facet grid formula (Optional)
+## The facet grid formula 
 
 Hopefully, you figured out that the facet grid formula is interpreted as "row
 variable ~ column variable" -- the resulting plot will have one row of facets
@@ -966,45 +990,46 @@ gf_point(births ~ day_of_year, data = Births1978) %>%
   gf_lims(x = c(100, 200), y = c(8000, 9000))
 ```
 
-## Themes
+## Axis Labels that Don't Fit
+Sometimes - particularly for bar graphs of categorical variables with long category names - axis tick labels overlap in an ugly way. For example:
 
-### Using predefined themes
-
-A number of predefined themes exist that control the appearance of non-data
-elements of plots. In this tutorial, we set the default theme using
-
-```{r, echo=TRUE, eval=FALSE}
-theme_set(theme_bw())
+```{r, echo=TRUE, fig.width=4}
+gf_bar(~Education, data=NHANES)
 ```
 
-Other themes include `theme_minimal()`, `theme_classic()`, `theme_gray()`, `theme_light()`, `theme_map()`, and `theme_quickmap()`. The ggthemes package includes some additional themes, including `theme_economist()`, `theme_economist_white()`, `theme_excel()`,  `theme_fivethirtyeight()`, `theme_stata()`, `theme_tufte()`, and `theme_wsj()`. Many of these themes mimic the look of other software packages or of popular publications.
+### Flip the Axes
+One simple way to solve this problem is to flip the x and y axes of the plot.
 
-The theme can be set for an individual plot using `gf_theme()` -- for example:
-
-```{r gf_theme-example, echo=TRUE}
-gf_bar(~ Race1, data = NHANES) %>%
-  gf_theme(theme = theme_wsj())
+```{r, echo=TRUE}
+gf_bar(~Education, data=NHANES) %>%
+  gf_refine(coord_flip())
 ```
 
-### Test some themes
+### Rotate the Labels
+Another solution is to rotate the axis labels. We can do that by modifying the `angle` and `hjust` values for the x tick labels in the plot's `theme`.  `angle` is the angle in degrees by which to rotate the labels, and `hjust` moves them up and down (positive `hjust` moves down, and negative moves up). For example:
 
-Choose some different themes in place of `theme_wsj()` and see how the resulting plot changes.
-
-Remember, options include `theme_minimal()`, `theme_classic()`, `theme_gray()`, `theme_light()`, `theme_map()`, and `theme_quickmap()`. The ggthemes package includes some additional themes, including `theme_economist()`, `theme_economist_white()`, `theme_excel()`,  `theme_fivethirtyeight()`, `theme_stata()`, `theme_tufte()`, and `theme_wsj()`.
-
-```{r gf_theme-example2, exercise=TRUE}
-gf_bar(~ Race1, data = NHANES) %>%
-  gf_theme(theme = theme_wsj())
+```{r, echo=TRUE}
+gf_bar(~Education, data=NHANES) %>% 
+    gf_theme(axis.text.x=element_text(angle=65, hjust=1))
 ```
 
-## Changing text font sizes
+### Your Turn!
+The dataset at <http://sldr.netlify.com/data/MammalMetabolicRates.csv> provides data on mammal metabolic rates.  Read it in and make a bar graph of the number of observations per Order (or per Family, Genus, or Species) with legible axis tick labels.
 
-Themes have optional arguments. One of the most useful is `base_size`, which controls the base font size (in points). (*`base_size` is an input argument to the theme, so it goes inside the parentheses after the theme name...* ) Try adjusting the font size and theme in the figure below - what theme and size do you think are optimal?
-
-```{r gf_theme-example3, exercise=TRUE}
-gf_bar(~ Race1, data = NHANES) %>%
-  gf_theme(theme = theme_wsj(base_size = 6))
+```{r mmr, exercise=TRUE}
 ```
+
+
+
+## Figure size in RMarkdown
+You will almost certainly want to adjust figure sizes in your own RMarkdown documents. There are several ways - you can set a file-wide default in the header of the Rmd file as is done in the STAT homework template - or you can set the figure size for one R code chunk in the chunk header, as shown below.
+
+The values of `fig.width` and `fig.height` are expected to be given in inches, by default.
+
+```{r, echo=FALSE, fig.width = 6, fig.height = 0.7}
+knitr::include_graphics('images/fig-size.png')
+```
+
  
  
 ## But I like numbers!
@@ -1091,6 +1116,7 @@ gf_boxplot(BPSysAve ~ TVHrsDay, data = NHANES)
 <!--  3. What happens if you switch the order of `SmokeNow` and `Race1` with `props`? -->
 
 <!--  4. Can we get counts and proportions at the same time? Try it. -->
+
 
 ## One template to rule a lot
 
