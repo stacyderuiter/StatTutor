@@ -49,3 +49,7 @@ Temporary Items
 # R projects 
 .Rproj.user
 .Rproj.user/shared/notebooks
+.Rhistory
+
+# RSconnect
+rsconnect/
