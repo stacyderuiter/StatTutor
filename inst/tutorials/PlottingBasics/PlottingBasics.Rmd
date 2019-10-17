@@ -952,7 +952,7 @@ things like:
 As you can imagine, all of these things can be adjusted pretty much however you
 like.  We will cover a few of the most common options here.
 
-## Custom labels
+## Custom axis labels
 
 One of the most common customizations you will want to make to your plots will
 be to change the title, subtitle, and axis labels (and maybe add a caption).
