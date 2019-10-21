@@ -20,18 +20,16 @@ knitr::opts_chunk$set(
   fig.align = "center",
   fig.width = 6, fig.height = 2.5)
 RSD1 <- do(1000)*rflip(n = 502, prob=0.5)
-marmot <- read.csv(file='http://www.calvin.edu/~sld33/data/marmot.csv')
+marmot <- read.csv(file='http://sldr.netlify.com/data/marmot.csv')
 RSD2 <- do(1000)*diff(tally(~whistle | shuffle(hiker), data=marmot, format='prop')[2,])
-subway <- read.csv(file='http://www.calvin.edu/~sld33/data/subway.csv')
+subway <- read.csv(file='http://sldr.netlify.com/data/subway.csv')
 subway$length12 <- subway$length + 0.7
-RSD3 <- do(1000)*mean(~length12, data=sample(subway,
-                                             size=nrow(subway),
-                                             replace=TRUE))
+RSD3 <- do(1000)*mean(~length12, data=resample(subway))
 
-marmot2 <- read.csv(file='http://www.calvin.edu/~sld33/data/marmot2.csv')
+marmot2 <- read.csv(file='http://sldr.netlify.com/data/marmot2.csv')
 
 RSD4 <- do(1000)* mean(~ddist*
-                          mosaic::sample( c(-1,1) ,
+                          sample( c(-1,1) ,
                                   size=60,
                                   replace=TRUE),
                         data=marmot2)
@@ -39,7 +37,7 @@ RSD4 <- do(1000)* mean(~ddist*
 
 ## Strategy 1: **Use rflip()**
 
-###**WHEN** can we use this method?
+### **WHEN** can we use this method?
 - *ONLY* if the parameter of interest is ONE PROPORTION.
 
 ### Example:
@@ -76,10 +74,10 @@ p.valueB
 ```
 The values should be almost the same.  Here, what does it mean to get a p-value of 0?  A value as extreme as the sample stat was *never* seen in the randomizations!  However, we only did 1,000.  So instead of reporting a p-value of 0, it would be better to say that the p-value is less than 0.001.
 
-##Strategy 2: Shuffle category labels
+## Strategy 2: Shuffle category labels
 
-###**WHEN** can we use this method?
-- *Whenever* the parameter of interest involves a difference between groups.
+### **WHEN** can we use this method?
+- *Whenever* the parameter of interest involves a difference between groups, or a correlation between two quantitative variables. (In case of a correlation, you can shuffle either of the variables - does not matter which.)
 
 ### Example:
 Is the proportion marmots who whistle different when they encounter hikers with dogs, rather than those without?
@@ -90,7 +88,7 @@ $$H_1: p_{dog} - p_{no dog} \neq 0$$
 
 First, we will read in the data and compute the sample stat.
 ```{r}
-marmot <- read.csv(file='http://www.calvin.edu/~sld33/data/marmot.csv')
+marmot <- read.csv(file='http://sldr.netlify.com/data/marmot.csv')
 #get a table of proportion whistles by hiker type:
 tally(~whistle | hiker, data=marmot, format='prop')
 #what about just the SECOND ROW of the table (where whistle='yes')?
@@ -112,7 +110,7 @@ p.value
 
 ## Strategy 3: Re-center data
 
-**WHEN** can we use this strategy?  It works when the parameter of interest is a single mean (or a median, or a standard deviation, or an IQR, or...ANY other single parameter *except* for a proportion. For a proportion, use the rflip() strategy instead.)
+### **WHEN** can we use this strategy?  It works when the parameter of interest is a single mean or a median.
 
 
 ### Example: 
@@ -123,14 +121,12 @@ $$H_1: \mu < 12$$
 (where $\mu$ is the true overall mean of all Subway subs in the world.) They chose a one-sided alternate because it won't help the law suit at all if the subs are actually *bigger* than Subway claims -- the claimants only care if they are shorter!
 
 ```{r}
-subway <- read.csv(file='http://www.calvin.edu/~sld33/data/subway.csv')
+subway <- read.csv(file='http://sldr.netlify.com/data/subway.csv')
 head(subway) #to see variable names
 mean(~length, data=subway)
 #make a new dataset with mean length 12
 subway$length12 <- subway$length + 0.7
-RSD3 <- do(1000)*mean(~length12,
-                     data=sample(subway,
-                                 size=nrow(subway), replace=TRUE))
+RSD3 <- do(1000)*mean(~length12, data=resample(subway))
 head(RSD3)
 gf_histogram(~mean, data=RSD3)
 #find p-value: one-sided
@@ -141,19 +137,25 @@ prop(~mean <= 11.3, data=RSD3)
 
 ## Strategy 4: Multiply all differences randomly by +1 or -1
 
-###**WHEN** can we use this method?
-- *Only* for **paired data**.  This happens if the variable of interest is a difference between two observations of the same case or subject, and your parameter of interest is the mean (or some other summary) of these *differences*. For example, if you measure the weight of 100 women at the start of pregnancy and then one year after birth, and compute the difference for each person, you might be interested in the mean of those differences. Or if you study 50 bee hives and for each one, find the difference in proportion drones (male bees) in summer and winter, you might be interested in testing whether the mean seasonal difference in proportion drones, averaged over the 50 hives, is 0 or not.
+### **WHEN** can we use this method?
+- *Only* for **paired data**.  This happens if the variable of interest is a difference between two observations of the same case or subject, and your parameter of interest is the mean (or some other summary) of these *differences*. 
 
+#### What is paired data?
+For example, if you measure the weight of 100 women at the start of pregnancy and then one year after birth, and compute the difference for each person, you might be interested in the mean of those differences. Or if you study 50 bee hives and for each one, find the difference in proportion drones (male bees) in summer and winter, you might be interested in testing whether the mean seasonal difference in proportion drones, averaged over the 50 hives, is 0 or not.
+
+**Paired** data is often **before and after** data. It can be stored in a format with three columns: two with different measurements of the same variable, and one with the *difference* between them for each row.
+
+### Example
 In class, we considered an experiment with marmots. Each marmot was tested in two experiments: once it was approached by a hiker without a dog, and once by a hiker with a dog. The researchers recorded the distance which the marmot ran away in each experiment. The variable of interest was the difference in flight distance with/without a dog; the parameter of interest was the true population mean difference in flight distance, $D = \mu_{diff}$ where $\mu_{diff}$ is the mean of differences in flight distance for all marmots in the population.
 
 ```{r}
-marmot2 <- read.csv(file='http://www.calvin.edu/~sld33/data/marmot2.csv')
+marmot2 <- read.csv(file='http://sldr.netlify.com/data/marmot2.csv')
 #sample statistic
 mean(~ddist, data=marmot2)
 #rand. dist
 RSD4 <- do(1000)* mean(~ddist*
       sample( c(-1,1) ,
-              size=60,
+              size=nrow(marmot2),
               replace=TRUE),
       data=marmot2)
 gf_histogram(~mean, data=RSD4)
@@ -167,8 +169,9 @@ As usual, if the computed p-value is 0, we can report it to be "less than [1/num
 There are a few important things to include when reporting the results of a hypothesis test.
 
 0. Somewhere in your answer, **report the hypotheses you are testing, and also report the sample statistic** from the data. This gives people a first impression for how large the difference between the sample stat and the $H_0$ value is, which helps them form opinions about whether results are *practically significant* as well as (possibly) *statistically significant*!
-1. **Report the p-value** you obtained.**
+1. **Report the p-value** you obtained.
 2. **State in words what the p-value tells you.** For example, in the Subway example, if we got a p-value of 0.01, we might say:
 *The p-value of the test was 0.01, which means that if Subway subs were really 12 inches long on average, there would be only a 1% chance of getting a dataset like ours, where the sample mean sub length was only 11.3 inches.*
-3. State your decision: do you **reject the null hypothesis** or **fail to reject the null hypothesis**?  (Remember, small p-values are evidence *against* the null, so **a small p-value leads you to reject $H_0$.**) If using a threshold $\alpha$, the usual standard is to use $\alpha = 0.05$, but 0.01 is also sometimes used. In this case, if the p-value is less than $\alpha$, then reject the null. If you are using a weight-of-evidence approach rather than a threshold, then you need to make a judgment call about whether the p-value you found is "small" or not; if it is "small" then you reject the null.
-4. **Explain what the decision means in context.** For example, for the Subway case, we might say: *Since the p-value is small, we reject the null hypothesis that the true mean sub length is 12 inches. The data provide evidence in favor of the alternate hypothesis, suggesting that Subway subs are less than 12 inches long.* If we had instead gotten a p-value of 0.45 in the Subway test, we might then say: *Since the p-value is large, we fail to reject the null hypothesis; the data provide no evidence against the idea that the true mean length of Subway subs is 12 inches.*
+3. State your decision: do you **reject the null hypothesis** or **fail to reject the null hypothesis**?  (Remember, small p-values are evidence *against* the null, so **a small p-value leads you to reject $H_0$.**) You should usually use a weight-of-evidence approach rather than a threshold: you need to make a judgment call about whether the p-value you found is "small" or not; if it is "small" then you reject the null. (*If using a threshold $\alpha$, the usual standard is to use $\alpha = 0.05$, but 0.01 is also sometimes used. In this case, if the p-value is less than $\alpha$, then reject the null. *) Sometimes people say a result is *statistically significant* if the null has been rejected.
+4. **Explain what the decision means in context.** "In context" means in terms of the real-world "story" of the problem, not just saying "reject the null" or "fail to rejejct the null". For example, for the Subway case, we might say: *Since the p-value is small, we reject the null hypothesis that the true mean sub length is 12 inches. The data provide evidence in favor of the alternate hypothesis, suggesting that Subway subs are less than 12 inches long.* If we had instead gotten a p-value of 0.45 in the Subway test, we might then say: *Since the p-value is large, we fail to reject the null hypothesis; the data provide no evidence against the idea that the true mean length of Subway subs is 12 inches.*
+5. **Consider the practical significance of the results.** What is the **effect size** -- how big *is* the pattern or difference you detected, really? A sub being 0.7 inches shorter than expected might have practical consequences - it really is noticably less food. But a sub being 0.07 inches shorter would probably *not* be practically important, even if the stats show the subs *are* smaller by that much on average.

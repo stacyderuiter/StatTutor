@@ -1,12 +1,19 @@
 ---
-title: "Basic Data Tidying"
-output: learnr::tutorial
+title: "Some Data Tidying"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, warning = FALSE}
 library(learnr)
-knitr::opts_chunk$set(echo = FALSE)
+library(mosaic)
+library(tidyverse)
+knitr::opts_chunk$set(echo = TRUE)
+terrible_demographics <- read.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vR3yEJxW6KNHE1lHPr3K-T4VZHeA_J_KGq_DUb1-Y9sYUd3IUEpliqVLVaJNa69TSRm-fm6WWWu7jS9/pub?gid=0&single=true&output=csv')
+terrible_data <- read.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vTWbGAYFfuwPFciVedTUkeM8fAa6kLJ3aefGVMAz4V0O1Geb-zzDytG3lhevy8JOWV0LGgx5QUzsxFx/pub?gid=0&single=true&output=csv')
 ```
 
 ## Motivation and Reference Material
@@ -15,71 +22,446 @@ In this tutorial, we will try to follow the data organization principles and dat
 For more (**optional**) reference material, you may consult:
 
 - [R for Data Science e-Book](http://r4ds.had.co.nz/)
+- [STAT 545 Course notes from UBC](https://stat545.com/)
 - [Tidyverse Learning Resources](https://www.tidyverse.org/learn/)
 - [tidyr package vignette](https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.html)
 - [Data Tidying from **Data Science with R** by Garrett Grolemund](http://garrettgman.github.io/tidying/)
 
+Note that for all the examples in this tutorial to work, we also need the `tidyverse` package, so make sure to add it to your settings chunk if you are going to use these methods:
 
-## Topic 1
-
-### Exercise 
-
-*Here's a simple exercise with an empty code chunk provided for entering the answer.*
-
-Write the R code required to add two plus two:
-
-```{r two-plus-two, exercise=TRUE}
-
+```{r, echo = TRUE, eval = FALSE}
+require(tidyverse)
 ```
 
-### Exercise with Code
+## Untidy Data
+We will start with two datasets, `terrible_demographics` and `terrible_data`.  
 
-*Here's an exercise with some prepopulated code as well as `exercise.lines = 5` to provide a bit more initial room to work.*
+If you want to play with the datasets on your own outside this tutorial, they are online:
 
-Now write a function that adds any two numbers and then call it:
+- [terrible_demographics](https://docs.google.com/spreadsheets/d/e/2PACX-1vR3yEJxW6KNHE1lHPr3K-T4VZHeA_J_KGq_DUb1-Y9sYUd3IUEpliqVLVaJNa69TSRm-fm6WWWu7jS9/pub?gid=0&single=true&output=csv)
+- [terrible_data](https://docs.google.com/spreadsheets/d/e/2PACX-1vTWbGAYFfuwPFciVedTUkeM8fAa6kLJ3aefGVMAz4V0O1Geb-zzDytG3lhevy8JOWV0LGgx5QUzsxFx/pub?gid=0&single=true&output=csv)
 
-```{r add-function, exercise=TRUE, exercise.lines = 5}
-add <- function() {
-  
-}
+Here in the tutorial, first, take a look at them (`glimpse()` them, and try making a few summary tables or plots).
+
+(The datasets are already loaded for you in the tutorial environment.)
+
+```{r, explore-untidy-data, exercise = TRUE}
 ```
 
-## Topic 2
+## Combining datasets by adding rows
+If you have two datasets with the same (or similar) columns, you can simply "paste" them togther. This is the R equivalent of copying all the data rows from one file, and pasting them at the bottom of the other file. For example, perhaps you have datasets containing responses to the same survey for several different years, and you want to put them all together (in that specific case, you'd want to add a `Year` column to each before you combine them...)
 
-### Exercise with Hint
+As you imagine, matching columns have to have the same names in the two datasets. If there are some columns that are present in one dataset and not the other, those will be filled in with NAs as needed.
 
-*Here's an exercise where the chunk is pre-evaulated via the `exercise.eval` option (so the user can see the default output we'd like them to customize). We also add a "hint" to the correct solution via the chunk immediate below labeled `print-limit-hint`.*
+If your "matching" columns do not have the same names in R, you will want to `rename()` them first before they match. Then, just pass the two (or more) datasets to `bind_rows()` to paste them together.
 
-Modify the following code to limit the number of rows printed to 5:
+As an example, below I artifically split the `terrible_demographics` dataset into two pieces (the first 25 rows and the last 25 rows), then use `bind_rows()` to paste them back together.
 
-```{r print-limit, exercise=TRUE, exercise.eval=TRUE}
-mtcars
+```{r}
+first_dataset <- terrible_demographics[1:25,]
+second_dataset <- terrible_demographics[26:50,]
+
+both_together <- bind_rows(first_dataset, second_dataset)
+glimpse(both_together)
 ```
 
-```{r print-limit-hint}
-head(mtcars)
+
+## Combining data files by key
+To join together several tables using a **key** variable, you want to `join` them. I very often use  `left_join()` (which means that I want to keep all the rows in the first dataset you name, and no more). Other options are covered at: <https://dplyr.tidyverse.org/reference/join.html>.
+
+You can find examples of this in HW2, where we worked with the gapminder dataset. 
+
+There is also an awesome set of examples and explanations by Jenny Bryan at: <https://stat545.com/join-cheatsheet.html>
+
+*Side note: If you are googling for random R help online and found something she wrote - it's probably awesome.*
+
+## Keep only certain rows
+To keep only certain rows, use `filter()`. For example, to keep only countries with more than 20 million people:
+
+```{r}
+countries <- terrible_data %>%
+  filter(Population.in.millions > 20)
 ```
 
-### Quiz
+Or to keep only the entries where `The.country.they.are.from` is "USA", 
 
-*You can include any number of single or multiple choice questions as a quiz. Use the `question` function to define a question and the `quiz` function for grouping multiple questions together.*
-
-Some questions to verify that you understand the purposes of various base and recommended R packages:
-
-```{r quiz}
-quiz(
-  question("Which package contains functions for installing other R packages?",
-    answer("base"),
-    answer("tools"),
-    answer("utils", correct = TRUE),
-    answer("codetools")
-  ),
-  question("Which of the R packages listed below are used to create plots?",
-    answer("lattice", correct = TRUE),
-    answer("tools"),
-    answer("stats"),
-    answer("grid", correct = TRUE)
-  )
-)
+```{r}
+countries <- terrible_demographics %>%
+  filter(The.country.they.are.from == 'USA')
 ```
 
+Or to keep only the ones that are either "USA", "usa", or "United States",
+
+```{r}
+countries <- terrible_demographics %>%
+  filter(The.country.they.are.from %in% c('USA', 'usa', 'United States'))
+```
+
+
+## Keep only certain columns
+
+To keep only certain columns, use `select()`:
+
+For example to keep only the population column we'd do:
+
+```{r}
+country <- terrible_data %>%
+  select(Population.in.millions)
+glimpse(country)
+```
+Or to keep *everything but* that we'd add a `-`:
+
+```{r}
+country <- terrible_data %>%
+  select(-Population.in.millions)
+glimpse(country)
+```
+
+You can also select (or -select) multiple columns at the same time. For example, to keep only `coke_or_pepsi` and `fave_color` from the `terrible_demographics` data,
+
+```{r}
+td <- terrible_demographics %>%
+  select(coke_or_pepsi, fave_color)
+head(td)
+```
+
+Or to *get rid* of just those two:
+
+```{r}
+td <- terrible_demographics %>%
+  select(-coke_or_pepsi, -fave_color)
+head(td)
+```
+
+## Renaming variables
+This is easy! Just use `rename()`:
+
+```{r}
+glimpse(terrible_data)
+country <- terrible_data %>%
+  rename(population = Population.in.millions)
+glimpse(country)
+```
+
+## Creating new variables
+If we want to make a new variable by modifying or combining some existing ones (or from scratch), we use `mutate()`.
+
+### Arithmetic and mathematical functions
+We can do arithmetic or apply mathematical functions to one or more existing variables. To create a variable that is population times two, and another that is the base 10 log of the population:
+
+```{r}
+country_data <- terrible_data %>%
+  mutate(double_pop = 2*Population.in.millions,
+         logpop = log10(Population.in.millions*1e6))
+glimpse(country_data)
+```
+
+### Quantitative to Categorical
+We can also make categorical variables from other variables, depending on whether some condition is met.
+
+For example, to make a new categorical variable that indicates whether or not a country's population is above 30 million, we could use `mutate()` with `ifelse()`.
+
+(`ifelse()` takes three inputs: first, a logical condition; second, the value the variable should have if the condition is TRUE; third, the value the variable should have if the condition if FALSE.)
+
+```{r}
+country_data <- terrible_data %>%
+  mutate(pop = ifelse(Population.in.millions >= 30, 
+                               "Above 30 million", 
+                               "Below 30 million"))
+glimpse(country_data)
+```
+
+## ifelse
+Previously we used the function `ifelse()` to make a two-category categorical variable from a quantitative one. But we can use it much more generally than that, anytime we want to make a categorical variable with two possible values.
+
+Recall, `ifelse()` takes three inputs: first, a logical condition; second, the value the variable should have if the condition is TRUE; third, the value the variable should have if the condition if FALSE.
+
+We use it with `mutate()` to make new variables.
+
+### Recoding from 0/1 to words
+Often we want to recode variables from logical (0 or 1) to words. (The logical format is fine if it's 100% clear what 0 should be and what 1 should be - otherwise words are less confusing.) For example, `terrible_demographics` has variable `coke_or_pepsi` which is 0 if a person prefers Pepsi and 1 if they prefer Coke.  We could make that clearer by changing from 0 and 1 to words:
+
+```{r}
+demo <- terrible_demographics %>%
+  mutate(coke_or_pepsi = ifelse(coke_or_pepsi == 1, 'Coke', 'Pepsi'))
+glimpse(demo)
+```
+
+*Remember in R you use two equal signs (`==`) in logical conditions. The single equal sign `=` is (mostly) reserved for pairing input names and values inside functions.*
+
+### Recoding from more than two categories to two
+What if we have a variable with multiple possible values, and we want to re-envision it as a binary variable? `ifelse()` can help with that.
+
+For example, consider using the variable `The.country.they.are.from` (*who named that!?!*) to create a new variable `country` with values "USA" and "other".
+
+First, remember that this dataset is a mess:
+
+```{r}
+tally(~The.country.they.are.from, data = terrible_demographics)
+```
+
+A first try at making our `country` variable might be:
+
+```{r}
+usa_data <- terrible_demographics %>%
+  mutate(country = ifelse(The.country.they.are.from == 'USA', 'USA', 'Other'))
+glimpse(usa_data)
+tally(~country | The.country.they.are.from, data = usa_data)
+```
+
+Notice that this will not include spelling variants "usa" and "United States" in our new "USA" category.  We could go back and clean up the possible values of `The.country.they.are.from` before creating our new `country` variable, of course, but if we want to take care of it here, we could use "or" (`|`) in our condition:
+
+```{r}
+usa_data <- terrible_demographics %>%
+  mutate(country = ifelse(The.country.they.are.from == 'USA' |
+                            The.country.they.are.from == 'usa' | 
+                            The.country.they.are.from == 'United States',
+                          'USA',
+                          'Other'))
+glimpse(usa_data)
+tally(~country | The.country.they.are.from, data = usa_data)
+```
+
+## Create categorical variables with more than two categories
+What if you want to do something kind of like `ifelse()` does, but with more than just two possible values for the resulting categorical variable?
+
+For example, the `terrible_demographics` data has variable `fave_color` which takes on integer values 1-7, representing colors red, orange, yellow, green, blue, indigo, and violet. What if we wanted to use the names of the colors (rather than the numbers) as the variable values?  We can use `case_when()`.
+
+The `case_when()` function uses the input format:
+
+```{r, eval = FALSE}
+data <- data %>%
+  mutate(new_variable_name = case_when( logical condition ~ "new variable value",
+                                        another condtion ~ "2nd new value",
+                                        another condition ~ "3rd new value",
+                                        TRUE ~ "last new value"))
+```
+
+A concrete example with the `fave_color` variable:
+
+```{r}
+countries <- terrible_demographics %>%
+  mutate(fave_color2 = case_when(fave_color == 1 ~ 'red',
+                                 fave_color == 2 ~ 'orange',
+                                 fave_color == 3 ~ 'yellow',
+                                 fave_color == 4 ~ 'green',
+                                 fave_color == 5 ~ 'blue',
+                                 fave_color == 6 ~ 'indigo',
+                                 fave_color == 7 ~ 'violet',
+                                 TRUE            ~ 'other'))
+head(countries)
+```
+
+*The TRUE line at the end is a catchall for all possible cases that don't meet any of the conditions yet specified.*
+
+## Convert between "wide" and "long" formats: Spread and Gather
+If you have multiple columns that you want to combine into one, or one column that you want to split into many, check out:
+<https://r4ds.had.co.nz/tidy-data.html#spreading-and-gathering>
+
+Also see me with your specific example if you want help with it.
+
+## Split a column in two
+Sometimes, you have a column like "Oct 20, 1997" or "Protestant, Christian Reformed"  or "heroin and cocaine" and you want to split it into two parts stored in two different variables. (keep just the Oct 20, or the 1997, or the Protestant, or the Christian Reformed, or the heroin, or the cocaine -- basically you want to split at a "," or at "and", etc.)
+
+We can use `separate` from package `tidyr` to do this.
+
+For example, the `terrible_demographics` data has a column `Birthday` that (for some people, at least) gives the date in the format: Month Day, Year. What if we want to split those at the comma?
+
+For `separate()`, the input `into` gives a list of column names for the new columns created by separating the old on; the input `sep` tells where to make the splits (`sep = ','` tells R to split at each comma).
+
+```{r}
+demo <- terrible_demographics %>%
+  separate(Birthday, into = c('Day', 'Year'), sep = ',')
+head(demo)
+```
+
+(*In this case, it worked perfectly for the dates formatted like "October 21, 2019", and unsurprisingly it did not at all for ones formatted like "10-21-2019"...*)
+
+For more examples, see: <https://r4ds.had.co.nz/tidy-data.html#separating-and-uniting>.
+
+## Change variable type
+R has several main variable types that we use: "factor" variables a categorical ones, but so are "character" variables. One difference is that R "knows" the allowable levels or values for "factors". (Another is the way they are stored and represented internally.) If you want to manipulate the  values of a categorical variable, it will probably be better to change to a "character" variable first.
+
+If you want to use a variable as a categorical predictor in a model or graph, you can force this behavior by asking R to treat is as a factor or character.
+
+You can convert between variable types by using functions `as.character()`, `factor()`, and `as.numeric()` to get the one you want. 
+
+For example, to force R to treat the variable `Hemisphere` as "character", use:
+
+```{r}
+countries <- terrible_data %>%
+  mutate(Hemisphere = as.character(Hemisphere))
+glimpse(countries)
+```
+
+*Note: be careful with `as.numeric()` though - it may not be as smart as you hope! See the next section...*
+
+### Numbers hiding in text
+There's also a nifty way to extract just numbers from character variables -- see [online help for `parse_number`](https://readr.tidyverse.org/reference/parse_number.html)
+
+## Change, combine, or correct factor levels
+Correcting mistakes in the values of categorical variables can get complicated!
+
+Check out: 
+
+- <https://cran.r-project.org/web/packages/forcats/vignettes/forcats.html>
+- <https://stat545.com/factors-boss.html>
+
+And then see if you can fix some of the problems with the terrible datasets...
+
+```{r, forcats-play, exercise = TRUE}
+```
+
+
+## Make corrections to string (character) data
+Look at the names of the people in the `terrible_demographics` data.
+
+For some reason they all have a strange $\hat{A}$ at the end. Let's remove those:
+
+```{r}
+demo <- terrible_demographics %>%
+  rename(name = Name.of.the.person) %>%
+  # note: for this I did copy/paste the offending character
+  mutate(name = stringr::str_remove(name, 'Â'))
+glimpse(demo)  
+```
+
+Better, but now there is random white space at the end of each name. We can also remove that with `stringr::trim_white()`:
+
+```{r}
+demo <- terrible_demographics %>%
+  rename(name = Name.of.the.person) %>%
+  # note: for this I did copy/paste the offending character
+  mutate(name = stringr::str_remove(name, 'Â'),
+         name = stringr::str_trim(name, side = "right"))
+glimpse(demo) 
+```
+
+Better!
+
+(The options for `side` are "left", "right", and "both".)
+
+There are many other things you might need to do with character data. For more information and examples, check out: <https://stringr.tidyverse.org/index.html> or the [stringr package cheatsheet](https://github.com/rstudio/cheatsheets/blob/master/strings.pdf)
+
+## Missing value "codes"
+Sometimes people use values (like -999, etc.) to indicate when data is missing.  You don't want to accidentally treat these values as "real" numbers (or categories) in your analysis!
+
+The simplest way to get rid of them is right when you are reading in your data. If you use `read.csv()`, just add the input `na.strings = c('your value')`
+
+For example, if you wanted every entry that is "space" (" ") or "two spaces" ("  ") or "unknown" to be interpreted as missing data, you would do:
+
+```{r, eval = FALSE}
+my_data <- read.csv('my_file.csv', na.strings = c(' ', '  ', 'unknown'))
+```
+
+If *numeric* variables contain *valid numeric values* like -999 that you would like to interpret as NA, you will have to replace them specifically.  There are some of these in our `terrible_demographics` data: it looks like -9 has been used as code for missing data in the variable `Number.in.family`.  We can replace all -9s in that variable using `ifelse()`:
+
+```{r}
+demo <- terrible_demographics %>%
+  mutate(num_in_fam = ifelse(Number.in.family == -9, NA, Number.in.family))
+glimpse(demo)
+```
+
+The code above tells R, "Make a new variable `num_in_fam` from the variable `Number.in.family`. If `Number.in.family` is -9, change it to NA (missing), and if it is not, then leave it alone."
+
+## Dates and Times
+If you are going to work with date/time data, I recommend the package `lubridate`. It can be used to parse date-time variables (even if they are in multiple formats!) and work with them. Help and examples are online at: <https://r4ds.had.co.nz/dates-and-times.html>
+
+To use this package, basically you first need to convert your variables (or create new ones) to date-time types in R.  `lubridate` can do this with a set of functions *named after the format/order of the input data they accept* -- for example, `mdy()` makes date-time variables from variables that give month, day, year; `ymd()` does it with variables that give year, month, day; `mdy_hms()` works with year, month, day, hour, minute, second; and so on.
+
+As one example, we can clean up the `Birthday` variable from the `terrible_demographics` dataset:
+
+```{r}
+terrible_demographics %>% select(Birthday) %>% head()
+```
+
+Note that some entries are month, day, year and some are year, month, day -- so we will have to parse both and then put them back together...
+
+```{r}
+require(lubridate)
+demo <- terrible_demographics %>%
+  mutate(birthday_datetime = mdy(Birthday),
+         birthday_datetime2 = ymd(Birthday))
+glimpse(demo)
+```
+
+Worked great, but now our birthday data is in two columns; let's put it back into one using `ifelse()`.
+
+```{r}
+demo <- terrible_demographics %>%
+  mutate(birthday_datetime = mdy(Birthday),
+         birthday_datetime2 = ymd(Birthday),
+         # if birthday_datetime is missing, use birthday_datetime2
+         birthday_all = ifelse(is.na(birthday_datetime), 
+                               birthday_datetime2,
+                               birthday_datetime))
+glimpse(demo)
+```
+
+Argh! Now our nice date-times are changed to random-looking numbers.  `lubridate::as_date()`, change them back!
+
+```{r}
+demo <- terrible_demographics %>%
+  mutate(birthday_datetime = mdy(Birthday),
+         birthday_datetime2 = ymd(Birthday),
+         # if birthday_datetime is missing, use birthday_datetime2
+         birthday_all = ifelse(is.na(birthday_datetime), 
+                               birthday_datetime2,
+                               birthday_datetime),
+         # make sure the final result is a date-time value
+         birthday_all = as_date(birthday_all))
+glimpse(demo)
+```
+
+## Other Data File Formats
+This tutorial provides a few examples and practice with basic techniques. One thing *not* covered so far is reading in your data, if it is stored in a file format *other* than a .csv file. Below are a few examples of reading in data in other formats.
+
+
+### Excel
+You can read in data directly from Excel files (.xls or .xlsx). 
+
+```{r}
+require(readxl)
+dsets <- read_excel("data/datasets.xlsx")
+head(dsets)
+```
+
+If there are multiple sheets in the Excel file, the code above will just read in the **first** one.  To figure out what the names of the sheets in the file are, you can run:
+
+```{r, echo = TRUE}
+excel_sheets("data/datasets.xlsx")
+```
+
+And to read in a specific sheet, use the input `sheet`:
+
+```{r}
+chick_data <- read_excel("data/datasets.xlsx",
+                         sheet = 'chickwts')
+glimpse(chick_data)
+```
+
+More help and examples are at: <https://readxl.tidyverse.org/>.
+
+### STATA (.dta) files
+You can read in data from .dta files using the package `foreign`:
+
+```{r}
+require(foreign)
+contraceptive_use <- read.dta('https://data.princeton.edu/wws509/datasets/cusew.dta')
+```
+
+### Other Text Files
+You can read in data from general text files (.txt, .dat, and more) using
+`read_table()` from package `readr`.  There are quite a few options - see help at <https://www.rdocumentation.org/packages/readr/versions/1.3.1/topics/read_table> if needed.
+
+Here is a simple example for a text file with a header row:
+
+```{r}
+require(readr)
+contraceptive_use <- read_table('https://data.princeton.edu/wws509/datasets/cuse.dat')
+```
+
+### Other file types?
+If you need examples of reading in other file types, email and I can add them here.
+
+The package `foreign` also contains functions to read in many data types, so you may want to check the [package documentation](https://www.rdocumentation.org/packages/foreign/versions/0.8-72) if you want to research on your own how to read in a particular file type.

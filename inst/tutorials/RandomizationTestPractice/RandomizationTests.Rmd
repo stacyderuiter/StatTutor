@@ -10,19 +10,22 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(mosaic)
-library(beepr)
 library(emoGG)
+library(cowsay)
 knitr::opts_chunk$set(echo = FALSE)
-penguins <- read.csv('http://www.calvin.edu/~sld33/data/bandedPenguins.csv')
+penguins <- read.csv('http://sldr.netlify.com/data/bandedPenguins.csv')
 # reindeer data: ROS (rain on snow) is bad for reindeer, so ROS High is Poor conditions
-reindeer <- read.csv('http://www.calvin.edu/~sld33/data/reindeer.csv') %>%
+reindeer <- read.csv('http://sldr.netlify.com/data/reindeer.csv') %>%
   mutate(WeatherConditions = ifelse(ROS == 'High', 'Poor', 'Good'))
 
-obscene <- read.csv('http://www.calvin.edu/~sld33/data/obscenity.csv') %>%
+obscene <- read.csv('http://sldr.netlify.com/data/obscenity.csv') %>%
   mutate_if(is.numeric, round)
 
-robins <- read.csv('http://www.calvin.edu/~sld33/data/robins.csv') %>%
+robins <- read.csv('http://sldr.netlify.com/data/robins.csv') %>%
   mutate(DiurnalDiff = DayNoise - NightNoise)
+
+RRD <- do(1000)*mean( ~( sample(c(-1,1), size= 121, replace = TRUE)*DiurnalDiff ),
+                      data=robins)
 ```
 
 ## Survival of Banded Penguins: The Study
@@ -164,20 +167,25 @@ PRD <- do(1000)*diff(prop(~__________ | shuffle(tag.type), data=penguins))
 PRD <- do(1000)*diff(prop(~survived == 'lived' | shuffle(tag.type), data=penguins))
 ```
 
-**We did it!** Nice work. Wouldn't it be nice if we could celebrate the successful completion of the task with an awesome sound effect?
+**We did it!** Nice work. Wouldn't it be nice to get some congratulatory comments from a friendly farm animal?  We can do that...
 
-```{r, beepr, exercise=TRUE}
-PRD <- do(1000)*diff(prop(~survived == 'lived' | shuffle(tag.type), data=penguins))
-beep(sound = 8)
+```{r, echo = TRUE}
+say("Nice work, randomization test learner!", by = "cow")
 ```
 
-There are 11 options (numbers 1-11) for the sound. *You may want to try them all.* This will only work when running code in the console, not when knitting a file. If you want to use it in your own code, make sure to add the line
+There are plenty of options for the animal, by the way...you may want to try them all.
 
 ```{r}
-require(beepr)
+sort(names(animals))
 ```
 
-to your setup r code chunk.
+If you want to use these friendly, talkative animals in your own work, make sure to add:
+
+```{r, echo=TRUE, eval=FALSE}
+require(cowsay)
+```
+
+To your settings R code chunk.
 
 ### Penguin Survival: Randomization Distribution, again
 
@@ -257,7 +265,9 @@ Hey, *that's not a penguin emoji.* **That's just a dot.** How do I turn it into 
 ```{r, add-stat1, exercise=TRUE, exercise.setup='setup-prd'}
 ss <- data.frame(samp_surv_diff = samp_surv_diff, height=0)
 gf_histogram(~ surv_diff , data = PRD2)  %>%
-  gf_refine(geom_emoji(emoji = '1f427', mapping = aes(samp_surv_diff, height), data=ss, size=0.07))
+  gf_refine(geom_emoji(emoji = '1f427', 
+                       mapping = aes(samp_surv_diff, height), 
+                       data=ss, size=0.07))
 ```
 
 Adjust the `size` to make the emoji bigger or smaller, and change the '1f427' to change the emoji. How can you find the code for the emoji you want? Here's a way to search:
@@ -561,7 +571,7 @@ quiz(question('What randomization strategy could you use in this scenario?',
 ```
 
 ### Generate Randomization Distribution
-Apply the "randomly change signs of differences" strategy to create the randomization distribution.
+Apply the "randomly change signs of differences" strategy to create the randomization distribution. Note: there are 121 rows in the robins data set.
 
 ```{r, robin-rd, exercise = TRUE}
 
@@ -577,12 +587,15 @@ RRD <- do(1000)*mean( ~( sample(c(-1,1),  size= _____, replace = ______)*Diurnal
 ```
 
 ```{r, robin-rd-hint-3, eval=FALSE}
-RRD <- do(1000)*mean( ~( sample(c(-1,1), size= nrow(robins), replace = TRUE)*DiurnalDiff ),
+RRD <- do(1000)*mean( ~( sample(c(-1,1), size= 121, replace = TRUE)*DiurnalDiff ),
                       data=robins)
 ```
 
 ```{r, rrd-setup, echo=FALSE}
-RRD <- do(1000)*mean( ~( sample(c(-1,1), size= nrow(robins), replace = TRUE)*DiurnalDiff ),
+require(mosaic)
+robins <- read.csv('http://sldr.netlify.com/data/robins.csv') %>%
+  mutate(DiurnalDiff = DayNoise - NightNoise)
+RRD <- do(1000)*mean( ~( sample(c(-1,1), size= 121, replace = TRUE)*DiurnalDiff ),
                       data=robins)
 ```
 
@@ -676,16 +689,16 @@ Now that we have shown that there *is* a difference between day and night, we mi
 
 *This experiment examined the effects of judicious swearing on persuasion in a pro‐attitudinal speech. Participants listened to one of three versions of a speech about lowering tuition that manipulated where the word “damn” appeared (beginning, end, or nowhere). The results showed that obscenity at the beginning or end of the speech significantly increased the persuasiveness of the speech and the perceived intensity of the speaker. Obscenity had no effect on speaker credibility.*
 
-Use the data at [http://www.calvin.edu/~sld33/data/obscenity.csv](http://www.calvin.edu/~sld33/data/obscenity.csv) and try to carry out tests to verify the findings reported in the abstract. Note: You will have to compare no more than two conditions at a time (for example, sweating at beginning or nowhere) because we haven't yet invented a great sample stat for comparing three groups.
+Use the data at [http://sldr.netlify.com/data/obscenity.csv](http://sldr.netlify.com/data/obscenity.csv) and try to carry out tests to verify the findings reported in the abstract. Note: You will have to compare no more than two conditions at a time (for example, swearing at beginning or nowhere) because we haven't yet invented a great sample stat for comparing three groups.
 
-If you want to work here in the tutorial, the data are already loaded for you in the dataset `obscenity`.
+If you want to work here in the tutorial, the data are already loaded for you in the dataset `obscene`.
 
 ```{r, obscenity, exercise = TRUE}
 ```
 
 ## Extra Practice: Reindeer
 
-Mathieu Douhard and colleagues studied the effects of weather on reproductive success in reindeer. For reindeer, frequent rain-on-snow (ROS) is *bad* weather. Using the dataset `reindeer` (already loaded for you in this tutorial, or accessible at [http://www.calvin.edu/~sld33/data/reindeer.csv](http://www.calvin.edu/~sld33/data/reindeer.csv)), try to answer:
+Mathieu Douhard and colleagues studied the effects of weather on reproductive success in reindeer. For reindeer, frequent rain-on-snow (ROS) is *bad* weather. Using the dataset `reindeer` (already loaded for you in this tutorial, or accessible at [http://sldr.netlify.com/data/reindeer.csv](http://sldr.netlify.com/data/reindeer.csv)), try to answer:
 
 - Does the proportion of pregnant reindeer depend on the ROS (weather conditions)?
 - Is the average physical `Condition` of reindeer who are pregnant different from those who are not?
