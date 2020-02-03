@@ -3,6 +3,7 @@ title: "Creating Bootstrap Confidence Intervals"
 output: 
   learnr::tutorial:
     progressive: TRUE
+    allow_skip: TRUE
 runtime: shiny_prerendered
 ---
 
@@ -21,7 +22,7 @@ knitr::opts_chunk$set(
   fig.width = 6, fig.height = 2.5)
 #lead <- read.csv(file='http://www.calvin.edu/~sld33/data/FlintWaterTestJanMar2016.csv')
 tutorial_options(exercise.eval = FALSE)
-students <- read.csv(file='http://www.calvin.edu/~sld33/data/IntroStatStudents.csv')
+students <- read.csv(file='http://sldr.netlify.com/data/IntroStatStudents.csv')
 students[students==''] <- NA
 students <- na.omit(students)
 students$Plans <- factor(students$Plans)
@@ -29,24 +30,44 @@ students$Exercise <- factor(students$Exercise)
 ```
 
 ## Sample Statistics
-The sample statistic is simply the quantity of interest, computed for the observed dataset.
+To find a confidence interval for a population parameter, we first have to compute an estimate of that parameter from a dataset. A 95% confidence interval can be:
 
-### Some examples
+$$ \text{sample statistic} \pm 1.96*SE$$
+
+So to compute it, we need to find the sample statistic and the $SE$ - the standard error of the sampling distribution.
+
+In other words, we first need to be able to compute a sample statistic! The sample statistic is simply the quantity of interest, computed for the observed dataset.
+
+## Sample Stat Example: Mean
 For example, if you are interested in $\bar{x}$, the mean number of hours that intro stat students sleep every night (using variable `Sleep` from the dataset `students`), the sample statistic would be:
 
 ```{r samp-mean}
-mean(~Sleep, data=students, na.rm=TRUE)
+mean(~Sleep, data = students, na.rm = TRUE)
 ```
 
-*(Note the "na.rm=TRUE" input - this tells R to ignore any missing values in the dataset when computing the mean. If you don't include this input, then if there are missing values (NA) in the data, the result of your calculation will also be NA.)*
+*(Note the "na.rm=TRUE" input - this tells R to ignore any missing values in the dataset when computing the mean. If you don't include this input, then if there are missing values (NA) in the data, the result of your calculation will also be NA.). Like this undesirable result:*
 
+```{r}
+mean(~Ozone, data = airquality)
+```
+
+## Sample Stat Example: Proportion
 Another example: what if you wanted to use the variable `Rank` in the `students` dataset to estimate $\hat{p}_{oldest}$, the sample proportion of intro stat students who are oldest siblings?
 
 ```{r, samp-prop}
-prop(~Rank=='Oldest', data=students)
+prop(~Rank == 'Oldest', data=students)
 ```
 
-### More advanced examples
+Logical operators are often useful for computing proportions. Here are the main ones you may want to know:
+
+- equals: `==` (note double equal for checking if things are equal)
+- does not equal: `!=`
+- is greater than (less than): `>` (`<`)
+- is greater than (less than) or equal to: `>=` (`<=`)
+
+The thing on the right of the logical operator should be *in quotation marks* if it is the value of a categorical variable, or *not in quotation marks* if it is numeric.
+
+## Sample Stat Example: Diff in Means
 More complicated sample statistics can also be computed. For example, what if the parameter of interest is the difference in mean GPAs (variable `GPA`) between intro stat students who plan to do further education after graduating from college, and those who plan to get jobs (variable `Plans`)?
 
 We can compute the mean for both groups:
@@ -71,19 +92,20 @@ question("How did the diff() function do subtraction?",
   allow_retry=TRUE)
 ```
 
+## Sample Stat Example: Diff in Proportions
 We can also compute differences in proportions.  For example, let's find the difference in proportions male and female intro stat students who plan to get jobs after college graduation. First, we can make a table of the two relevant variables, `Gender` and `Plans`, using the input `format='prop'` to get the results as proportions rather than number of observations:
 
 ```{r}
 tally(~Plans | Gender, data=students, format='prop')
 ```
 
-We need to isolate just the second row of the table:
+We need to isolate just the second row of the table. We use hard brackets [] to do this, with the format `[row, column]`. Leaving `row` or `column` blank means "keep them all", so to get all columns and row 2:
 
 ```{r}
 tally(~Plans | Gender, data=students, format='prop')[2,]
 ```
 
-Then take the difference.
+Then take the difference using `diff()`.
 ```{r}
 diff(tally(~Plans | Gender, data=students, format='prop')[2,])
 ```
@@ -121,7 +143,7 @@ Now, what about computing the median heart rate of intro stat students?
 ```{r, heartrate-hint-1, eval=FALSE, echo=FALSE, results='hide'}
 #use this line to get the names of the variables in the students dataset:
 names(students)
-# alternatively, you could use head() or str() to do this.
+# alternatively, you could use head() or glimpse() to do this.
 ```
 
 ```{r, heartrate-hint-2, eval=FALSE, echo=FALSE, results='hide'}
@@ -132,7 +154,7 @@ median(~..., data=...)
 median(~Heartrate, data=students)
 ```
 
-Next, compute the difference in mean top speeds driven (variable `Topspeed`) between men and women.
+Next, compute the difference in mean top speeds driven (variable `Topspeed`) between students who have/haven't gotten a speeding ticket while driving (variable `Ticket`).
 
 ```{r speed-diff, exercise=TRUE}
 ```
@@ -146,10 +168,10 @@ diff(mean(~ ... | ... , data=...))
 ```
 
 ```{r speed-diff-solution, echo=FALSE, eval=FALSE, results='hide'}
-diff(mean(~Topspeed | Gender, data=students))
+diff(mean(~Topspeed | Ticket, data=students))
 ```
 
-Finally, compute the difference in proportions men and women intro stat students who **do not** exercise regularly (variable `Exercise`).
+Finally, compute the difference in proportion of intro stat students who exercise regularly (variable `Exercise`), between those who plan to get a job after Calvin and those who will attend more school (variable `Plans`).
 
 ```{r exercise-gender, exercise=TRUE}
 ```
@@ -163,7 +185,7 @@ diff(tally(~...|..., data=..., format=...)[...,])
 ```
 
 ```{r exercise-gender-hint-3, eval=FALSE, echo=FALSE}
-diff(tally(~Exercise | Gender, data=students, format='prop')[,1])
+diff(tally(~Exercise | Plans, data=students, format='prop')[,1])
 ```
 
 ## A bootstrap sample
@@ -180,17 +202,19 @@ To get a bootstrap sampling distribution, we will follow the process:
 To do this, we first have to think about how to take a single bootstrap sample from the data. *We won't have to do this step when using real data to compute a CI; we are just doing it here for illustration, to better understand how the resampling is done.*
 
 ### Examples
-To get a bootstrap sample from a dataset, we will use the function sample. It has inputs `size` -- here we want `size` to be the number of cases in the original dataset -- and replace -- we will use `replace==TRUE` to sample with replacement.
+To get a bootstrap sample from a dataset, we will use the function `resample()`. Given a dataset, it takes a sample from the dataset *with replacement* and returns a "resampled" dataset with the same number of rows (but a somewhat different set of observations).
 
-For example, to take one bootstrap sample from the `students` dataset, we would run the r code:
+For example, to take **one bootstrap sample** from the `students` dataset, we would run the r code:
 
 ```{r, echo=TRUE, eval=FALSE}
-sample(students, size=nrow(students), replace=TRUE)
+# do not copy and paste this code for use in homework.
+# (you need many bootstrap samples, not just one)
+resample(students)
 ```
 
 *Note that no result will be printed to the screen when you run this code. It does work, though...*
 
-You try. How would you compute one bootstrap sample from the HELPrct dataset? *(If your code runs without an error, it's probably correct...but nothing will print to the screen as a result. You can use the hints to check your work.)
+You try. How would you compute one bootstrap sample from the HELPrct dataset? *(If your code runs without an error, it's probably correct...but nothing will print to the screen as a result. You can use the hints to check your work.)*
 
 ```{r HELPrctsample, exercise=TRUE}
 
@@ -198,28 +222,31 @@ You try. How would you compute one bootstrap sample from the HELPrct dataset? *(
 
 
 ```{r HELPrctsample-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-sample(..., size=nrow(...), replace=TRUE)
+resample(...)
 ```
 
 ```{r HELPrctsample-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-sample(HELPrct, size=nrow(HELPrct), replace=TRUE)
+resample(HELPrct)
 ```
+
+**Remember - that was just for practice. Going forward, there is no real use computing ONE bootstrap sample -- we always need to compute MANY of them to get a** *bootstrap sampling distribution.*
 
 ## Bootstrap sample stat
 
 ### Example
 For every bootstrap sample, we will have to compute the sample statistic.
 
-To do this, the code will be almost exactly the same as the code used to compute the sample statistic from the original dataset.  The only difference is that instead of `data=dataset.name`, you will input `data=sample(...)` so that the data used for the calculation is a boostrap sample.
+To do this, the code will be almost exactly the same as the code used to compute the sample statistic from the original dataset.  The only difference is that instead of `data=dataset.name`, you will input `data=resample(dataset.name)` so that the data used for the calculation is a boostrap sample.
 
 Here's an example of computing the sample stat for one bootstrap sample, if the parameter of interest is the proportion intro stat students who are the youngest among their siblings:
 
 ```{r, bootstatex}
-prop(~Rank=='Youngest', 
-     data=sample(students, size=nrow(students), replace=TRUE))
+# don't copy and paste this code for homework problems.
+# remember, you need to get MANY bootstrap sample stats...
+# and this computes just ONE.
+prop(~Rank == 'Youngest', 
+     data = resample(students))
 ```
-
-*Note: again, we won't have to run this code as part of the final calculation of a bootstrap distribution. We are building up to the full code needed to compute the bootstrap distribution, and this is just one piece of it. Once you see how to do the whole thing, you don't need to do this first anymore.*
 
 ### Practice
 
@@ -230,17 +257,17 @@ Compute the sample statistic for one bootstrap sample, if the parameter of inter
 ```
 
 ```{r oldestbstat-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-prop(~..., data=sample(...))
+prop(~..., data = resample(...))
 ```
 
 ```{r oldestbstat-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-prop(~Rank==..., 
-     data=sample(..., size=nrow(...), replace=TRUE))
+prop(~Rank == ..., 
+     data = resample(...))
 ```
 
 ```{r oldestbstat-solution, eval=FALSE, echo=FALSE, results='hide'}
-prop(~Rank=='Youngest', 
-     data=sample(students, size=nrow(students), replace=TRUE))
+prop(~Rank == 'Youngest', 
+     data = resample(students))
 ```
 
 
@@ -256,58 +283,56 @@ diff(tally(...,...,...)[...])
 ```
 
 ```{r bsamp-exercise-hint-2, echo=FALSE, eval=FALSE}
-diff(tally(~...|..., data=sample(...), format=...)[...,])
+diff(tally(~...|..., data = resample(...), format = ...)[...,])
 ```
 
 ```{r bsamp-exercise-solution, echo=FALSE, eval=FALSE}
 diff(tally(~Exercise|Gender, 
-           data=sample(students, size=nrow(students), replace=TRUE),
-           format='prop')[2,])
+           data = resample(students),
+           format = 'prop')[2,])
 ```
 
 ## BSD for a mean
-Once we see how to compute the sample statistic for each bootstrap sample, the only thing we need to add is to repeat the calculation many times (1000 or 10000) and save the results as a dataset. 
+Once we see how to compute the sample statistic for each bootstrap sample, the only thing we need to add to get the whole BSD (*which is what we really want!*) is to **repeat the calculation many times** (1000 or 10000) and **save the results as a dataset.** 
 
 For example, a bootstrap distribution for the mean GPA of intro stat students:
 
 ```{r}
-BSD <- do(1000)*mean(~GPA, 
-                     data=sample(students, size=nrow(students), replace=TRUE))
-head(BSD)
+BSD <- do(1000)*mean(~GPA, data = resample(students))
+glimpse(BSD)
 ```
 
-Notice: all we added was `do(1000)*` at the start of the code!
+Notice: all we added was `do(1000)*` at the start of the code! Now instead of taking one bootstrap sample and computing one bootstrap sample stat, it does 1000 (and stores the result for us)!
 
 ## BSD for a proportion
 
-### sample() method
-We can compute a BSD for a proportion in a similar way. For example, a BSD for the proportion intro stat students that are male:
+### resample() method
+We can compute a BSD for a proportion in a similar way. For example, a BSD for the proportion intro stat students that are planning on grad school:
 
 ```{r}
-BSD <- do(1000)*prop(~Gender=='Male',
-                     data=sample(students, size=nrow(students), replace=TRUE))
-head(BSD)
+BSD <- do(1000)*prop(~Plans == 'Educ', data = resample(students))
+glimpse(BSD)
 ```
 
-*Notice the somewhat strange variable name `TRUE.`...*
+*Notice the somewhat strange variable name `prop_TRUE`...*
 
 ### shortcut rflip() method
 There is another way (a bit of a shortcut) to find a bootstrap distribution that **only works if the parameter of interest is one proportion**.  It uses the function `rflip()`, which flips and imaginary coin a certain number of times. You can specify the probability of getting "heads" on each imaginary coin-flip.  
 
-For the `students` data, the sample proportion Male from the real data was 0.48 and the size of the dataset was 131 observations:
+For the `students` data, the sample proportion wannabe-grad-students from the real data was 0.33 and the size of the dataset was 131 observations:
 
 ```{r}
-prop(~Gender=='Male', data=students)
+prop(~Plans == 'Educ', data=students)
 nrow(students)
 ```
 
-So each bootstrap sample is like the outcome of a set of `n`=131 coin flips with probability of "heads" (Male), `prob`=0.48.
+So each bootstrap sample is like the outcome of a set of `n`=131 coin flips with probability of "heads" (Educ), `prob`=0.33.
 
 Thus, we can compute a bootstrap distribution via:
 
 ```{r}
-BSD <- do(1000)*rflip(n=131, prob=0.48)
-head(BSD)
+BSD <- do(1000)*rflip(n=131, prob=0.33)
+glimpse(BSD)
 ```
 
 ```{r which-rflip, echo=FALSE}
@@ -320,7 +345,7 @@ question("Which variable in the BSD above contains the bootstrap sampling distri
   allow_retry=TRUE)
 ```
 
-Your turn: try using `rflip()` to generate a bootstrap sampling distribution for the proportion intro stat students who plan to go on for further education after college graduation.
+Your turn: try using `rflip()` to generate a bootstrap sampling distribution for the proportion intro stat students who have texted while driving (variable `Texted`, value `Yes`).
 
 ```{r rflip-ex, exercise=TRUE}
 
@@ -333,7 +358,7 @@ BSD <- do(...)*rflip(n=..., prob=...)
 
 ```{r rflip-ex-solution, echo=FALSE, eval=FALSE}
 BSD <- do(1000)*rflip(n=nrow(students), 
-                      prob=prop(~Plans=='Educ',data=students))
+                      prob=prop(~Texted == 'Yes', data = students))
 ```
 
 ## BSD for differences
@@ -347,10 +372,8 @@ What about a bootstrap sampling distribution for the difference in mean GPA betw
 diff(mean(~GPA | Plans, data=students))
 #BSD
 BSD <- do(100)*diff(mean(~GPA | Plans,
-                         data=sample(students,
-                                     size=nrow(students), 
-                                     replace=TRUE)))
-head(BSD) #to see variable names in BSD dataset
+                         data = resample(students)))
+glimpse(BSD) #to see variable names in BSD dataset
 gf_histogram(~Job, data=BSD)
 ```
 
@@ -363,18 +386,15 @@ diff(tally(~Exercise | Plans, data=students,
            format='prop')[2,])
 #bootstrap CI:
 BSD <- do(100)*diff(tally(~Exercise | Plans,
-                          data=sample(students,
-                                      size=nrow(students), 
-                                      replace=TRUE),
-                          
-           format='prop')[2,])
-head(BSD) #to see variable names
+                          data = resample(students),
+                          format='prop')[2,])
+glimpse(BSD) #to see variable names
 gf_histogram(~Job, data=BSD, bins=10)
 ```
 
 ### Your turn...
 
-Try applying what you've learned so far to try a few more complex examples.
+Try applying what you've learned so far to try a few more challenging examples.
 
 First, find a bootstrap sampling distribution for the difference in mean hours of sleep per night (variable `Sleep`) between students who exercise, and those who don't (variable `Exercise`).
 
@@ -388,13 +408,13 @@ BSD <- diff(mean(...,data=...))
 ```
 
 ```{r sleep-exercise-hint-2}
-BSD <- diff(mean(...,data=sample(...)))
+BSD <- diff(mean(...,data = resample(...)))
 ```
 
 ```{r sleep-exercise-solution}
 BSD <- do(1000)*diff(mean(~Sleep | Exercise, 
-                 data=sample(students, size=nrow(students), replace=TRUE)))
-head(BSD)
+                 data = resample(students)))
+glimpse(BSD)
 ```
 
 Now, try finding a BSD for the difference in proportion men and women who are oldest children:
@@ -408,13 +428,14 @@ BSD <- do(...)*diff(tally(..., data=..., format=...)[...])
 ```
 
 ```{r gender-oldest-hint-2, eval=FALSE}
-BSD <- do(...)*diff(tally(~... | ..., data=sample(students, size=...), replace=TRUE), format='prop')[...,])
+BSD <- do(...)*diff(tally(~... | ..., data = resample(students), format='prop')[...,])
 ```
 
 ```{r gender-oldest-solution, eval=FALSE}
-BSD <- do(1000)*diff(tally(~Rank | Gender, data=sample(students, size=nrow(students), replace=TRUE), format='prop')[2,])
-head(BSD)
+BSD <- do(1000)*diff(tally(~Rank | Gender, data = resample(students), format='prop')[2,])
+glimpse(BSD)
 ```
+
 ## Finding the standard error
 Once you have a bootstrap distribution, it's easy to compute the standard error.  Just compute the standard deviation of the bootstrap sampling distribution.
 
@@ -422,12 +443,12 @@ For example, recall that the proportion male intro stat students was 0.48 and th
 
 ```{r}
 BSD <- do(1000)*rflip(n=131, prob=0.48)
-head(BSD)
+glimpse(BSD)
 SE <- sd(~prop, data=BSD)
 SE
 ```
 
-*Note that for the `sd()` calculation, the data should be the bootstrap sampling distribution, and the variable in the formula should be whichever variable in the BSD that contains the bootstrap sample statistics.*
+*Note that for the `sd()` calculation, the* **data** *should be the bootstrap sampling distribution, and the* **variable name** *in the formula should be the variable in the BSD - you may need to use `head()` or `glimpse()` to find out its name.*
 
 Your turn:  try computing the SE for one of the previous examples.
 
@@ -437,7 +458,11 @@ Your turn:  try computing the SE for one of the previous examples.
 ## Computing a 95% CI: 2SE method
 Once you have the SE, it is possible to compute a 95% CI according to:
 
-$$ sample\_stat \pm 2*SE$$
+$$ \text{sample stat} \pm 2*SE$$
+(or, if you want to be more precise:)
+
+$$ \text{sample stat} \pm 1.96*SE$$
+
 
 For example, 
 
@@ -448,7 +473,7 @@ CI <- 0.48 + c(-1,1)*2*SE
 CI
 ```
 
-*Notice the `c(-1,1)`.  The `c()` "concatenates" the -1 and 1 together into a small r variable.  The result is like $\pm$ -- the quantity* $2*SE$ *gets added to AND substracted from the sample stat.*
+*Notice the `c(-1,1)`.  The `c()` "concatenates" or "pastes together into a list" the -1 and 1.  The result is like $\pm$ -- the quantity* $2*SE$ *gets added to AND substracted from the sample stat.*
 
 Your turn: try computing a 95% CI in this way for one of the previous examples.
 
@@ -467,7 +492,7 @@ cdata(~prop, data=BSD, p=0.95)
 
 We can use this method to get a CI with **any** confidence level, not just 95%.
 
-A 95% CI is wide enough to cover the central 95% of the sampling distribution.  So, for example, a 99% CI is wider, because it's wide enough to cover the central 99% of the distribution. Similarly, a 90% CI would be narrower, because it only needs to be wide enough to cover the middle 90% of the sampling distribution.
+A 95% CI is wide enough to cover the central 95% of the sampling distribution.  So, for example, a 99% CI is wider, because it's wide enough to cover the central 99% of the distribution. Similarly, a 90% CI would be narrower, because it only needs to be wide enough to cover the middle 90% of the sampling distribution. But we can't get these other confidence levels by adding/subtracting nice round multiples of the SE from the sample stat - instead we use `cdata()`.
 
 How would you compute a 98% CI using the same BSD as above?
 

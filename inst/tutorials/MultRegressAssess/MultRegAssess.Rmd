@@ -19,13 +19,13 @@ knitr::opts_chunk$set(
   echo = TRUE,
   fig.align = "center",
   fig.width = 6, fig.height = 3.5)
-lead <- read.csv(file='http://www.calvin.edu/~sld33/data/FlintWaterTestJanMar2016.csv')
+lead <- read.csv(file='http://sldr.netlify.com/data/FlintWaterTestJanMar2016.csv')
 tutorial_options(exercise.eval = FALSE)
 mr1 <- lm(Lead ~ Fluoride + Water_Filter + Month, data=lead)
 ```
 
 ## Fitting a model
-To fit a linear regression model in R, we will use the function `lm()`. Let's try an example with the `lead` dataset from (http://www.calvin.edu/~sld33/data/FlintWaterTestJanMar2016.csv):
+To fit a linear regression model in R, we will use the function `lm()`. Let's try an example with the `lead` dataset from (http://sldr.netlify.com/data/FlintWaterTestJanMar2016.csv):
 
 ```{r, echo=FALSE}
 head(lead)
@@ -105,9 +105,8 @@ In these plots, we should see **no** trends -- linear or nonlinear. They should 
 We can use the R function `resid()` to get the residuals from the fitted model object, and `fitted()` to get the predictions.
 
 ```{r, resid-plots, exercise=TRUE, eval=FALSE}
-xyplot(resid(mr1) ~ fitted(mr1))
-# the following will also work outside the tutorial:
-# gf_point(resid(mr1) ~ fitted(mr1))
+mr1 <- lm(y ~ x1 + x2, data=lead)
+gf_point(resid(mr1) ~ fitted(mr1))
 ```
 
 ## Checking Independence
@@ -164,22 +163,18 @@ In the plot above, all the "spikes" are within the "fences", so there is no indi
 To check whether the residuals look like a sample from a normal distribution, look at a histogram:
 
 ```{r, rhist, eval=FALSE, exercise=TRUE}
-histogram(~resid(mr1))
-# the following will also work outside the tutorial:
-# gf_histogram(~resid(mr1))
+gf_histogram(~resid(mr1))
 ```
 
-Note: The distribution doesn't have to look perfectly normal -- it has to look like it might reasonably be a *sample* from a normal.  Check out examples at (http://shiny.calvin.edu/sld33/NormSamps).
+Note: The distribution doesn't have to look perfectly normal -- it has to look like it might reasonably be a *sample* from a normal.  
 
 ## Checking Error Variance
-For linear regression to be appropriate for data, there should be homoscedasticity, or constant variance of the residuals.  This means that the spread of the data points around the best-fit line should be even.  
+For linear regression to be appropriate for data, there should be homoscedasticity, or constant variance of the residuals.  This means that the spread of the data points around the best-fit line should be constant - the width of the point cloud around the line should not be less in some places, and more in others.  
 
-Or, alternatively (and easier to see visually), the spread of the residuals around a horizontal line at y=0 on a residuals vs fitted plot should be even.
+Or, alternatively (and easier to see visually), the spread of the residuals around a horizontal line at y = 0 on a residuals vs fitted plot should be constant.
 
 ```{r, resid-error, eval=FALSE,exercise=TRUE}
-xyplot(resid(mr1) ~ fitted(mr1))
-# the following will also work outside the tutorial:
-# gf_point(resid(mr1) ~ fitted(mr1))
+gf_point(resid(mr1) ~ fitted(mr1))
 ```
 
 If this condition does not hold, the most common pattern to see is a "trumpet" shape like the one above, where the residuals become more spread out for larger fitted values.  However, any non-constant spread is a cause for concern.
