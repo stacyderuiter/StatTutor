@@ -10,20 +10,19 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(mosaic)
-library(beepr)
 library(emoGG)
 knitr::opts_chunk$set(echo = FALSE)
-penguins <- read.csv('http://www.calvin.edu/~sld33/data/bandedPenguins.csv')
+penguins <- read.csv('http://sldr.netlify.com/data/bandedPenguins.csv')
 # reindeer data: ROS (rain on snow) is bad for reindeer, so ROS High is Poor conditions
-reindeer <- read.csv('http://www.calvin.edu/~sld33/data/reindeer.csv') %>%
+reindeer <- read.csv('http://sldr.netlify.com/data/reindeer.csv') %>%
   mutate(WeatherConditions = ifelse(ROS == 'High', 'Poor', 'Good'))
 rein.boots <- do(1000)*diff(prop(~Pregnant == 'Yes' | ROS, data= resample(reindeer)) )
 
-obscene <- read.csv('http://www.calvin.edu/~sld33/data/obscenity.csv') %>%
+obscene <- read.csv('http://sldr.netlify.com/data/obscenity.csv') %>%
   mutate_if(is.numeric, round)
 obscene.boot <- do(5)*mean(~messageAgree | swearing, data=resample(obscene))
 
-robins <- read.csv('http://www.calvin.edu/~sld33/data/robins.csv') %>%
+robins <- read.csv('http://sldr.netlify.com/data/robins.csv') %>%
   mutate(DiurnalDiff = DayNoise - NightNoise)
 ```
 
@@ -48,7 +47,7 @@ We will use a few example datasets to practice computing sample statistics and b
 
 *This experiment examined the effects of judicious swearing on persuasion in a pro‐attitudinal speech. Participants listened to one of three versions of a speech about lowering tuition that manipulated where the word “damn” appeared (beginning, end, or nowhere). The results showed that obscenity at the beginning or end of the speech significantly increased the persuasiveness of the speech and the perceived intensity of the speaker. Obscenity had no effect on speaker credibility.*
 
-The `obscene` data are pre-loaded for you in this tutorial, and also available at [http://www.calvin.edu/~sld33/data/obscenity.csv](http://www.calvin.edu/~sld33/data/obscenity.csv) and includes useful variables:
+The `obscene` data are pre-loaded for you in this tutorial, and also available at [http://sldr.netlify.com/data/obscenity.csv](http://sldr.netlify.com/data/obscenity.csv) and includes useful variables:
 
 - `swearing` When in his speech the speaker swore ("beginning", "end", or "none")
 - `messageAgree` Viewer ratings of whether they agreed with the speaker, on a scale of 1 to 7 (7 is more agreement)
@@ -58,7 +57,7 @@ The `obscene` data are pre-loaded for you in this tutorial, and also available a
 *Note: the dataset is simulated based on summary statistics reported in the paper.*
 ### Rain-on-Snowy Reindeer
 
-Mathieu Douhard and colleagues studied the effects of weather on reproductive success in reindeer. For reindeer, frequent rain-on-snow (ROS) is *bad* weather. The dataset `reindeer` (already loaded for you in this tutorial, or accessible at [http://www.calvin.edu/~sld33/data/reindeer.csv](http://www.calvin.edu/~sld33/data/reindeer.csv)) includes variables:
+Mathieu Douhard and colleagues studied the effects of weather on reproductive success in reindeer. For reindeer, frequent rain-on-snow (ROS) is *bad* weather. The dataset `reindeer` (already loaded for you in this tutorial, or accessible at [http://sldr.netlify.com/data/reindeer.csv](http://sldr.netlify.com/data/reindeer.csv)) includes variables:
 
 - `Year`
 - amount of rain-on-snow `ROS` (with frequent ROS indicating bad weather conditions for reindeer)
@@ -332,7 +331,7 @@ That was a lot of code!
 
 Don't forget you can return to this tutorial anytime to view the examples.
 
-There are also examples of these calculations on [the class R reference site](http://rsconnect.calvin.edu:3939/connect/#/apps/94). (If there is something that should be there and isn't, let Prof DR know.)
+There are also examples of these calculations on [the class R reference site](https://rsconnect.calvin.edu:3939/content/23/R-Examples.html). (If there is something that should be there and isn't, let Prof DR know.)
 
 ## The Actual Bootstrap
 Whoa, that was a lot of sample statistics you just calculated. Wasn't this supposed to be about practicing bootstrap CIs?

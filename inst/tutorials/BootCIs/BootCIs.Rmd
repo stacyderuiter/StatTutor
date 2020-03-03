@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
   echo = TRUE,
   fig.align = "center",
   fig.width = 6, fig.height = 2.5)
-#lead <- read.csv(file='http://www.calvin.edu/~sld33/data/FlintWaterTestJanMar2016.csv')
+#lead <- read.csv(file='http://sldr.netlify.com/data/FlintWaterTestJanMar2016.csv')
 tutorial_options(exercise.eval = FALSE)
 students <- read.csv(file='http://sldr.netlify.com/data/IntroStatStudents.csv')
 students[students==''] <- NA
@@ -34,7 +34,7 @@ To find a confidence interval for a population parameter, we first have to compu
 
 $$ \text{sample statistic} \pm 1.96*SE$$
 
-So to compute it, we need to find the sample statistic and the $SE$ - the standard error of the sampling distribution.
+So to compute it, we need to find the sample statistic and the SE - the standard error of the sampling distribution.
 
 In other words, we first need to be able to compute a sample statistic! The sample statistic is simply the quantity of interest, computed for the observed dataset.
 
