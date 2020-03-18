@@ -1,0 +1,191 @@
+---
+title: "Linear Regression Model Set-Up"
+output:
+  learnr::tutorial:
+    incremental: true
+    allow_skip: true
+runtime:
+  shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+require(mosaic)
+theme_set(theme_bw(base_size = 12))
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Relevant Text: FastR2 6.1.1 - 6.1.4
+Read it; it's wonderful! (Maybe after this tutorial?)
+
+## The model equation
+
+### Slope-intercept form 
+The familiar form of the equation for a regression line is:
+
+$$ Y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \dots \beta_p x_p + \epsilon$$
+
+where $\mathbf{Y}$ are the response variable values, the $\beta$s are the $p + 1$ intercept and slopes, $x$s are the $p$ predictor variable values, and $\epsilon$ are the errors or *residuals*.
+
+### A problem
+But...this slope-intercept form of the regression equation doesn't keep track of the individual data points. The $\mathbf{Y}$ up there (capitalized because it's a random variable) is a *vector*, not a scalar -- it's a list of $n$ response variable values. Same for the data.  So maybe we could say something like:
+
+$$\mathbf{Y}_i = \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \dots \beta_p x_{ip} + e_i $$
+
+but...*OH*, those double subscripts are already getting cumbersome!
+
+### A solution
+We can fix that by writing our regression equation as a matrix equation.  Let $\mathbf{i} = <1, 2, 3, \dots n>$ be the indices identifying each observation in the data, and $\mathbf{j} = <0, 1, 2, 3, \dots p>$ the indices identifying the different (intercept and) slope values. 
+
+Now let $\mathbf{Y}$ be a length $n$ column vector of response variable values, and $\mathbf{\beta}$ a length $p$ column vector of parameter values.
+
+$\mathbf{X}$ is a $n$ by $(p+1)$ matrix, whose first column is a length $n$ vector of ones, and whose other columns are length $n$ vectors of values of the $jth$ predictor variable.  $\mathbf{X}$ is often called the **model matrix**.
+
+We then have the equation:
+
+$$ \mathbf{Y} = \mathbf{X} \mathbf{\beta} + \mathbf{\epsilon}$$
+
+(the same as before, but using vectors and a matrix to avoid all those pesky subscripts).
+
+### Comprehension Check: Model Matrix Size
+
+```{r size-x-quiz}
+quiz(
+  question("Consider a regression model with 4 predictor variables being fitted to a dataset with 46 observations. What will be the size of the model matrix X?",
+    answer("46 x 3", message = 'Think about what each column represents.'),
+    answer("46 x 4", message = 'Do not forget the intercept!'),
+    answer("46 x 5", correct = TRUE),
+    answer("4 x 46", message = 'It is one row per datapoint and one column per beta...'),
+    answer("4 x 47", message = 'It is one row per datapoint and one column per beta...') , allow_retry = TRUE
+  )
+)
+```
+
+## A Toy Dataset
+For the next few examples, we'll consider a very small dataset on [racing pigeons](https://www.independent.co.uk/news/world/europe/armando-racing-pigeon-auction-sell-record-pipa-a8829101.html) from Michigan. Their `unirate` scores measure their racing performance (smaller is better).
+
+```{r, out.width='500px', fig.align='center'}
+knitr::include_graphics('armando-6.jpg')
+```
+
+```{r, echo = FALSE}
+set.seed(4)
+pigeons <- read.csv('http://sldr.netlify.com/data/pigeons.csv')
+pigeons <- pigeons %>%
+  mutate(Age = round(rnorm(nrow(pigeons), mean = 1.8, sd =0.6), digits = 1)) %>%
+  select(Unirate, OwnerName, Sex, Age)
+pander::pander(pigeons)
+```
+
+## Fitting a normal distribution
+Let's try to reformulate a familiar exercise -- fitting a normal distribution to a dataset -- as a linear regression problem.
+
+We might want to consider a model where the pigeon `Unirate` scores are $iid$ samples from a $N(\mu, \sigma)$ distribution.
+
+How could we reformulate that model *as a linear regression*?
+
+```{r predictors-quiz}
+quiz(
+  question("How many predictors will our pigeon normal-distribution model have?",
+    answer("None", correct = TRUE),
+    answer("One", message = 'Think: what variable does the Unirate score depend on?'),
+    answer("Two", message = 'Think: what (you say two) variables does the model claim the Unirate score depends on?'), allow_retry = TRUE
+    )
+)
+```
+
+### A no-predictor model
+It can make sense to think of the residuals $\mathbf{\epsilon}$ of a linear regression having a $N(0, \sigma)$ distribution -- they are normally distributed, and the model is right *on average*, but not spot on *for every data observation*.  This gives us the "intercept-only" regression model:
+
+$$ \mathbf{Y} = \mu \mathbf{1} + \epsilon,$$
+
+$\epsilon \stackrel{iid}{\sim} N(0, \sigma)$
+
+
+Here $\mathbf{X}$ is just a column vector of ones, since there are no predictors, and the intercept $\beta_0$ is $\mu$, the mean `Unirate` score.
+
+## Another Model
+Of course, we can also fit models *with* one or more predictor variables.
+
+A model matrix is shown below.
+
+\begin{bmatrix}
+1 & 1.9 \\
+1 & 1.5 \\
+1 & 2.3 \\
+1 & 2.2 \\
+1 & 2.8 \\
+\end{bmatrix}
+
+for the pigeon data:
+
+```{r}
+pander::pander(pigeons)
+```
+
+```{r age-quiz}
+quiz(
+  question("What is the regression model corresponding to the model matrix above?",
+    answer("A different model with no predictors, but Gamma distributed errors"),
+    answer("A regression where the response variable is the pigeon age instead of unirate score", message = 'Think: which variable(s) are represented in the model matrix?'),
+    answer("A regression in which age predicts unirate score", correct = TRUE), allow_retry = TRUE
+    )
+)
+```
+
+## Categorical Predictors (2 categories)
+Let's consider another model: one where both `Age` *and* `Sex` ("H" for hen and "C" for cock) predict `Unirate` score.
+
+How can we formulate a model matrix *now*?
+
+Take a moment to brainstorm before you reveal the answer. A hint (especially for data science or computer science types): some people call this trick "one hot encoding."
+
+### Another hint
+Another hint, if you haven't gotten it yet: Think of a way to encode the information from the `Sex` variable numerically by changing it from a categorical variable to a logical one.
+
+### The solution
+
+The idea is to convert our categorical variable into an **indicator variable** that is 1 if an observation fits in a certain category, and 0 otherwise (i.e., 0 if the observation is in the other category).
+
+```{r}
+pander::pander(pigeons)
+```
+
+Our model for `Unirate` score as a function of `Age` and `Sex` would have the model matrix:
+
+\begin{bmatrix}
+1 & 1.9 & 1 \\
+1 & 1.5 & 1\\
+1 & 2.3 & 1\\
+1 & 2.2 & 0\\
+1 & 2.8 & 0\\
+\end{bmatrix}
+
+```{r sex-quiz}
+quiz(
+  question("What would be the best name for this new numeric variable indicating sex?",
+    answer("Hen", correct = TRUE, message = 'Yes - since "H" is encoded as 1, that would be a better name.'),
+    answer("Cock", message = 'Try again - cocks are encoded as 0s, which usually corresponds to "FALSE".'), allow_retry = TRUE
+    )
+)
+```
+
+## Categorical Predictors with More Categories
+What if we have a categorical predictor with more than two categories?
+
+No problem -- we just need *more than one* indicator variables!
+
+```{r many-cat-quiz}
+quiz(
+  question("How many indicator variables would be needed to construct the model matrix for a regression with one predictor, which is a categorical variable with 5 categories?",
+    answer("3"),
+    answer("4", correct = TRUE, message = 'Yes - if we have indicator variables for 4 of the 5 categories and they are all 0, then the observation must be from the fifth category. Another way of saying this is that one of the categories is "included in the intercept".'),
+    answer("5", message = 'Think about a reason why one of your indicator variables is actually redundant.'), allow_retry = TRUE
+    )
+)
+```
+
+The category that is included in the intercept value is often called the "base" level. 
+
+## That's it?
+Yep, that's it for now. True, we are taking a pretty leisurely pace this week.  It's intentional - so you have space to work on your test and attend to everything else that is going on right now.  (If you're actually bored, get in touch - I can offer you more to play with...or read ahead a little in Chapter 6.)
