@@ -1,0 +1,108 @@
+---
+title: "Least Squares Estimations"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tidyverse)
+library(ggformula)
+library(mosaic)
+theme_set(theme_bw())
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+tutorial_options(exercise.eval = FALSE)
+```
+
+
+<style type="text/css">
+  span.boxed {
+    border:5px solid gray;
+    border-radius:10px;
+    padding: 5px;
+  }
+span.invboxed {
+  border:5px solid gray;
+  padding: 5px;
+  border-radius:10px;
+  color: white;
+}
+
+table, td, th { border:0px; }
+
+/* cellpadding */
+  th, td { padding: 5px; }
+
+</style>
+
+## Finding the Betas
+To find the "best-fitting" regression line for a dataset, we need to first define a metric to measure how "well" a line fits, and then find the $\beta$s (intercept and slope(s)) that maximize it. (Actually, we'll come up with a way to measure the mismatch between a line and the data, and find the $\beta$s that minimize it - but it's the same idea.)
+
+In other words, our goal at the moment is to figure out how to estimate the $\beta$s.
+
+*Side note: you may wonder at this point,* "Wouldn't using maximum likelihood estimation be a great idea, especially since we just spent weeks learning about it?" *Well...sure. But we're going to first consider another route to the exact same solution, which may be more intuitive - at least for those with less expertise in MLE.*
+
+## A Geometric Interpretation
+Bear with me here: it's rare that I have (or will) ask you to just read your text book.
+
+But take a few minutes to read and study pages 464 - 465 (section 6.2.3). These pages present yet another way to think about and visualize linear regression.  I haven't come across a better or more concise presentation of these same ideas. So read it through, matching up the colors in the diagram and the text to link the geometry with the mathematical statements. Absorb as much as you can, but know we will return to the important parts later and dig in further.
+
+A few questions below will help you check that you're on the right track.
+
+```{r, geom-interp, echo = FALSE}
+quiz(question("Why is the observation vector y in Figure 6.2 three-dimensional?",
+              allow_retry = TRUE,
+              answer("The example is a simple linear regression (requires estimation of 2 items: a slope and one predictor)"),
+              answer("The example dataset has three observations (n = 3)",
+                     correct = TRUE)),
+  question("Why is the model space in Figure 6.2 a plane?",
+           allow_retry = TRUE,
+           answer("The model has one predictor, and a plane is: 1 (for the predictor) + 1 (for the intercept) = 2 dimensional", correct = TRUE),
+           answer("There are 3 observations in the dataset, and 3 - 1 = 2.")
+           ),
+  question("Why is the 'effect' component of the variance vector called that?",
+           allow_retry = TRUE,
+           answer("It changes when the data changes."),
+           answer("It measures how far predicted values are from the mean; and when this value is big compared to the residuals, the model is 'effective' (good) at explaining the data.", correct = TRUE),
+           answer("It gets larger when there is a causal (cause-and-effect) relationship between predictor(s) and response")
+           )
+)
+```
+
+## Least Squares (visually)
+OK, it was fun to think geometrically for a few minutes (perhaps).
+
+But we haven't yet made progress at our main goal: outlining a method to find the best $\beta$s and fit a line to a particular dataset.
+
+The method we'll first explore is called **Least Squares**, for reasons that will become clear shortly.
+
+First, check out [Ordinary Least Squares Estimation (explained visually)](https://setosa.io/ev/ordinary-least-squares-regression/). *Be sure to take advantage of the interactive elements to play around!)
+
+## Least Squares (practically)
+Next, try your hand at off-the-cuff least squares estimation. Visit [the PhET interactive simulator](https://phet.colorado.edu/sims/html/least-squares-regression/latest/least-squares-regression_en.html) and:
+
+- Pick an example (or create your own dataset) and:
+  - Choose your best-guess slope and intercept
+  - Compare your result with the best-fit line. How close were you? Why/how do you think you went wrong?
+  - View the residuals, and the squared residuals, for the best-fit line.
+  - Verify that you understand exactly what the *residuals* and the *SSE* = *RSE* = sum of squared residuals are measuring. In what sense does the minimal-SSE line come "closest" to the data points?
+- Repeat the exercise for at least one more example.
+
+## Least Squares (class, revisited)
+If you were in class on Thursday, March 19: It was great to see you there!
+
+If you weren't there - I understand; it was a crazy couple of days. Please make sure you've [gone back and reviewed the video](https://moodle.calvin.edu/mod/page/view.php?id=993617).
+
+## Least Squares (explained)
+This task is **optional**.
+
+If you would like one more presentation of the idea of least squares fitting, watch the (slightly boring but very clear) [StatQuest video explanation](https://www.youtube.com/watch?v=PaFPbb66DxQ).
