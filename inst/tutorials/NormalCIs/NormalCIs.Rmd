@@ -1,0 +1,405 @@
+---
+title: "Putting the Normal Distribution to Work"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tidyverse)
+library(ggformula)
+library(mosaic)
+library(Lock5withR)
+theme_set(theme_bw())
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+tutorial_options(exercise.eval = FALSE)
+```
+
+
+<style type="text/css">
+  span.boxed {
+    border:5px solid gray;
+    border-radius:10px;
+    padding: 5px;
+  }
+span.invboxed {
+  border:5px solid gray;
+  padding: 5px;
+  border-radius:10px;
+  color: white;
+}
+
+table, td, th { border:0px; }
+
+/* cellpadding */
+  th, td { padding: 5px; }
+
+</style>
+
+## Sampling Distribution Shapes
+
+Previously, we played around with a [web app](https://rsconnect.calvin.edu:3939/content/13/) that let us view the sampling distribution of the mean in different scenarios -- different populations to sample from, and different sample sizes.
+
+
+[![CLT Shiny App](images/clt-shiny-app.png){ width=350px }](https://rsconnect.calvin.edu:3939/content/13/)
+
+There's also an [alternative, similar app](https://gallery.shinyapps.io/CLT_mean/) if you want a change of pace.
+
+Return to an app if needed -- or just search your memory -- to figure out:
+
+- What PDF is the closest match to the sampling distribution (in most cases)?
+- *When* (under what conditions) is it a good match?
+
+## Central Limit Theorem
+
+The answers to those two questions are provided by the **Central Limit Theorem**:  Sampling distribution will be **normal**, as long as the sample size is **big enough**.
+
+(*"Big enough" is a relative term -- how big is big enough depends on how far from normal the parent population distribution is, and also what the sample statistic of interest is.*)
+
+## Central Limit Theorem, Again
+The CLT is, as its name hints, **central** to much of the  statistics we will learn in the rest of this course. So it's worth considering from a few angles to make sure it's set in your mind!
+
+Check out this [interactive visualization](http://mfviz.com/central-limit/) that brings the CLT to life in another way.
+
+[![MFViz CLT Explanation](images/mfviz-clt.png){ width=350px }](http://mfviz.com/central-limit/)
+
+## Motivation: So what?
+We noticed before that sampling distributions (whether ideal ones, or bootstrap ones, or randomization ones) tend to be Normal.  Why re-focus our attention on it now?
+
+The **normality** of most sampling distributions gives us an **alternative way to compute CIs and p-values**.
+
+Not at first, but eventually, this will lead us to some **shortcuts that let us compute CIs and p-values without any resampling**.
+
+## But first, z-scores
+
+*Textbook: Lock5 Chapter 2.3, pages 78-79*
+
+A quantity known as a **z-score** will prove useful in our next explorations. What is it? (Watch the 3.5-minute video...)
+
+![](https://youtu.be/03aanM4ruqw){ width=400px }
+
+(You can also [watch directly on YouTube](https://youtu.be/03aanM4ruqw) if you prefer.)
+
+## CIs with Varying Confidence Levels
+
+*Textbook reference: Lock5 Chapter 5.2*
+
+So...how does the Central Limit Theorem actually help us? And why that detour about z-scores?
+
+Until now, if you wanted to compute a confidence interval -- especially with a confidence level other than 95% -- you generated a bootstrap distribution and then used `cdata()`.
+
+### An AP CI (Review)
+For example, the dataset `APMultipleChoice` contains the answers (A, B, C, D, or E) to 400 questions from a sample of publicly available AP tests, in the variable `Answer`. Use your bootstrap skills to find a 98% CI for the proportion of the time that "B" is the right answer.
+
+```{r AP-boot, exercise = TRUE}
+
+```
+
+```{r AP-boot-hint-1}
+prop(~_____, data = ______)
+boot_dist <- do(1000)*prop(~______, data = _____)
+head(boot_dist)
+```
+
+```{r AP-boot-hint-2}
+prop(~Answer == "B", data = APMultipleChoice)
+boot_dist <- do(1000)*prop(~Answer == "B", 
+                           data = resample(APMultipleChoice))
+head(boot_dist)
+```
+
+```{r AP-boot-hint-3}
+boot_dist <- do(1000)*prop(~Answer == "B", 
+                           data = resample(APMultipleChoice))
+head(boot_dist)
+gf_histogram(~prop_TRUE, data = _____)
+cdata(~prop_TRUE, data = _____, p = _____)
+```
+
+```{r AP-boot-hint-4}
+boot_dist <- do(1000)*prop(~Answer == "B", 
+                           data = resample(APMultipleChoice))
+head(boot_dist)
+gf_histogram(~prop_TRUE, data = boot_dist)
+cdata(~prop_TRUE, data = boot_dist, p = 0.98)
+```
+
+You should find a CI that ranges from about 0.18 to 0.27 or so.
+
+### It's Normal!
+
+We can get that CI another way, though.  We will use the fact that the sampling distribution is pretty much Normal.  Remember, it looked like this:
+
+```{r, echo = FALSE, fig.width = 7, fig.height = 3}
+boot_dist <- do(1000)*prop(~Answer == "B", 
+                           data = resample(APMultipleChoice))
+gf_dhistogram(~prop_TRUE, data = boot_dist, binwidth = 0.01) %>%
+  gf_labs(x = 'Proportion of time B is Correct', y = 'Density')
+```
+
+And a normal distribution fits it well.
+
+```{r, echo = FALSE}
+boot_dist <- do(1000)*prop(~Answer == "B", 
+                           data = resample(APMultipleChoice))
+gf_dhistogram(~prop_TRUE, data = boot_dist, binwidth = 0.01) %>%
+  gf_labs(x = 'Proportion of time B is Correct', y = 'Density') %>%
+  gf_dist(dist = 'norm', params = c(mean = 0.225, sd = sd(~prop_TRUE, data = boot_dist)))
+```
+
+
+```{r norm-params-quiz}
+quiz(
+  question("What is the mean of the normal distribution shown above?",
+    answer("0"),
+    answer("0.225", correct = TRUE),
+    answer("0.2"),
+    answer("0.5"),
+    answer("1"),
+    incorrect = "Remember, a bootstrap sampling distribution is centered at the sample statistic value...",
+    random_answer_order = TRUE,
+    allow_retry = TRUE
+  ),
+  question("What is the standard deviation of the normal distribution shown above?",
+           answer("About 0"),
+           answer("About 1"),
+           answer("About 0.02", correct = TRUE),
+           answer("About 0.225"),
+           incorrect = "You may need to go back and compute the standard error (standard deviation) of your sampling distribution to get a good estimate.",
+           random_answer_order = TRUE,
+           allow_retry = TRUE
+           )
+
+)
+```
+
+## CIs from Normal Quantiles
+Instead of using `cdata()` to get our CI, we could have used `qnorm()` or `xqnorm()` to find the edges of the middle 98% (or whatever-percent-we-want) of the Normal curve that approximates our bootstrap sampling distribution.
+
+Whoa, that's a mouthful. What are we trying to do again?
+
+1. Generate a bootstrap distribution
+2. Fit a normal distribution to it (with mean = our sample stat and sd = our SE = the standard deviation of the bootstrap sample stats)
+3. Use `qnorm()` to find the sample stat values that bound the middle 98% of the distribution
+
+We should be pretty solid on 1) and 2) above. Let's do a 4-minute review of 3), shall we?
+
+![](https://youtu.be/Db2n_nH_ALc){ width=400px }
+
+(You can also [watch directly on YouTube](https://youtu.be/Db2n_nH_ALc) if you prefer.)
+
+### Your Turn to Practice
+
+Time to put your `xqnorm()` skills to the test!
+
+Assume you have a bootstrap distribution for a mean that is well approximated by a normal distribution with mean 34 and sd 11.  What is a 97% confidence interval for the mean?
+
+```{r meanci, exercise = TRUE}
+
+```
+
+```{r meanci-hint-1}
+xqnorm(___, mean = ___, sd = ___)
+xqnorm(___, mean = ___, sd = ___)
+```
+
+```{r meanci-hint-2}
+xqnorm(___, mean = 34, sd = ___)
+xqnorm(___, mean = 34, sd = ___)
+```
+
+```{r meanci-hint-3}
+xqnorm(___, mean = 34, sd = 11)
+xqnorm(___, mean = 34, sd = 11)
+```
+
+```{r meanci-hint-4}
+xqnorm(0.015, mean = 34, sd = 11)
+xqnorm(___, mean = 34, sd = 11)
+```
+
+```{r meanci-hint-5}
+xqnorm(0.015, mean = 34, sd = 11)
+xqnorm(0.985, mean = 34, sd = 11)
+```
+
+Did you find out that you are 97% confident that the true mean is between 10.13 and 57.87?
+
+### Another One
+One more to try. The bootstrap sampling distribution for a proportion is well approximated by a normal distribution with mean 0.67 and standard deviation 0.03. What is a 99% CI for the proportion?
+
+```{r prop-ci, exercise = TRUE}
+
+```
+
+```{r prop-ci-hint-1}
+xqnorm(___, mean = ___, sd = ___)
+xqnorm(___, mean = ___, sd = ___)
+```
+
+```{r prop-ci-hint-2, eval = FALSE}
+xqnorm(___, mean = 0.67, sd = ___)
+xqnorm(___, mean = 0.67, sd = ___)
+```
+
+```{r prop-ci-hint-3, eval = FALSE}
+xqnorm(___, mean = 0.67, sd = 0.03)
+xqnorm(___, mean = 0.67, sd = 0.03)
+```
+
+```{r prop-ci-hint-4, eval = FALSE}
+xqnorm(0.005, mean = 0.67, sd = 0.03)
+xqnorm(___, mean = 0.67, sd = 0.03)
+```
+
+```{r prop-ci-hint-5}
+xqnorm(0.005, mean = 0.67, sd = 0.03)
+xqnorm(0.995, mean = 0.67, sd = 0.03)
+```
+
+Did you find that you are 99% confident the true proportion is between 0.593 and 0.747?
+
+## Never Again
+
+Well, we did it -- we found CIs using a normal distribution fitted to a bootstrap distribution and then some `qnorm()` calculations. 
+
+But it was a bit of a pain!
+
+Plain old `cdata()` was simpler to code and think about.
+
+So why bother with all that stuff we just did?
+
+## A Pattern
+Did you notice any patterns in the `xqnorm()` output you saw for different CI calculations?
+
+As a hint, below are two different 95% CIs for two different scenarios.
+
+```{r, fig.show = 'hold', fig.width = 3.1, fig.height = 2.5, results = 'hide'}
+xqnorm(0.025, mean = 50, sd = 10, return = 'plot', verbose = FALSE)
+xqnorm(0.975, mean = 50, sd = 10, return = 'plot', verbose = FALSE)
+xqnorm(0.025, mean = 4, sd = 0.2, return = 'plot', verbose = FALSE)
+xqnorm(0.975, mean = 4, sd = 0.2, return = 'plot', verbose = FALSE)
+```
+
+### The z-scores
+The pattern to notice here is in the z-scores of the boundaries of the CIs (they label the vertical lines that mark the quantiles of interest).
+
+**The z-scores of the edges of a 95% CI are always -1.96 and 1.96.**
+
+In other words, the boundaries of a 95% CI are always 1.96 SEs away from the center of the bootstrap distribution.
+
+*Heyyyyy...* - that is where we got the formula
+
+$$ \text{sample stat} \pm 1.96(SE)$$
+
+for a 95% CI (and why it should only be used if the distribution looks normal)!
+
+This is also why the multiplier we use on the SE to get the margin of error for a CI is sometimes called the "critical value" $z^*$: the "z" is for "z-score". This leads to a generalized version of our formula: 
+
+$$ \text{sample stat} \pm z^*(SE)$$
+
+## $z^*$ for Other Confidence Levels
+For any confidence level we choose, we can find a multiplier $z^*$ -- **and it depends only on the chosen confidence level,** *not* **the mean and standard error of our particular sampling distribution!**
+
+Now *this* really will make our calculations a bit easier.
+
+Once we find the $z^*$ values for a set of confidence levels, we are free to calculate CIs to our hearts' content without further use of `xqnorm()`.
+
+Often we use the "standard normal" or "z" distribution -- a normal distribution with mean 0 and sd 1 -- to find these. (This is nice because the x-axis value we get back from R *is* a z-score, so we don't need to refer to the figure from `xqnorm()` to get $z^*$.)
+
+For example, for 95% confidence:
+
+```{r, echo = TRUE}
+xqnorm(0.975, mean = 0, sd = 1)
+```
+
+Well, we did already know that!
+
+
+### Find Yourself some z*s
+
+It's your turn -- compute $z^*$ values for 80%, 90%, 97%, 98%, and 99% confidence. Check your work against the table below.
+
+
+```{r find-z, exercise = TRUE}
+
+```
+
+```{r find-z-hint-1}
+xqnorm(____, mean = ___, sd = ___)
+```
+
+```{r find-z-hint-2}
+xqnorm(____, mean = 0, sd = 1)
+```
+
+```{r find-z-hint-3}
+# for 80% 
+xqnorm(0.9, mean = 0, sd = 1)
+```
+
+```{r find-z-hint-4}
+# for 90% 
+xqnorm(0.95, mean = 0, sd = 1)
+```
+
+
+```{r, echo = FALSE}
+ztab <- tibble(`Confidence Level` = c(80, 90, 95, 97, 98, 99))
+ztab <- ztab %>% 
+  mutate(`z*` = qnorm(1 - (1 - ztab$`Confidence Level`/100)/2))
+pander::pander(ztab)
+```
+
+### More Interactive
+If you want a more interactive interface to make these kinds of calculations, you may want to check out and bookmark your favorite of these apps:
+
+- [https://istats.shinyapps.io/NormalDist/](https://istats.shinyapps.io/NormalDist/)
+- [http://davidmlane.com/hyperstat/z_table.html](http://davidmlane.com/hyperstat/z_table.html)
+
+### Use Your z*s
+
+```{r, echo = FALSE}
+ztab <- tibble(`Confidence Level` = c(80, 90, 95, 97, 98, 99))
+ztab <- ztab %>% 
+  mutate(`z*` = qnorm(1 - (1 - ztab$`Confidence Level`/100)/2))
+pander::pander(ztab)
+```
+
+```{r z-ci-quiz}
+quiz(
+  question(text = "If a (normal) bootstrap sampling distribution for a proportion is centered at 0.14 and has SE 0.02, what is a 99% CI for the proportion?",
+           answer("(0.10, 0.18)"),
+           answer("(0.1008, 0.1792)"),
+           answer("(0.12, 0.16)"),
+           answer("(0.0884, 0.1916)", correct = TRUE),
+           answer("(0, 1)"),
+           random_answer_order = TRUE,
+           allow_retry = TRUE
+           ),
+    question(text = "If a (normal) bootstrap sampling distribution for a median is centered at 1426 and has SE 95, what is a 90% CI for the median?",
+           answer("(1180, 1671)"),
+           answer("(1236, 1616)"),
+           answer("(1270, 1581)", correct = TRUE),
+           answer("(1240, 1612)"),
+           random_answer_order = TRUE,
+           allow_retry = TRUE
+           )
+)
+```
+
+## Recap
+Now you know how to use normal distributions and z-scores to allow calculation of confidence intervals *with any confidence level, not just 95%*, given a sample stat and the standard error of the bootstrap sampling distribution.
+
+So far...well, to be honest, it's a bit underwhelming, isn't it? It is really no simpler than the `cdata()` method.
+
+However, *just imagine* that you were able to obtain a shortcut that allowed you to estimate the standard error of the bootstrap distribution...*from the data*...*without actually generating the bootstrap distribution.*  That's where we are headed in the next few weeks!

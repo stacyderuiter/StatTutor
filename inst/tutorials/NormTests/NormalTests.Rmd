@@ -20,16 +20,23 @@ knitr::opts_chunk$set(
   echo = TRUE,
   fig.align = "center",
   fig.width = 6, fig.height = 2.5)
-zsurvey <- read.csv('http://www.calvin.edu/~sld33/data/ZandeeSurvey.csv')
+zsurvey <- read.csv('http://sldr.netlify.com/data/ZandeeSurvey.csv')
 
 tutorial_options(exercise.eval = FALSE)
 ```
 
+## Goal: p-values from Normal Distributions
+In the last tutorial, you learned to use normal distributions as an approximation to bootstrap sampling distributions, allowing you to use critical values $z^*$ in the calculation of confidence intervals.
+
+You will probably not be surprised to learn that randomization distributions, too, can be approximated well by normal distributions. **We can take advantage of this fact to give us another way to compute p-values for randomization tests.**
+
+*The material in this tutorial is also covered in the textbook: Lock5 Chapter 5.2.*
+
 ## The Dataset
 
-This exercise uses data collected in 2011-2014 by Calvin College nursing students, led by Prof. Gail Zandee. They surveyed residents in several diﬀerent neighborhoods to get information about their physical and mental health and lifestyles. The variables in the dataset `zsurvey` (available at <http://www.calvin.edu/~sld33/data/ZandeeSurvey.csv>) include:
+This exercise uses data collected in 2011-2014 by Calvin College nursing students, led by Prof. Gail Zandee. They surveyed residents in several diﬀerent neighborhoods to get information about their physical and mental health and lifestyles. The variables in the dataset `zsurvey` (available at <http://sldr.netlify.com/data/ZandeeSurvey.csv>) include:
 
-- **`neighborhood**: Which neighborhood of Grand Rapids the person lives in: Heartsize or Creston.
+- **`neighborhood`**: Which neighborhood of Grand Rapids the person lives in: Heartsize or Creston.
 - **`checkup`:** Respondents stating they have visited a doctor or clinic for a routine checkup within the past year
 - **`ER4`**: Respondents stating they have visited the emergency room 4 or more times in the past year 
 - **`nervous`**: Respondents stating they feel nervous all or most of the time
@@ -37,12 +44,12 @@ This exercise uses data collected in 2011-2014 by Calvin College nursing student
 - **`transport`**: Respondents who say they have transportation to get needed health care
 
 ## Normal Probabilities
-The R function `pnorm()` calculates probabilities (areas under the curve) for normal distributions.
+We learned before that the R function `pnorm()` calculates probabilities (areas under the curve) for normal distributions.
 
 ### Halloween Candy Example
 For example, let's assume that the number of pieces of candy Grand Rapids kids get trick-or-treating on Halloween follows a normal distribution with mean 63 and standard deviation 21. 
 
-*(Note: this is neither a test nor a CI; the distribution is not a bootstrap **or** randomization distribution. We are just claiming that the actual population distribution of candy-pieces-per-kid is Normal, as a simple first example...)*
+*(Note: this is neither a test nor a CI; the distribution is not a bootstrap* **or** *randomization distribution. We are just claiming that the actual population distribution of candy-pieces-per-kid is Normal, as a simple first example...)*
 
 The distribution looks like this:
 
@@ -76,17 +83,18 @@ pnorm(100, mean=63, sd=21, lower.tail=FALSE)
 Your turn:  what is the probability of getting less than 50 pieces of candy, if the distribution of pieces of candy per kid follows a normal distribution with mean 63 and standard deviation 21? (*Verify that the correct answer is 0.268.*)
 
 ```{r halloweenC, exercise=TRUE}
+
 ```
 
-```{r halloweenC-hint-1, echo=FALSE, eval=FALSE}
+```{r halloweenC-hint-1}
 pnorm(... , ..., ..., ...)
 ```
 
-```{r halloweenC-hint-2, echo=FALSE, eval=FALSE}
+```{r halloweenC-hint-2}
 pnorm( ..., mean=..., sd=..., lower.tail=...)
 ```
 
-```{r halloweenC-hint-3, echo=FALSE, eval=FALSE}
+```{r halloweenC-hint-3}
 pnorm(50, mean=63, sd=21, lower.tail=TRUE)
 ```
 
@@ -94,22 +102,24 @@ pnorm(50, mean=63, sd=21, lower.tail=TRUE)
 If the proportion Halloween candy secretly thrown out by parents follows a normal distribution with mean 0.40 and a standard deviation of 0.11, what is the probability of a kid's parents throwing away at least 90% of her candy? (*Verify that the probability is only about 0.0000027 - what a relief!*)
 
 ```{r thrownout, exercise=TRUE}
+
 ```
 
-```{r thrownout-hint-1, echo=FALSE, eval=FALSE}
+```{r thrownout-hint-1}
 pnorm(... , ..., ..., ...)
 ```
 
-```{r thrownout-hint-2, echo=FALSE, eval=FALSE}
+```{r thrownout-hint-2}
 pnorm( ..., mean=..., sd=..., lower.tail=...)
 ```
 
-```{r thrownout-hint-3, echo=FALSE, eval=FALSE}
+```{r thrownout-hint-3}
 pnorm( 0.90, mean=0.40, sd=0.11, lower.tail=FALSE)
 ```
 
 ## P-values from Normal Distributions
-Most randomizations are unimodal, symmetric, and bell-shaped, so they can be approximated well by normal distributions.
+
+Most randomization distributions are unimodal, symmetric, and bell-shaped, so they can be approximated well by normal distributions.
 
 The **mean** of the relevant normal distribution will be the **$H_0$** value of the parameter of interest.
 
@@ -151,10 +161,10 @@ xpnorm(0.0276, mean=0, sd=0.054)
 
 ```{r checkup-q, echo=FALSE}
 question("What feature on the figure above corresponds to the p-value of the test?",
-  answer("The orange area"),
-  answer("Twice the orange area"),
-  answer('The teal area'),
-  answer("Twice the teal area", correct=TRUE),
+  answer("The purple area"),
+  answer("Twice the purple area"),
+  answer('The yellowish-green area'),
+  answer("Twice the yellowish-green area", correct=TRUE),
   answer("The vertical black line"),
   answer("Not enough information is given to be able to tell"),
   allow_retry=TRUE
@@ -162,33 +172,36 @@ question("What feature on the figure above corresponds to the p-value of the tes
 ```
 
 ### Using pnorm()
-Now, use `pnorm()` to compute the p-value and verify that the correct p-value is 0.061. Recall: the parameter of interest is the difference in proportion people who have had checkups; the sample statistic is 0.0276, the $H_0$ value is 0, and the SE of the randomization distribution is `r round(SE, digits=3)`.
+Now, use `pnorm()` (or `xpnorm()`) to compute the p-value and verify that the correct p-value is 0.061. Recall: the parameter of interest is the difference in proportion people who have had checkups; the sample statistic is 0.0276, the $H_0$ value is 0, and the SE of the randomization distribution is `r round(SE, digits=3)`.
 
 ```{r checkup-p, exercise=TRUE}
+
 ```
 
-```{r checkup-p-hint-1, echo=FALSE, eval=FALSE}
+```{r checkup-p-hint-1}
 2*pnorm(... , mean= ..., sd=..., lower.tail=...)
 ```
 
-```{r checkup-p-hint-2, echo=FALSE, eval=FALSE}
+```{r checkup-p-hint-2}
 2*pnorm(0.0276, mean=0, sd=0.054, lower.tail=FALSE)
+# or:
+2*(1 - pnorm(0.0276, mean = 0, sd = 0.054))
 ```
 
 ```{r checkup-q2, echo=FALSE}
-question("When you computed the p-value above, you had to use lower.tail=FALSE. Why (choose all correct answers)?",
+question("When you computed the p-value above, you likely used lower.tail=FALSE. Why (choose all correct answers)?",
   answer("To get the probability of a sample stat being AT LEAST 0.026, if H0 were true and the true difference was 0", correct=TRUE),
   answer("To get the probability of a sample stat being AT MOST 0.026, if H0 were true and the true difference was 0"),
-  answer("Because the sample statistic (0.026) is smaller than the H0 value"),
-  answer("Because the sample statistic is larger than the H0 value", correct=TRUE),
+  answer("Because the sample statistic (0.026) is smaller than the H0 value, and we want the area 'more extreme' (outside) that value"),
+  answer("Because the sample statistic is larger than the H0 value, and we want the area 'more extreme' (outside) that value", correct=TRUE),
   allow_retry=TRUE
 )
 ```
 
 ```{r checkup-q3, echo=FALSE}
 question("Why was the pnorm() result multiplied by two?",
-  answer("To get a 2-sided p-value", correct=TRUE),
-  answer("To get a one-sided p-value"),
+  answer("To get a 2-sided p-value, since we are interested in detecting differences in either direction -- either neighborhood could have the higher proportion", correct=TRUE),
+  answer("To get a one-sided p-value -- we are only interested in differences in a specific direction"),
   answer("Because the p-value is small"),
   answer("Because the null hypothesis value is 0"),
   allow_retry=TRUE
@@ -212,11 +225,11 @@ We want to test:
 
 $$ H_0: p = 0.20$$
 $$ H_1: p > 0.20$$
-The alternate is one-sided because the nonprofit only cares if the proportion without rides definitely *exceeds* 20%; if it is 20% or less, it's all the same to them.
+The alternate is one-sided this time because the nonprofit only cares if the proportion without rides definitely *exceeds* 20%; if it is 20% or less, it's all the same to them.
 
 ```{r transport-q2, echo=FALSE}
 question("If we reject the null, what should the nonprofit decide to do?",
-  answer("This result will not help them decide; more study will be needed"),
+  answer("This result will not help them decide because the sample size is too small; more study will be needed"),
   answer("They should start offering a ride service", correct=TRUE),
   answer("They should not start offering a ride service"),
   allow_retry=TRUE
@@ -232,9 +245,10 @@ SE <- sd(~prop, data=RD2)
 The sample proportion people without transport in the study area is 0.244. The SE of the relevant randomization distribution is `r round(SE, digits=3)`.  What is the p-value of the test? (Verify that  the correct answer is 0.028.)
 
 ```{r transport, exercise=TRUE}
+
 ```
 
-```{r transport-solution, echo=FALSE, eval=FALSE}
+```{r transport-solution}
 pnorm(0.244, mean=0.20, sd=0.023, lower.tail=FALSE)
 ```
 
@@ -249,22 +263,25 @@ question("What do you conclude?",
 ```
 
 ## P-values with Standardized Test Statistics
-Sometimes we call the sample statistic used in a hypothesis test a "test statistic." 
+Sometimes we call the sample statistic used in a hypothesis test a **"test statistic."**
 
-In some cases (you'll see why later in the course), it can be useful to *standardize* the test statistic. We compute a *standardized test statistic* according to:
+In some cases (you'll see why later in the course), it can be useful to *standardize* the test statistic. We compute a **standardized test statistic** according to:
 
 $$\frac{(\text{sample statistic} - H_0\text{ value})}{SE}$$
 
-You can think of the standardized test statistic as the *z-score* of the sample stat. Remember, the z-score of one observed data point from a distribution is computed by subtracting the mean of the distribution, then dividing by the standard deviation of the distribution. Here, the sample stat is the data point; the distribution is the randomization distribution, which has mean = the $H_0$ parameter value and standard deviation $SE$. 
+You can think of the standardized test statistic as the *z-score* of the sample stat, when compared to the randomization distribution. 
 
-We can get a p-value by comparing the standardized test statistic to the standard normal distribution, with mean 0 and standard deviation 1. We should get the same p-value that we would get by comparing the normal sample stat to the randomization distribution.
+Remember, the z-score of one observed data point from a distribution is computed by subtracting the mean of the distribution, then dividing by the standard deviation of the distribution. Here, the sample stat is the *data point*; the distribution is the *randomization distribution*, which has *mean = the $H_0$ parameter value* and *standard deviation $SE$*. 
+
+**We can get a p-value by comparing the standardized test statistic to the standard normal distribution, with mean 0 and standard deviation 1.** 
+We should get the same p-value that we would get by comparing the normal sample stat to the randomization distribution.
 
 ### Example
 For example, for the transport question, we found the p-value using the information:
 
-- Sample stat: the observed proportion without transport is 0.244
-- $H_0$ value: the null hypothesis states that the true proportion without transport is 0.20.
-- Standard error: the SE was given to us; it is 0.023.
+- **Sample stat:** the observed proportion without transport is 0.244
+- **$H_0$ value:** the null hypothesis states that the true proportion without transport is 0.20.
+- **Standard error:** the SE was given to us; it is 0.023. (We could also find it ourselves by generating a randomization distribution and computing its `sd()`.)
 
 ```{r, echo=FALSE, message=FALSE, results='hide'}
 xpnorm(0.244, mean=0.20, sd=0.023)
@@ -276,9 +293,18 @@ To compute the p-value with `pnorm()`:
 pnorm(0.244, mean=0.20, sd=0.023, lower.tail=FALSE)
 ```
 
-Alternatively, we could find the standardized test statistic. Confirm that the standardized test stat in this case is 1.913:
+Alternatively, we could find the standardized test statistic. Find the standardized test stat in this case:
 
 ```{r, stts, exercise=TRUE}
+
+```
+
+```{r, stts-hint-1}
+(stat - H0)/SE
+```
+
+```{r, stts-hint-2}
+(0.244 - 0.20)/0.023
 ```
 
 Now, find the p-value by comparing the standardized test statistic to a normal distribution with mean 0 and sd 1. We should again get a p-value of 0.028.
@@ -289,8 +315,24 @@ xpnorm(1.913)
 
 How would you compute this value using `pnorm()`?
 
-```{r psts, exercise=TRUE }
-pnorm(...,mean=,sd=,lower.tail=...)
+```{r psts, exercise=TRUE}
+
+```
+
+```{r psts-hint-1}
+pnorm(..., mean = ..., sd = ..., lower.tail = ...)
+```
+
+```{r psts-hint-2}
+pnorm(..., mean = 0, sd = 1, lower.tail = ...)
+```
+
+```{r psts-hint-3}
+pnorm(1.913, mean = 0, sd = 1, lower.tail = ...)
+```
+
+```{r psts-hint-4}
+pnorm(1.913, mean = 0, sd = 1, lower.tail = FALSE)
 ```
 
 Look back and verify: we got the same solution (p-value) by both methods!
@@ -304,4 +346,37 @@ Try another example.  Verify that, for the other case study we tried, the standa
 - Standard error of randomization distribution: 0.054
 
 ```{r neighbor-std, exercise=TRUE}
+
 ```
+
+```{r neighbor-std-hint-1}
+std_stat <- (stat - H0) / SE
+2 * pnorm(..., mean = ..., sd = ..., lower.tail = ...)
+```
+
+```{r neighbor-std-hint-2}
+std_stat <- (0.0276 - 0) / 0.054
+2 * pnorm(..., mean = ..., sd = ..., lower.tail = ...)
+```
+
+```{r neighbor-std-hint-3}
+std_stat <- (0.0276 - 0) / 0.054
+std_stat
+2 * pnorm(std_stat, mean = ..., sd = ..., lower.tail = ...)
+```
+
+```{r neighbor-std-hint-4}
+std_stat <- (0.0276 - 0) / 0.054
+std_stat
+2 * pnorm(std_stat, mean = 0, sd = 1, lower.tail = FALSE)
+```
+
+## Perspectives
+
+In the last tutorial, you learned clever ways to use normal distributions and z-scores to help you compute confidence intervals for any confidence level, given the center and SE of a bootstrap distribution.
+
+This time, you learned clever ways to use normal distributions to compute p-values for hypothesis tests, given the hypotheses being tested and the SE of the appropriate randomization distribution.
+
+As hinted before: these skills will come in *even more* handy once we have some shortcut ways of estimating the SE (for a CI *or* a test) from the *dataset itself*, **without** doing any resampling.
+
+For now: pause to congratulate yourself on these two new skills!

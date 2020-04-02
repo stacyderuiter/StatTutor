@@ -1,0 +1,192 @@
+---
+title: "Through Least Squares, and Beyond"
+output: 
+  learnr::tutorial:
+    progressive: TRUE
+    allow_skip: TRUE
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(mosaic)
+library(fastR)
+library(fastR2)
+library(maxLik)
+theme_set(theme_bw(base_size=16))
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+tutorial_options(exercise.eval = FALSE)
+```
+
+## Least Squares - Analytically
+
+*Text book reference: FAStR Chapter 6.3.2*
+
+By now you should have a solid idea of how the principle of least squares estimation works.
+
+But how does R (or other software, or a person in the pre-computer age) actually use this principle to estimate the parameters (also known as the "$\beta$s", also known as the intercept and slope(s)) of a regression line?
+
+### A Numerical Search?
+
+Perhaps you imagined a search algorithm that tested out many possible values for the $\beta$s and kept the ones that yielded the very smallest possible sum of squared residuals. (Sound familiar?  We'll come back to that, and revisit Chapter 5's Adventures with Maximum Likelihood when we do...)
+
+But in this case, we don't necessarily need to rely on numerical maximization. We can make progress analytically.
+
+## Minimizing the Squares Analytically
+Basically, our goal is to find the slope and intercept values (for a simple linear regression case with just one predictor) that minimize the squared residuals, *using calculus*. Hooray! Calculus.
+
+
+### The regression equation
+
+Remember, we're working with a regression line of the form
+
+$$y_i = \beta_0 + \beta_1x_i + e_i$$
+
+where $i$ indexes the $n$ observed data-points and there is only one predictor variable, $x$.
+
+### Parameter Estimation
+
+Our goal? Find the *least-squares* parameter estimates $\hat{\beta}_0$ and $\hat{\beta}_1$ that minimize the sum of squared residuals.
+
+How? Why, let me show you in a fun 5-minute animated video. I have *always* wanted to make a video like this and now I have! (A *real* animation like Bayesville still lies beyond my reach, but this is fun anyway.)
+
+I recommend trying to follow along and make notes so you have a record of the whole derivation. And if the animation makes you seasick or otherwise unhappy, you can check out pages 468-469 of your text book.
+
+![](https://youtu.be/5kvo09zIxpM){ width=400px }
+
+(You can also [watch directly on YouTube](https://youtu.be/5kvo09zIxpM) if you prefer.)
+
+**Wait a minute!** *What a cliffhanger!* **How can we just stop there?!?**
+
+Obviously we can't, but it was getting a bit much for scraps of paper...
+
+This is the perfect moment for you to finish the substitution on your own to complete your notes. Then, carry on to the next section.
+
+### Scrapping the scraps of paper
+
+Where were we?  We had found an expression for $\beta_0$ by taking the partial derivative of $S$ with respect to $\beta_0$ and then setting it equal to 0 to find the minimum. (*Side note: how did we know it would be a minimum? Blind trust, basically. You could check that if you wanted to be thorough.*)
+
+$$ \hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
+We wanted to subsitute that $\hat{\beta}_0$ expression into our second partial derivative, set equal to 0 (the one for $\frac{\partial{S}}{\partial{\beta_1}}$):
+
+$$\frac{\partial{S}}{\partial{\beta_1}} = 0 = -2\sum_{i = 1}^{n} (x_iy_i - \beta_0x_i - \beta_1x_i^2)$$
+
+Making the substitution, we get
+
+$$\frac{\partial{S}}{\partial{\beta_1}} = 0 = -2\sum_{i = 1}^{n} [x_iy_i - (\bar{y} - \hat{\beta}_1 \bar{x})x_i - \hat{\beta}_1x_i^2] $$
+So
+
+$$ 0 = -2\sum_{i = 1}^{n} [x_iy_i - \bar{y}x_i + \hat{\beta}_1 \bar{x}x_i - \hat{\beta}_1x_i^2]$$
+
+Now, just solve! Hmmm, wait a sec...solve for what?
+
+```{r what-to-solve-for}
+quiz(question("You should solve the equation above to find:",
+              answer('The slope', correct = TRUE),
+              answer('The intercept'),
+              answer('The mean of x'),
+              answer('The mean of y'),
+              answer('n'),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+              )
+     )
+```
+
+Before you go any further, do it -- solve! (You don't have to simplify the expression yet - just do enough algebra to isolate the thing you're trying to isolate.)
+
+### Beta 2 of 2
+You found it!  You've got an expression for $\beta_1$ (right?) And we had one earlier for $\beta_0$, so that's it -- the parameter estimates that we wanted.
+
+For the record, you should find (dropping the indexing on the sums for legibility):
+
+$$ \hat{\beta}_1 = \frac{\sum(y_i - \bar{y})x_i}{\sum x_i^2 - \sum x_i \bar{x}} $$
+
+Combining terms in the denominator, we get
+
+$$ \hat{\beta}_1 = \frac{\sum(y_i - \bar{y})x_i}{\sum x_i(x_i - \bar{x})} $$
+
+The above expression is not hard to compute (given a dataset), but also not really recognizable as any quantity we've seen before. Surely we can rearrange somehow and...
+
+Indeed we can!
+
+It can be shown that
+
+$$ \hat{\beta}_1 = \frac{\sum(y_i - \bar{y})x_i}{\sum x_i(x_i - \bar{x})} = \frac{\sum (y_i - \bar{y})(x_i - \bar{x})}{\sum (x_i - \bar{x})^2} $$
+
+In fact, *go for it.* Now is the perfect time to start on your next homework assignment. Problem **6.6** will ask you to show that the middle expression
+
+$$ \frac{\sum(y_i - \bar{y})x_i}{\sum x_i(x_i - \bar{x})}$$
+
+is equivalent to the last one,
+
+$$ \frac{\sum (y_i - \bar{y})(x_i - \bar{x})}{\sum (x_i - \bar{x})^2} $$
+
+Why not go ahead and do it right now?
+
+## Recognizing Old Friends
+Well, we did it. We rearranged that expression for the slope $\hat{\beta}_1$.  But why did we bother? It must be that the final expression include some quantity (quantities) we've seen before.
+
+Take another close look.
+
+Recognize anything that rings a bell?
+
+$$ \hat{\beta}_1 = \frac{\sum (y_i - \bar{y})(x_i - \bar{x})}{\sum (x_i - \bar{x})^2} $$
+
+## Of Course I Remember You
+Did variance and covariance come to mind?  Or perhaps, even, the correlation coefficient $r$?
+
+*Note: Recall our choice of $S(\mathbf{\beta})$ as the name of the function giving the sum of the squared residuals. Perhaps you noticed at the time that $S$ was an OK choice since the function was giving the* **sum** *of the* **squares**. *Let's now define two more sums of squares:*
+
+$$S_{xx} = \sum (x_i - \bar{x}^2)$$
+
+and also
+
+$$S_{xy} = \sum (y_i - \bar{y})(x_i - \bar{x})$$
+So what we have is just
+
+$$ \hat{\beta}_1 = \frac{S_{xx}}{S_{xy}}$$
+
+Those quantities $S_{xx}$ and $S_{xy}$ will come back in a week or two.
+
+## Correlation Coefficient
+
+All right! That last expression seemed to have something to do with variances and covariances, or (looking at it slightly differently) you could write it in terms of the standard deviations of $x$ and $y$. So why not do so?
+
+Verify that 
+
+$$ \frac{S_{xx}}{S_{xy}}  = \bigg{[} \frac{1}{(n-1)} \sum_{i=1}^n \bigg{(}  \frac{(x_i - \bar{x})}{s_x} \cdot \frac{(y_i - \bar{y})}{s_y}  \bigg{)}\bigg{]} \frac{s_y}{s_x}$$
+
+(Yes, really.)
+
+Why?
+
+Well, you may have encountered the quantity $r$, the correlation coefficient, before.
+
+$$ r = \frac{1}{(n-1)} \sum_{i=1}^n \bigg{(}  \frac{(x_i - \bar{x})}{s_x} \cdot \frac{(y_i - \bar{y})}{s_y} \bigg{)}$$
+
+So our expression can be expressed a couple of different ways:
+
+$$ \hat{\beta}_1 = \frac{S_{xx}}{S_{xy}} = r \frac{s_y}{s_x}$$
+
+The definition of $r$ is, it can be argued, not very intuitive. (That is, it's hard to look at the expression and know what property of a scatter plot of $y$ as a function of $x$ it is measuring.) Hopefully, you are drawing on past experience working with correlation coefficients. In case you are not (or in case you are ready for a bit of less-mathematical fun), you're in luck.
+
+- First, try playing a round or two of [the istics.net correlation game](http://istics.net/Correlations/). The numbers you have to choose from are correlation coefficients $r$. It shouldn't take long before you start to get an idea of what property of the scatter plots $r$ summarizes, if you didn't know already!
+- Next, if you like you can test your skills. No more obvious multiple choice -- you just have to [Guess the Correlation](http://guessthecorrelation.com/)!
+
+*Note: the games above are just for fun and to get a first idea of what the correlation coefficient measures; don't spend any more time on them than you wish to!*
+
+## Try it Out
+To reiterate the main point: we just found closed-form expressions for the intercept ($\beta_0$) and slope ($\beta_1$) of a simple linear regression. And it wasn't even that hard!
+
+Now you have power.  Before, you needed R and `lm()` to find slope and intercept estimates. Now, if you wanted to, you could do it "by hand" -- using R or a calculator, but knowing exactly how the estimated were computed from the data.
+
+Assuming we have done all our work correctly, 
