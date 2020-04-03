@@ -35,7 +35,7 @@ The first input to `lm` is a formula of the form $y \sim x_1 + x_2 + ...$, where
 
 Let's try a model with response varialbe `Lead` and predictors `Fluoride`, `Water_Filter`, and `Month`.
 
-```{r, fit-lm, exercise=TRUE, eval=FALSE}
+```{r, fit-lm, exercise=TRUE}
 mr1 <- lm(y ~ x1 + x2, data=lead)
 ```
 
@@ -47,12 +47,12 @@ where $\epsilon \sim N(0, \sigma)$. (The residuals $\epsilon$ follow a normal di
 ## Viewing model summary and coefficients
 To extract just the *coefficient* or *parameter* values (the "$\beta$s") from the fitted model object `mr1`, we can use  `coef()`:
 
-```{r, get-coef, eval=FALSE, exercise=TRUE}
+```{r, get-coef, exercise=TRUE}
 coef(mr1)
 ```
 
 To get a full summary, use `summary()`:
-```{r, get-summ, eval=FALSE, exercise=TRUE}
+```{r, get-summ, exercise=TRUE}
 summary(mr1)
 ```
 
@@ -104,7 +104,7 @@ In these plots, we should see **no** trends -- linear or nonlinear. They should 
 
 We can use the R function `resid()` to get the residuals from the fitted model object, and `fitted()` to get the predictions.
 
-```{r, resid-plots, exercise=TRUE, eval=FALSE}
+```{r, resid-plots, exercise=TRUE}
 mr1 <- lm(y ~ x1 + x2, data=lead)
 gf_point(resid(mr1) ~ fitted(mr1))
 ```
@@ -149,7 +149,7 @@ knitr::include_graphics("images/lag3.png")
 
 We can plot the ACF for many lags using the function `acf()`.
 
-```{r, make-acf, eval=FALSE, exercise=TRUE}
+```{r, make-acf, exercise=TRUE}
 acf(resid(mr1))
 ```
 
@@ -162,7 +162,7 @@ In the plot above, all the "spikes" are within the "fences", so there is no indi
 ## Checking Normality of Residuals
 To check whether the residuals look like a sample from a normal distribution, look at a histogram:
 
-```{r, rhist, eval=FALSE, exercise=TRUE}
+```{r, rhist, exercise=TRUE}
 gf_histogram(~resid(mr1))
 ```
 
@@ -173,7 +173,7 @@ For linear regression to be appropriate for data, there should be homoscedastici
 
 Or, alternatively (and easier to see visually), the spread of the residuals around a horizontal line at y = 0 on a residuals vs fitted plot should be constant.
 
-```{r, resid-error, eval=FALSE,exercise=TRUE}
+```{r, resid-error, exercise=TRUE}
 gf_point(resid(mr1) ~ fitted(mr1))
 ```
 

@@ -14,8 +14,8 @@ library(learnr)
 library(tibble)
 library(ggformula)
 library(mosaic)
-library(fastR)
-library(fastR2)
+#library(fastR)
+#library(fastR2)
 library(maxLik)
 theme_set(theme_bw(base_size=16))
 # knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
@@ -141,10 +141,12 @@ Recognize anything that rings a bell?
 
 $$ \hat{\beta}_1 = \frac{\sum (y_i - \bar{y})(x_i - \bar{x})}{\sum (x_i - \bar{x})^2} $$
 
-## Of Course I Remember You
-Did variance and covariance come to mind?  Or perhaps, even, the correlation coefficient $r$?
+### Of Course I Remember You
+Did variance and covariance come to mind?  The expression we derived is the ratio of the *sample covariance of x and y* and the *sample variance of x*. So as the covariance between x and y increases, the slope increases; and postive/negative covariances correspond to positive/negative slopes.
 
-*Note: Recall our choice of $S(\mathbf{\beta})$ as the name of the function giving the sum of the squared residuals. Perhaps you noticed at the time that $S$ was an OK choice since the function was giving the* **sum** *of the* **squares**. *Let's now define two more sums of squares:*
+In addition to the (co)variances, you might, perhaps, also have recognized parts of the expression for the correlation coefficient $r$ -- did you?
+
+*Note: Recall our choice of $S(\mathbf{\beta})$ as the name of the function giving the sum of the squared residuals. Perhaps you noticed at the time that $S$ was an OK choice since the function was giving the* **sum** *of the* **squares**. *Let's now define two more sums of squares related to the variance and covariance discussed above:*
 
 $$S_{xx} = \sum (x_i - \bar{x}^2)$$
 
@@ -153,17 +155,17 @@ and also
 $$S_{xy} = \sum (y_i - \bar{y})(x_i - \bar{x})$$
 So what we have is just
 
-$$ \hat{\beta}_1 = \frac{S_{xx}}{S_{xy}}$$
+$$ \hat{\beta}_1 = \frac{S_{xy}}{S_{xx}}$$
 
-Those quantities $S_{xx}$ and $S_{xy}$ will come back in a week or two.
+Those quantities $S_{xx}$ and $S_{xy}$ will come back in a later module.
 
-## Correlation Coefficient
+### Correlation Coefficient
 
 All right! That last expression seemed to have something to do with variances and covariances, or (looking at it slightly differently) you could write it in terms of the standard deviations of $x$ and $y$. So why not do so?
 
 Verify that 
 
-$$ \frac{S_{xx}}{S_{xy}}  = \bigg{[} \frac{1}{(n-1)} \sum_{i=1}^n \bigg{(}  \frac{(x_i - \bar{x})}{s_x} \cdot \frac{(y_i - \bar{y})}{s_y}  \bigg{)}\bigg{]} \frac{s_y}{s_x}$$
+$$ \frac{S_{xy}}{S_{xx}}  = \bigg{[} \frac{1}{(n-1)} \sum_{i=1}^n \bigg{(}  \frac{(x_i - \bar{x})}{s_x} \cdot \frac{(y_i - \bar{y})}{s_y}  \bigg{)}\bigg{]} \frac{s_y}{s_x}$$
 
 (Yes, really.)
 
@@ -189,4 +191,232 @@ To reiterate the main point: we just found closed-form expressions for the inter
 
 Now you have power.  Before, you needed R and `lm()` to find slope and intercept estimates. Now, if you wanted to, you could do it "by hand" -- using R or a calculator, but knowing exactly how the estimated were computed from the data.
 
-Assuming we have done all our work correctly, 
+Assuming we have done all our work correctly, such calculations should yield the same parameter estimates that `lm()` provides.
+
+Let's verify!
+
+### An example model
+
+First, let's fit a simple linear regression model in R.  For data, let's consider a dataset containing scores of 542 people who chose to take an online nerdiness quiz. Higher scores mean more nerdiness. The participants also provided their ages. Variables in the data include `score` and `age`. Does someone's age predict their nerdiness score?
+
+Plot the data and use `lm()` to fit a linear regression model to explore this question.  The code to read in the dataset is provided for you.
+
+```{r nerd-lm, exercise = TRUE}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+
+```
+
+```{r nerd-lm-hint-1}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+gf_point(_____ ~ _____, data = ______)
+```
+
+```{r nerd-lm-hint-2}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+gf_point(score ~ age, data = nerds)
+```
+
+```{r nerd-lm-hint-3}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+gf_point(score ~ age, data = nerds)
+nerd_model <- lm(_____ ~ _____, data = ______)
+```
+
+```{r nerd-lm-hint-4}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+gf_point(score ~ age, data = nerds)
+nerd_model <- lm(score ~ age, data = nerds)
+```
+
+```{r nerd-lm-hint-5}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+gf_point(score ~ age, data = nerds)
+nerd_model <- lm(score ~ age, data = nerds)
+summary(nerd_model)
+```
+
+```{r nerd-eqn}
+quiz(question("What is beta0 for the model you just fitted?",
+              answer("95.8", correct = TRUE),
+              answer("-0.061", correct = FALSE),
+              answer("0.22"),
+              answer("15.81"),
+              answer('0.00092'),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+              ),
+     question("What is beta1 for the model you just fitted?",
+              answer("95.8", correct = FALSE),
+              answer("-0.061", correct = TRUE),
+              answer("0.22"),
+              answer("15.81"),
+              answer('0.00092'),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+              ),
+     question("What is sigma, the standard deviation of the residuals, for the model you just fitted?",
+              answer("95.8", correct = FALSE),
+              answer("-0.061", correct = FALSE),
+              answer("0.22"),
+              answer("15.81", correct = TRUE),
+              answer('0.00092'),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+              )
+     )
+```
+
+All right - now, to try out our shiny new estimators of $\beta_0$ and $\beta_1$. Remember,
+
+$$ \hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
+
+$$ \hat{\beta}_1 = \frac{S_{xy}}{S_{xx}}$$
+
+$$S_{xx} = \sum (x_i - \bar{x}^2)$$
+
+$$S_{xy} = \sum (y_i - \bar{y})(x_i - \bar{x})$$
+
+Using these, what are your estimates of the slope and intercept? You should be able to verify that they match the `lm()` results.
+
+Just to keep the code a bit cleaner, we'll first create free-standing variables $y$ and $x$ from the `nerds` `score` and `age` data.
+
+```{r nerds-by-hand, exercise = TRUE}
+y <- nerds$score
+x <- nerds$age
+
+```
+
+```{r nerds-by-hand-hint-1}
+Sxx <- sum( (x - mean(x))^2 )
+```
+
+```{r nerds-by-hand-hint-2}
+Sxx <- sum( (x - mean(x))^2 )
+Sxy <- sum( (y - mean(y)) * (x - mean(x)) )
+beta1 <- Sxy / Sxx; beta1
+```
+
+```{r nerds-by-hand-hint-3}
+Sxx <- sum( (x - mean(x))^2 )
+Sxy <- sum( (y - mean(y)) * (x - mean(x)) )
+beta1 <- Sxy / Sxx; beta1
+```
+
+```{r nerds-by-hand-hint-4}
+r <- 1/nrow(nerds) * sum((x - mean(x)) / sd(x) * (y - mean(y)) / sd(y))
+r
+beta1_other_way <- r * sd(y) / sd(x); beta1_other_way
+```
+
+```{r nerds-by-hand-hint-5}
+beta0 <- mean(y) - beta1 * mean(x); beta0
+```
+
+## Maximum Likelihood
+
+*Text book reference: FAStR Chapter 6.3.3*
+
+Think back to the very start of this module. You were asked to imagine *how* R came up with its least squares parameter estimates. Perhaps you imagined it doing a numerical search, trying a bunch of $\beta_0$ and $\beta_1$ values until it seemed to have the ones that truly minimized the sum of squared residuals. 
+
+As we saw, that wasn't necessary.
+
+But doesn't the thought of it remind you of something? It sounds a lot like numerical maximum likelihood estimation, doesn't it? (Except that, of course, a different criterion is being used, and it's being minimized instead of maximized...)
+
+Once you've started thinking about MLE, you might wonder: **Why not?**  Why not get the slope and intercept estimates using MLE instead of least squares?  *Why not, indeed.*
+
+## The Likelihood Function
+
+Well, if we want to find the $\beta$s that maximize the likelihood, we're going to need a likelihood function!
+
+They often involve PDFs, and the only one of *those* that is involved in the linear regression equation is the normal distribution that we assume the residuals to follow.
+
+We said that
+
+$$ y = \beta_0 + \beta_1x + \epsilon$$
+
+with
+
+$$\epsilon \sim N(0,\sigma)$$
+
+and so the $i$th residual is
+
+$$e_i = y_i - \beta_0 - \beta_1x_i$$
+
+The *likelihood* of the $i$th residual $e_i$ is the normal density from the normal PDF with mean 0, and standard deviation $\sigma$.  So it turns out that in order to estimate the $\beta$s this way, we will also have to estimate $\sigma$, the residual standard error.
+
+The joint likelihood of the whole dataset is just the product of the likelihoods of all the individual residuals (i.e., all the individual datapoints); so we have
+
+$$L(\beta_0, \beta_1, \sigma; \mathbf{x}, \mathbf{y}) = \prod_{i = 1}^n \frac{1}{\sigma \sqrt{2\pi}} e^{\frac{- (e_i - 0)^2}{2 \sigma^2}} = \prod_{i = 1}^n \frac{1}{\sigma \sqrt{2\pi}} e^{\frac{- (y_i - \beta_0 - \beta_1x_i)^2}{2 \sigma^2}}$$
+
+Your turn: take the logarithm of the expression above to get the log-likelihood. We'll compare notes in the next section.
+
+## Log-Likelihood Function
+
+The log-likelhood function for simple linear regression is:
+
+$$ \ell(\beta_0, \beta_1, \sigma; \mathbf{x}, \mathbf{y}) = \sum_{i = 1}^{n} -log(\sigma) - \frac{1}{2} log(2\pi) - \frac{(y_i - \beta_0 - \beta_1x_i)^2}{2\sigma^2}$$
+
+It is left as an exercise for you to maximize the above expression using methods from calculus (find partial derivatives with respect to $beta_0$ and $\beta_1$, set equal to 0, and solve for the parameters).  You should find that the estimates are *identical* to the ones we got earlier by least squares. Cool!
+
+### An estimate for the residual standard error
+You can also use calculus to find an estimate of $\sigma$ using the log-likelihood. First, try differentiating with respect to $\sigma$ -- again we'll compare notes in the next section.
+
+### What's your derivative?
+
+$$ \frac{\partial{\ell}}{\partial{\sigma}} = \frac{-n}{\sigma} + \frac{1}{\sigma^3} \sum_{i = 1}^{n} (y_i - \beta_0 - \beta_1x_i)^2  $$
+
+$$ = \frac{-1}{\sigma^3} \bigg{(} n\sigma^2 - \sum_{i=1}^{n} (y_i - \beta_0 - \beta_1x_i)^2 \bigg{)} = \frac{-1}{\sigma^3} \bigg{(} n\sigma^2 - \sum_{i=1}^{n} e_i^2\bigg{)}$$
+
+Setting this equal to 0, we immediately know that the $\frac{-1}{\sigma^3}$ can not be 0, giving
+
+$$0 = n\sigma^2 - \sum_{i=1}^{n} e_i^2$$
+
+$$ \sigma^2 = \frac{\sum e_i^2}{n}$$
+
+Which seems very sensible -- the mean of the sum of squared residuals estimates the variance.
+
+Unfortunately (as so often happens) this estimator is biased; an unbiased version that is more often used is:
+
+$$ \hat{\sigma}^2 = \frac{\sum e_i^2}{(n - 2)}$$
+
+## Numerical MLE
+For fun and review (and because if we've already solved the same problem at least two ways, why not try another?), write an R function to compute the (log-) likelihood for the case of a simple linear regression model, and use `maxLik()` to find the parameter estimates.
+
+Using the `nerds` data again, can you confirm that you get the same parameter estimates yet again?
+
+```{r nerd-num-mle, exercise = TRUE}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+
+```
+
+```{r nerd-num-mle-hint-1}
+lm_ll <- function(theta, x, y){
+  errs <- ____________
+  sum(dnorm(___, mean = ___, sd = _____, log = TRUE))
+}
+```
+
+```{r nerd-num-mle-hint-2}
+lm_ll <- function(theta, x, y){
+  errs <- y - theta[1] - theta[2]*x
+  sum(dnorm(____, mean = _____, sd = ______, log = TRUE))
+}
+```
+
+```{r nerd-num-mle-hint-3}
+lm_ll <- function(theta, x, y){
+  if (theta[3] < 0) return(NA)
+  
+  errs <- y - theta[1] - theta[2]*x
+  sum(dnorm(errs, mean = 0, sd = theta[3], log = TRUE))
+}
+```
+
+```{r nerd-num-mle-hint-4}
+maxLik(lm_ll, 
+       start = c(intercept = 100, slope = 0, sigma = 20),
+       x = nerds$age,
+       y = nerds$score)
+```
+
+Is it delightful and satisfying to keep on getting the same answer so many different ways? (*If you agree that it is, it's possible you are turning into a statistician...*)
