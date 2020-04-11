@@ -148,7 +148,7 @@ In addition to the (co)variances, you might, perhaps, also have recognized parts
 
 *Note: Recall our choice of $S(\mathbf{\beta})$ as the name of the function giving the sum of the squared residuals. Perhaps you noticed at the time that $S$ was an OK choice since the function was giving the* **sum** *of the* **squares**. *Let's now define two more sums of squares related to the variance and covariance discussed above:*
 
-$$S_{xx} = \sum (x_i - \bar{x}^2)$$
+$$S_{xx} = \sum (x_i - \bar{x})^2$$
 
 and also
 
