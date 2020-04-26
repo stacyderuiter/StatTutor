@@ -21,12 +21,12 @@ knitr::opts_chunk$set(
   fig.align = "center",
   fig.width = 6, fig.height = 2.5)
 tutorial_options(exercise.eval = FALSE)
-elephants <- read.csv('http://www.calvin.edu/~sld33/data/elephants.csv')
+elephants <- read.csv('http://sldr.netlify.com/data/elephants.csv')
 elephants <- subset(elephants, Country == 'Tanzania')
 elephants$HighDensity <- 'Yes'
 elephants$HighDensity[elephants$Density<1] <- 'No'
 elephants$HighDensity <- factor(elephants$HighDensity)
-robins <- read.csv('http://www.calvin.edu/~sld33/data/robins.csv')
+robins <- read.csv('http://sldr.netlify.com/data/robins.csv')
 robins$Year <- factor(robins$Year)
 robins$DiurnalDiff <- robins$DayNoise - robins$NightNoise
 ```
@@ -221,7 +221,8 @@ prop.test(~HighDensity, data=elephants,
 
 We are 95% confident that the true proportion high density sites is between 0.31 and 0.62.
 
-###Practice
+### Practice
+
 Your turn: compute a 99% CI for the proportion low-density sites.
 
 ```{r low-dens, exercise=TRUE, eval=FALSE}
@@ -301,7 +302,8 @@ prop.test(~DaySong | Year, data=robins,
           conf.level=0.95, success='Present')
 ```
 
-###Practice
+### Practice
+
 How would you compute a 95% CI for the difference in proportion sites with *Night* song in 2005 vs 2006?
 
 ```{r night-song, exercise=TRUE, eval=FALSE}
@@ -357,7 +359,7 @@ What do you conclude? Is the proportion night song different between two years? 
 ## One-sample t interval
 What if our sample statistic is a mean rather  than a proportion? For example, what if we wanted to find a 95% confidence interval for the mean elephant density in Tanzania using the elephant data? We can use the function `t.test()`.  The inputs will be:
 
-- a formula (giving the name of the variable for which we want to compute the mean, in the form (tilde) VariableName)
+- a formula (giving the name of the variable for which we want to compute the mean, in the form `~VariableName`)
 - `data` (the name of the dataset, as usual)
 - `conf.level` (the desired confidence level)
 
@@ -402,7 +404,7 @@ t.test(~Density, data=elephants, mu=1,
 
 With a p-value of 0.081, we have only weak evidence (if any) against the null hypothesis. We would probably fail to reject the null and conclude that it's reasonable to believe that the true density is 1 (or less) elephants per $km^2$.
 
-###Practice
+### Practice
 Your turn: How would you use the `robins` data to test the hypotheses below? Let $\mu$ be the true mean noise level during the day. According to the *Handbook of Environmental Noise*, the typical suburban area has background noise levels of about 50dBA. Does Sheffield match this prediction?
 
 $$H_0: \mu = 50$$
@@ -469,7 +471,7 @@ t.test(~DiurnalDiff, data=robins, mu=0,
 ```
 
 ## Two-sample t interval
-What if we want to find a CI for a difference between the means of two groups?  The only change from before is that we need to alter the formula to have the form:  ** (tilde) MainVariableName (vertical line) GroupVariable**, where **MainVariableName** is the name of the variable of which you want to compute the mean, and **GroupVariable** is the name of a categorical variable that divides the data into 2 groups.
+What if we want to find a CI for a difference between the means of two groups?  The only change from before is that we need to alter the formula to have the form: ` ~MainVariableName | GroupVariable`, where `MainVariableName` is the name of the variable of which you want to compute the mean, and `GroupVariable` is the name of a categorical variable that divides the data into 2 groups.
 
 For example, we might want to find a 98% CI for the difference in `DayNoise` levels between the two years 2005 and 2006. How would you do it?
 
