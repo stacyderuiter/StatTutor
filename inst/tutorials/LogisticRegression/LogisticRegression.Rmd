@@ -75,9 +75,9 @@ Now, all we have to do is work out the details.
 
 ## Logistic Regression
 
-![](https://youtu.be/K43eJcVd21A){ width=400px }
+![](https://youtu.be/etIlztmozs8){ width=400px }
 
-(You can also [watch directly on YouTube](https://youtu.be/K43eJcVd21A) if you prefer).
+(You can also [watch directly on YouTube](https://youtu.be/etIlztmozs8) if you prefer).
 
 Now that we have our model, we just have to figure out how to fit it to the data...we'll use maximum likelihood estimation.
 
