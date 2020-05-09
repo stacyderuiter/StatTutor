@@ -1,0 +1,780 @@
+---
+title: "(More) Inference for Linear Regression Models"
+output: 
+  learnr::tutorial:
+    progressive: TRUE
+    allow_skip: TRUE
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(mosaic)
+library(fastR)
+library(fastR2)
+library(RColorBrewer)
+library(wordcloud)
+library(car)
+theme_set(theme_bw(base_size=16))
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5,
+  message = FALSE, warning = FALSE)
+tutorial_options(exercise.eval = FALSE)
+
+grateful <- read.csv('http://sldr.netlify.com/data/gratitude-experiment.csv') 
+
+grateful2 <- grateful %>%
+  filter(group != 'events') %>%
+  mutate(group = factor(group))
+```
+
+## Learning Outcomes
+
+This module introduces several additional tests that will allow us to make more nuanced inferences, for a wider range of (linear) regression models.  After our brief foray into binary data regression last week, this week will return to (multiple) linear regression, including both quantitative and categorical variables. Methods explored will include t-tests (with non-equal variance) and **An**alysis **o**f **Va**riance (ANOVA), which allows us to assess the utility of categorical predictors with 3+ categories, as well as comparing pairs of models to each other. 
+
+By the end of the module you will:
+
+1) Use a two-sample t-test as an alternative to simple linear regression with one two-level categorical predictor, to test whether the two categories have different average response variable values *without assuming that variance is equal between the two groups.*
+2) Derive the F-ratio and ANOVA test in terms of SSG, MSG, SSE, and MSE, and the F-ratio
+3) Generalize your understanding of ANOVA to the case of model comparisons for deciding between a (multiple) linear regression model and a selected sub-model
+4) Synthesizing 2)-3), Be able to explain (graphically, verbally, or analytically) how ANOVA allows us to assess the utility of a quantitative predictor or a categorical predictor, or to compare models 
+5) Use `anova()` or `car::Anova()` to carry out ANOVA in R
+6) Use `TukeyHSD()` in R to determine which group means are different, **if** a one-way ANOVA has allowed you to reject the null hypothesis that they are all the same
+
+*These materials come from your text book, FAStR2 Chapters 6.4, 6.7, 7.1 - 7.3 (selection from them!).*
+
+## Case Study: Gratitude
+
+A growing body of research has documented the effects that practicing gratitude can have on people -- providing not just spiritual and mental-health benefits, but even improving physical health.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/_sokh9e2WGc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+## Dataset
+
+We will dive further into this topic -- learning about ANOVA and some other tests along the way -- via a case study where researchers tried to collect data to answer:
+
+**"How does gratitude affect peoples' mental and physical well-being?"**
+
+The data are simulated based on the results of a paper published in 2003:
+
+[![](images/count-blessings.png){width=450px}](https://moodle.calvin.edu/pluginfile.php/1481445/mod_page/content/1/Counting_blessings_versus_burd.pdf)
+
+*Click on the image above to get the full PDF. Reading it is* **not** *required, but it is interesting and accesible - check it out if you have time!*
+
+## Can We Induce Gratitude?
+
+To understand whether gratitude can *cause* improvements in mental and physical health and practices, the researchers needed to do a **randomized** study, in which they somehow controlled peoples' gratitude levels.  How did they do *that*?
+
+First, they recruited nearly 200 college students to participate in their study.
+
+They asked participants to complete a weekly journal, writing lists of things that they were grateful for.  1/3 of study participants were randomly assigned to this group - the `gratitude` group.
+
+Other participants were asked to write about things that *annoyed* them instead -- this was the `hassles` group.
+
+Finally, a control group -- the `events` group -- just wrote about events in the past week that had affected them (could be either positive or negative).
+
+Before delving into any other questions, the researchers had to verify that the `gratitude` group *actually felt more grateful* than the other groups...
+
+### More Design Details
+
+In addition to the journals, all the students had to complete weekly surveys about their behavior and state of mind.
+
+For example, they had to state how often (on a scale of 1 to 5) they experienced each of a set of feelings over the preceding week:
+
+```{r, echo = FALSE, fig.width = 6, fig.height = 4}
+emotions <- c("interested", "distressed", "excited", "alert", "irritable", "sad", "stressed", "ashamed", "happy", "grateful", "tired", "upset", "strong", "nervous", "guilty", "joyful", "determined", "thankful", "calm", "attentive", "forgiving", "hostile", "energetic", "hopeful", "enthusiastic", "active", "afraid", "proud", "appreciative", "angry")
+wordcloud::wordcloud(emotions, min.freq = 1, scale = c(1, 0.001), random.color = TRUE, colors = RColorBrewer::brewer.pal(8, 'Set2'))
+```
+
+### Pulling out Gratitude
+
+The researchers combined scores from the words *thankful*, *appreciative*, and *grateful* to assess participants' gratitude. In our dataset, this value is called `gratitude_score`.
+
+```{r, echo = FALSE, fig.width = 6, fig.height = 4}
+emotions <- c("interested", "distressed", "excited", "alert", "irritable", "sad", "stressed", "ashamed", "happy", rep("grateful",20), "tired", "upset", "strong", "nervous", "guilty", "joyful", "determined", rep("thankful",17), "calm", "attentive", "forgiving", "hostile", "energetic", "hopeful", "enthusiastic", "active", "afraid", "proud", rep("appreciative",18), "angry")
+wordcloud::wordcloud(emotions, min.freq = 1, scale = c(4, 0.5), random.color = TRUE, colors = RColorBrewer::brewer.pal(8, 'Set2'))
+```
+
+### The Data 
+How do the data actually look?
+
+```{r}
+gf_boxplot(gratitude_score ~ group, data = grateful, color = ~group)
+```
+
+It seems like perhaps the `gratitude_score` is higher for the `gratitude` group and lower for the others, but we really need hypothesis test results to have more confidence in our judgment of whether the difference is real or if the differences between groups could just be the result of random sampling variation.
+
+### Our Questions
+
+As Emmons and McCullough did, our first job will be to test whether the mean `gratitude_score` is the same for the different groups in the study -- the `gratitude` group, the `hassles` group, and the `events` group.
+
+First, we will consider a simplified case with only two groups: the `gratitude` and `hassles` groups.
+
+But, considering the full dataset, we have *more than* two groups to compare. We also have other potential quantitative predictors we could include in our models. This will allow us to look at a few other tests (to figure out whether it is worthwhile to include a multi-level categorical predictor, or even a quantitative one; or to compare pairs of models consisting of a larger model and a smaller one that is a submodel of the larger one).
+
+## Comparing 2 Means: `lm()` Way
+We have previously seen that we can use slope estimates from `lm()` and their standard errors with t-distributions to compute CIs or carry out hypothesis tests about the slope (often, testing $H_0: \beta_1 = 0$).
+
+### Review: Quantitative Predictors
+For example, we could consider a model to predict `gratitude_score` as a function of `life_rating` (a score measuring positivity about one's life as a whole).
+
+```{r}
+gf_point(gratitude_score ~ life_rating,
+         data = grateful) %>%
+  gf_lm()
+```
+
+```{r, echo = TRUE}
+life_model <- lm(gratitude_score ~ life_rating, 
+                 data = grateful)
+msummary(life_model)
+```
+
+### Review: CI for Slope
+
+Find a 95% confidence interval for the slope coefficient of the `life_model`.
+
+```{r life-model-CI, exercise = TRUE}
+life_model <- lm(gratitude_score ~ life_rating, 
+                 data = grateful)
+
+```
+
+```{r life-model-CI-hint-1}
+life_model <- lm(gratitude_score ~ life_rating, 
+                 data = grateful)
+beta_1 + c(-1,1) * t_star * SE
+```
+
+```{r life-model-CI-hint-2}
+life_model <- lm(gratitude_score ~ life_rating, 
+                 data = grateful)
+# note: could also fill in numeric values for beta_1 and SE
+# from model summary.
+coef(life_model)[2] + c(-1,1) * 
+  qt(0.975, df = nrow(grateful) - 1) *
+  sqrt(diag(vcov(life_model)))[2]
+```
+
+```{r life-model-CI-hint-3}
+# or short cut:
+life_model <- lm(gratitude_score ~ life_rating, 
+                 data = grateful)
+confint(life_model)
+```
+
+### Review: Test for Slope
+
+```{r, slope-t-test-quiz, echo = FALSE}
+s0 <- summary(lm(gratitude_score ~ life_rating, 
+                 data = grateful))
+s <- s0$coefficients
+quiz(question("You test the hypothesis that the slope of the life_model is zero. What is the p-value of the test?",
+     answer(paste(signif(s['life_rating', 'Pr(>|t|)'], digits = 3)), correct = TRUE),
+     answer(paste(signif(s['(Intercept)', 'Pr(>|t|)'], digits = 3))),
+     answer(paste(signif(s0[['r.squared']], digits = 3))),
+     answer('Something else'),
+     allow_retry = TRUE,
+     random_answer_order = TRUE)
+     )
+```
+
+### Categorical?
+*Text book reference: FAStR Chapter 6.7.1*
+
+If we consider a categorical variable with *only two categories*, everything is exactly the same (except the interpretation of the slope coefficient, which now gives the difference in means between the two categories).
+
+For example, we can reduce the dataset to exclude the third `events` group, and then model `gratitude_score` as a function of `group` to see if the `gratitude` and `hassles` groups have different average gratitude scores.
+
+```{r, echo = TRUE}
+grateful2 <- grateful %>%
+  filter(group != 'events') %>%
+  mutate(group = factor(group))
+gf_boxplot(gratitude_score ~ group, data = grateful2)
+```
+
+
+### Practice
+
+Fit the model and, just as in the previous example, find a 95% CI for $\beta_1$ and test $H_0: \beta_1 = 0$.
+
+```{r two-group-lm, exercise = TRUE}
+
+```
+
+```{r two-group-lm-hint-1}
+two_group_model <- lm(gratitude_score ~ group, 
+                      data = grateful2)
+```
+
+```{r two-group-lm-hint-2}
+two_group_model <- lm(gratitude_score ~ group, 
+                      data = grateful2)
+confint(two_group_model)
+```
+
+```{r two-group-lm-hint-3}
+two_group_model <- lm(gratitude_score ~ group, 
+                      data = grateful2)
+summary(two_group_model)
+# to pull out just the p-value
+coefficients(summary(two_group_model))['grouphassles', 'Pr(>|t|)']
+```
+
+Easy peasy!  As we mentioned before, the only real difference between this model and the one with a quantitative predictor is that we end up with an *indicator variable* instead of one with many different numeric values, so the interpretation of the slope coefficient $\beta_1$ is different.
+
+```{r cat-slope-interp-quiz, echo = FALSE}
+quiz(
+  question("In our model to compare the gratitude and hassles groups, the grouphassles coefficient estimate is about -1.54. What does this mean?",
+           answer("When the amount of 'hassles' increases by one unit, the gratitude_score goes down by 1.54 units."),
+           answer("The mean gratitude_score is 1.54 units lower in the hassles group than in the gratitude group.", correct = TRUE),
+           answer("The mean gratitude score is 1.54 units higher in the hassles group than in the gratitude group."),
+           answer("The mean gratitude_score for people in the hassles group is -1.54."),
+           random_answer_order = TRUE,
+           allow_retry = TRUE
+    )
+)
+```
+
+### So what's the problem?
+*Text book reference: FAStR Chapter 6.7.2*
+
+This works, generally. But it's subject to all the conditions of any linear regression model; the key one we want to focus on at the moment is
+
+#### E. Constant Variance of Residuals
+
+In this case, the constant variance condition means that the variances of the two groups being compared are assumed to be *the same*.
+
+(*Note: in this particular case, the graph we looked at before showed very similar spread for both groups, so there is no problem with the constant-variance condition here...but it's easy to imagine scenarios where we might want to compare group means without assuming equal variances.*)  
+
+In some situations, though, this constant-variance assumption is not appropriate, or is unnecessarily restrictive. 
+
+And in this scenario, we're in luck: it's not too hard to derive an alternative procedure *without* the constant-variance condition (in this context, it's often called the "equal-variance" condition).
+
+## Comparing 2 Means: 2-sample t-test
+*Text book reference: FAStR Chapter 6.7.2*
+
+If we draw samples of sizes $n_1$ and $n_2$, independently, from two normal populations with means $\mu_1$ and $\mu_2$ and variances $\sigma^2_1$ and $\sigma^2_2$, then the difference in means $\bar{Y}_1 - \bar{Y}_2$ will be distributed:
+
+$$ \bar{Y}_1 - \bar{Y}_2 \sim \text{Norm}\bigg{(} \mu_1 - \mu_2, \sqrt{\frac{\sigma^2_1}{n_1} + \frac{\sigma^2_2}{n_2}} \bigg{)}$$
+
+(Since the variance of a sum (or difference) is the sum of the variances (favorite. variance. rule. ever...) and the standard deviation is the square root of the variance.)
+
+Unfortunately, we do not generally know $\sigma_1$ or $\sigma_2$; we have to estimate them using the data.  It turns out that the sampling distribution for this difference in means, with unknown $\sigma$s, does not correspond exactly to any of our standard PDF families. However, a t-distribution with $\nu$ degrees of freedom is a good approximation.  $\nu$ is a bit of a pain to compute (so we generally leave it to software):
+
+$$ \nu = \frac{(s_1^2 / n_1 + s_2^2 / n_2)^2}{\bigg{(} \frac{(s_1^2 / n_1)^2}{(n_1-1)} + \frac{(s_2^2 / n_2)^2}{(n_2-1)}\bigg{)}}$$
+
+We could carry out this test "by hand", using the expressions above to compute the standard error and the degrees of freedom (and then the $t^*$ multiplier or the p-value from the t-distribution with those degrees of freedom $\nu$).  
+
+But conveniently, the R function `t.test()` does all the work for us.
+
+```{r}
+t.test(gratitude_score ~ group, data = grateful2)
+```
+
+*Here, the group sizes are nearly equal and both groups have nearly the same variance, to the `t.test()` method and the `lm()` method give very similar solutions.*
+
+Of course, the `t.test()` is preferred when the two groups under comparison have very different variances!
+
+So far, we considered a special case of a categorical predictor *with just two categories*. It's often of interest to compare *more than two* categories. In fact, in our case study, we'd like to compare `gratitude_score`s between the `gratitude`, `hassles`, *and* `events` groups. How can we do this?
+
+## Hypotheses for ANOVA
+*Text book reference: FAStR2 Chapter 6.4.6, 7.1.2, 7.3*
+
+We want to test:
+
+$$H_0: \mu_{gratitude} = \mu_{events} = \mu_{hassles}$$
+
+In other words, our null hypothesis is that the means of *all groups* are the same. (The $\mu$s are the true population means for each of the groups.)
+
+The alternate hypothesis is that *at least one pair of groups has different means*. 
+
+How do we translate this set-up into a linear regression model?  We're considering the model in which we predict `gratitude_score` with `group`:
+
+```{r, echo = TRUE}
+grat_by_group <- lm(gratitude_score ~ group, data = grateful)
+summary(grat_by_group)
+```
+
+There are a few equivalent ways of setting this up (depending on which group is included in the intercept), but in R the code above will yield a model like:
+
+$$ y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \epsilon$$
+
+where $x_1$ and $x_2$ are indicator variables for the `gratitude` and `hassles` groups:
+
+$$ x_1 = \begin{cases} 1 \text{,  if group is gratitude}\\ 0 \text{,  otherwise} \end{cases}$$
+
+$$ x_2 = \begin{cases} 1 \text{,  if group is hassles}\\ 0 \text{,  otherwise} \end{cases}$$
+
+In this framework, $\beta_0$ is the mean for the `events` group. $\beta_1$ and $\beta_2$ are the differences in means between groups (`gratitude` and `events`, and `hassles` and `events`).  So our intention with this ANOVA is to test $H_0: \beta_1 = \beta_2 = 0$. If this is true, then the intercept $\beta_0$ will be the overall mean `gratitude_score`.
+
+## Test Stat for ANOVA: F-ratio
+
+The big challenge here is to come up with a **test statistic** -- *one number* that measures evidence against the null hypothesis that all the group means are the same.
+
+**How can we define a good test statistic to measure how different** *more than two* **numbers are?**
+
+The video below will walk through the derivation of the F-ratio statistic.  You're welcome to download or print [a worksheet](https://moodle.calvin.edu/pluginfile.php/1481659/mod_page/content/1/ANOVA-handout.pdf) where you can take notes and summarize the material from this video (and other key parts of the tutorial). Writing and drawing it yourself may make it easier to understand and remember.
+
+### Part 1: What we need to measure
+*Note: in this video, $x$ is used for the variable whose mean is being estimated; for us it would make more sense to use $y$ but I'm trusting you to make the translation...*
+
+![](https://youtu.be/oM1lInZGs-g){ width=400px }
+
+(You can also [watch directly on YouTube](https://youtu.be/oM1lInZGs-g) if you prefer.)
+
+### Part 2: How we measure it
+*Note: again in this video, $x$ is used for the variable whose mean is being estimated; for us it would make more sense to use $y$ but I'm trusting you to make the translation...*
+
+![](https://youtu.be/ngh8at4ADog){ width=400px }
+
+(You can also [watch directly on YouTube](https://youtu.be/ngh8at4ADog) if you prefer.)
+
+## Sampling Distribution of F, Simulated
+
+All right, we can compute the F-ratio now.
+
+But what is its sampling distribution? 
+
+```{r f-samp-dist, echo = FALSE}
+quiz(question("If the null hypothesis is true, what will the value of the F-ratio be?",
+              answer("Close to 0", correct = TRUE, message = "Yes! If H0 is true, then SSG will be 'close to 0' because the group means will be very close to the overall mean. So, MSG and the whole F-ratio will also be near 0 - but since it MSG is not exactly zero, it matters a lot what the corresponding value of MSE is..."),
+              answer("Close to 1", correct = TRUE, message = 'Yes, F will be close to 1 if the null is true and the sample sizes in the groups are equal. MSE and MSG will BOTH depend on the overall variance of the data. In terms of intuition about the F ratio, though, it can be more useful to think about what happens to MSG when H0 is true (it gets smaller, and so so does F...). Bigger F is more evidence against H0.' ),
+              answer("Very large"),
+              answer("It depends on the specific scenario"),
+              random_answer_order = TRUE,
+              allow_retry = TRUE),
+     question("If the population group means are actually very different, with little variation within groups, what will the value of the F-ratio be?",
+              answer("Close to 0"),
+              answer("Close to 1"),
+              answer("Very large", correct = TRUE, message = "Yes! If H0 is very wrong, then SSG will be relatively large because the group means will be quite different from the overall mean. And SSE will be relatively small, if there is little within-group variation. So the ratio will be (big / small) = VERY BIG, providing strong evidence against the null hypothesis and allowing us to conclude that the group means are NOT the same."),
+              answer("It depends on the specific scenario"),
+              random_answer_order = TRUE,
+              allow_retry = TRUE)
+)
+```
+
+### A Simulation
+
+So, we know that a *large* value of F will let us reject the null. But *how big is "large"?*
+
+We need to know the sampling distribution of F (when $H_0$ is true) in order to judge.
+
+Let's first consider a simulation tailored to the case study we're currently investigating.
+
+### Plan of Attack for Simulation
+
+- We will simulate dataset with $n =$ `r nrow(grateful)` and three groups
+- In our simulations, $H_0$ is true, so all the groups actually have the same mean (let's make it 10).
+- We'll draw simulated data points from a $N(10,2)$ distribution
+- We will allocate them randomly to the three groups
+- For each simulated sample, we will compute $F$
+- **When we have many values of $F$ for many simulated datasets, we can plot the sampling distribution of $F$ under the null hypothesis and see what it looks like.**
+
+### Simulation Code/Results
+
+If you are interested in details of how the simulation is coded, you're welcome to check it out (but it's hidden because you will not be asked to re-create something like this yourself).
+
+<details>
+  <summary>Show code</summary>
+```{r, echo = TRUE, eval = FALSE, fig.show ='hide'}
+n_sim <- 5000
+n <- nrow(grateful)
+F <- numeric(length = n_sim)
+
+for(i in c(1:n_sim)){
+  sim_data <- data.frame(gratitude_score = 
+                           rnorm(n, mean = 10, sd = 2),
+                         group = grateful$group)
+  
+  group_means <- mean(~gratitude_score | group, 
+                      data = sim_data)
+  
+  sim_data <- sim_data %>%
+  mutate(overall_mean = mean(~gratitude_score, 
+                             data = sim_data),
+         group_mean = group_means[group])
+  
+  F[i] <- sum(~ ((group_mean - overall_mean)^2), 
+              data = sim_data) / (3 - 1) /
+  ( sum(~ (gratitude_score - group_mean)^2,
+        data = sim_data) / (nrow(sim_data) - 3) )
+}
+
+gf_density(~F)
+```
+
+</details>
+
+```{r, echo = FALSE, fig.show = 'hold', fig.width = 6, fig.height = 3}
+n_sim <- 5000
+n <- nrow(grateful)
+F <- numeric(length = n_sim)
+
+for(i in c(1:n_sim)){
+  sim_data <- data.frame(gratitude_score = rnorm(n, mean = 10, sd = 2),
+                         group = grateful$group)
+  
+  group_means <- mean(~gratitude_score | group, data = sim_data)
+  
+  sim_data <- sim_data %>%
+  mutate(overall_mean = mean(~gratitude_score, data = sim_data),
+         group_mean = group_means[group])
+  
+  F[i] <- sum(~ ((group_mean - overall_mean)^2), data = sim_data) / (3 - 1) /
+  ( sum(~ (gratitude_score - group_mean)^2, data = sim_data) / (nrow(sim_data) - 3) )
+}
+
+gf_density(~F) %>%
+  gf_labs('F-ratios from many samples\nWhere H0 is true')
+```
+  
+## Sampling Distribution of F, Derived
+*Text book reference: FAStR2 Chapter 6.4.6, 7.2, 7.3.2-7.3.3*
+
+- It looks how we expected -- bounded by 0 on the left, and right skewed.
+- But...*what PDF looks like that*???
+- You may have some guesses based on the simulation, but let's think it through.
+- If you desire a more rigorous geometric treatment of these ideas, check out the text book references listed above.
+
+### Denominator of F (SSE / (n-K))
+
+Let's consider the denominator of F first: MSE = SSE / (n-K).
+
+**The residual standard error of our linear regression model is $\sqrt{MSE}$!**
+
+The residuals follow a normal distribution with mean 0 and variance $\sigma^2$. We could standardize them by subtracting the mean (0) and dividing by $\sigma$, and then they would have a standard normal distribution.  The square of a standard normal random variable has a chi-square distribution, so
+
+$$ \frac{SSE}{\sigma^2} \sim \text{Chisq}(n - K)$$
+
+Similarly, for the numerator of F, 
+
+$$ \frac{SSG}{\sigma^2} \sim \text{Chisq}(K - 1)$$
+
+The ratio of two chi-square distributions is an F distribution, so
+
+$$ F = \frac{SSG / (K - 1)}{SSE / (n - K)} \sim F(\text{df}_1 = K - 1, \text{df}_2 = n - K)$$
+
+Check it out:
+
+```{r, echo = TRUE}
+gf_density(~F) %>%
+  gf_dist(dist = 'f', 
+          params = c(df1 = 2, df2 = (nrow(grateful) - 3))) 
+```
+
+*You may notice there's a little mismatch between the simulated sampling distribution and the theoretical F distribution for very small F-values, but...where it counts, in the right tail, the match is very good. So our p-value estimates should be pretty good using this distribution (and for the record, you won't see this issue so much with $K > 3$...)*
+
+## P-value!
+
+To get the p-value of our test, we just need to find the probability of getting an $F$ stat *at least as big as ours*, in a $F_{2, 193}$ distribution:
+
+```{r}
+pf(11.15, df1 = 2, df2 = 193, lower.tail = FALSE)
+```
+
+This is *very* small, so we reject $H_0$: at least one of the pairs of groups in the study had different `gratitude_score`s.
+
+## Letting R do all the work
+*Text book reference: FAStR2 Chapter 7.3.2 - 7.3.3*
+
+Of course, we won't do all the calculations by hand each time; there's an R function to automate it all.
+
+```{r}
+car::Anova(lm(gratitude_score ~ group, data = grateful))
+```
+
+But **notice** -- all the quantities that we used in our derivation of the F-statistic are *right there in the ANOVA output table*! (The numeric values also all match with the ones we've previously computed by hand.)
+
+- The "group" row gives the SSG and its df (and the F stat and p-value)
+- The "Residuals" row gives the SSE and its df. (*Residuals* is another statistical term for *errors*.)
+- The "Sum Sq" column corresponds to "SS" terms ("MS" terms are not in the table, but can be computed from SSX and df from the table)
+- The "F value" is the F-ratio (test statistic)
+- The "Pr(>F)" is the p-value of the test
+
+(A classic intro-stat textbook ANOVA problem is to give you a partially-filled-in ANOVA results table, and ask you to fill in the missing values.)
+
+## Pairwise Comparisons
+*Text book reference: FAStR2 Chapter 7.3.7*
+
+**Whaddaya wanna know NOW?**
+
+- If we **do reject $H_0$**, like we do here, the test just tells us that *at least one* pair of means is different.
+- So here, is the `gratitude` different from `hassles`?  What about the control, `events` -- is either `gratitude` or `hassles` different from that?
+- With the ANOVA test, *we don't know* which pairs are different
+- *BUT* if we *fail to reject* $H_0$, then we know they are all the same - case closed.
+- If we want to make pairwise comparisons, we need more tests.
+
+### Maybe a LOT more tests...
+
+- Here, with three groups, we have just three pairs of means to compare
+- With more groups, it would be a lot worse.
+- We want to avoid problems with multiple comparisons! Consider **jelly beans**
+
+![](https://imgs.xkcd.com/comics/significant.png)
+
+In other words: we should be careful carrying out multiple comparisons, because the probability of making at least one Type I error increases with the number of hypotheses tested.
+
+### Pairwise tests corrected for multiple tests
+*Text book reference: FAStR Chapter 7.3.7*
+
+
+What if we could do a 2-sample t-test for each pair, but *inflate* the p-value of each test a little to make up for the number of tests being done?
+
+*(Well, that'd be great.)*
+
+**Tukey's pairwise Honest Significant Difference test** (`TukeyHSD()`) in R does this for us.
+
+(*Note: we omit the details of the exact adjustment here, in the interest of making the size of this module a bit more reasonable. You can find them all in FAStR 7.3.7 if you wish to know.*)
+
+We **only** carry out the `TukeyHSD()` test *after* an ANOVA rejects $H_0$ and indicates that at least one pair has different means. This restraint -- not doing pairwise tests unless we already have evidence there will be at least one pair that are significantly different (plus the Tukey HSD adjustment-of-the-p-values) -- helps us avoid Type I errors. 
+
+Coding the test in R is simple:
+
+```{r}
+TukeyHSD(lm(gratitude_score ~ group, data = grateful), 
+         conf.level = 0.95)
+```
+
+In the results table,
+
+- The row labels tell us which means are being compared, and also gives the direction of subtraction
+- The `diff` column gives the numeric difference in means for the two groups
+- The `lwr` column gives the lower bound of a confidence interval for the difference in means. (If you want a confidence level other than 95%, just change the input `conf.level = ...` in your call to `TukeyHSD()`. If you omit it, 95% is the default.)
+- The `upr` column gives the upper bound of a CI for the difference in means.
+- The `p adj` column gives the p-value of a test with $H_0: \mu_1 = \mu_2$ (agains a two-sided alternate).
+
+Here, we see that the `gratitude` group has higher `gratitude_score`s than the `hassles` and `events` groups, but there is no evidence from the data that `hassles` and `events` are different from each other.
+
+*That's good news for our researchers - they successfully "induced gratitude" in the `gratitude` group!*
+
+## Practice
+
+Since we've now demonstrated that the `gratitude` group is actually more grateful, we can now look at other hypotheses. 
+
+For example, are outlook on life and physical health different between the three groups?
+
+The dataset contains four metrics that might differ between the groups:
+
+- `life_rating` is a score measuring positivity about one's life as a whole
+- `week_rating` is a score measuring expectations of how good one's life will be in the coming week
+- `illness_score` measures the degree to which one experienced physical illness in the past week
+- `exercise_hours` measures the number of hours spent exercising in the preceding week
+
+Choose one of the variables listed above.
+
+Use the dataset `grateful` and carry out an ANOVA to test whether the mean of your variable is the same for all three groups. If appropriate, follow up with a Tukey HSD test to figure out which pairs of means differ.  Be sure to think through what the conclusions of each test will be, in terms of gratitude.
+
+```{r anova-practice, exercise = TRUE}
+
+```
+
+```{r anova-practice-hint-1}
+car::Anova(lm(...))
+```
+
+```{r anova-practice-hint-2}
+car::Anova(lm(..., data = grateful))
+```
+
+```{r anova-practice-hint-3}
+car::Anova(lm(your_variable_name ~ group, data = grateful))
+```
+
+```{r anova-practice-hint-4}
+car::Anova(lm(your_variable_name ~ group, data = grateful))
+# only if ANOVA returns a small p-value:
+TukeyHSD(lm(your_variable_name ~ group, data = grateful))
+```
+
+**Wow! I am always amazed that such simple practices can have such profound effects, in unexpected ways...**
+
+## Devotion Break
+
+Colossians 3:12-17 reminds us:
+
+*Therefore, as God’s chosen people, holy and dearly loved, clothe yourselves with compassion, kindness, humility, gentleness and patience. Bear with each other and forgive one another if any of you has a grievance against someone. Forgive as the Lord forgave you. And over all these virtues put on love, which binds them all together in perfect unity.*
+
+*Let the peace of Christ rule in your hearts, since as members of one body you were called to peace. And be thankful. Let the message of Christ dwell among you richly as you teach and admonish one another with all wisdom through psalms, hymns, and songs from the Spirit, singing to God with gratitude in your hearts. And whatever you do, whether in word or deed, do it all in the name of the Lord Jesus, giving thanks to God the Father through him.*
+
+We *do know* that God expects our gratitude of us.  The Heidelberg catechism is pretty clear on this requirement too (from Lord's Day 45):
+
+**116. Why is prayer necessary for Christians?**
+
+*Because it is the chief part of thankfulness which God requires of us (Psalm 50:14-15), and because God will give His grace and Holy Spirit only to those who earnestly and without ceasing ask them of Him, and render thanks unto Him for them (Matthew 7:7–8; Luke 11:9–10, 13; Matthew 13:12; Ephesians 6:18).*
+
+But this can all begin to feel burdensome, being told repeatedly that we *should* be thankful. It seems so unlikely to be fruitful.  Being forced to be grateful -- what possible good could that do?
+
+Of course, we can consider that question theologically and get profound answers.
+
+But *data tells us too*.  What happened to the students in the study? *Someone forced them to be grateful.* And actually, it did them a kind of startling amount of good. How wonderful, that what is *required* of us is so *good* for us.
+
+## Generalization 1: A Quantitative Predictor
+
+We can, if we wish, use ANOVA to measure the *model utility* of a simple linear regression with one quantitative predictor. *Model utility* means, basically, whether the model is any good -- is it better to include the predictor than to stick with a simple intercept-only model?  In the simple (one-predictor) linear regression case, the model utility test is basically the same as testing $H_0: \beta_1 = 0$.
+
+Before we examine the details, let's just try it and see what happens. As our example, we'll try to model `gratitude_score` as a function of `life_rating`, like we did at the beginning of the module.
+
+```{r, echo = TRUE}
+Anova(lm(gratitude_score ~ life_rating, data = grateful))
+```
+
+Comparing to our previous results with a t-test of $H_0: \beta_1 = 0$:
+
+```{r, echo = TRUE}
+summary(lm(gratitude_score ~ life_rating, data = grateful))
+```
+
+**We notice that the p-values for the ANOVA and the t-test are identical.**
+
+Clued in by the matching p-values, we can also note that the t-test statistic (`r round(summary(lm(gratitude_score ~ life_rating, data = grateful))$coefficients['life_rating', 't value'], digits = 4)`) is related to the ANOVA F statistic (`r round(Anova(lm(gratitude_score ~ life_rating, data = grateful))['life_rating', 'F value'], digits = 4)`): $F = t^2$.
+
+*(Remember in a previous assignment, when I thought that you all knew what F was but you didn't actually, you proved that?  I'm sorry / you're now welcome...)*
+
+### Cool. But, does it make sense?
+So, the two tests are equivalent. But can we actually conceptualize the ANOVA with a quantitative predictor, analogous to the way we did for the case of the categorical predictor? Sure!
+
+Here, we usually change notation a little - instead of talking about SSG and MSG we use SSM and MSM (Sum of Squares for the **Model** and Mean Squares for the **Model**, since there's now a regression line instead of a set of group means).
+
+Otherwise, the approach is exactly the same, but still worth walking through:
+
+
+![](https://www.youtube.com/watch?v=WWqE7YHR4Jc){ width=400px }
+
+(You can also [watch directly on YouTube](https://www.youtube.com/watch?v=WWqE7YHR4Jc) if you prefer.)
+
+## Generalization 2: Model Comparisons
+*Text book reference: FAStR2 Chapter 7.1.5*
+
+We can also use ANOVA for multiple linear regression models (with several predictors, perhaps a mix of categorial and quantitative ones); now, there is a variety of hypotheses we might want to test.
+
+Generally, we can call these **model comparison tests**.  These compare two models, one of which must be a submodel of the other; in other words, the its model space must be a subspace of the model space of the larger model. We want to test whether the larger model $\Omega$ is preferable to the smaller one $\omega$.
+
+### Hypotheses to Test
+To specify a test, we have to set up a null hypothesis that tells exactly how to restrict the larger model $\Omega$ in order to make it equivalent to the smaller one $\omega$.
+
+A few examples (each section gives one representative example - of course, there are many other specimens of each type of test):
+
+#### Model Utility Test
+
+$$ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2$$
+
+$$ \omega: E(Y) = \beta_0 $$
+
+$$H_0: \beta_1 = \beta_2 = 0$$
+
+#### Removing a parameter
+
+$$ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2$$
+
+$$ \omega: E(Y) = \beta_0 + \beta_1x_1 $$
+
+$$H_0: \beta_2 = 0$$
+
+#### Constraints on Parameter Values
+
+$$ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2$$
+
+$$ \omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_1x_2 = \beta_0 + \beta_1(x_1 + x_2)$$
+
+$$ H_0: \beta_1 = \beta_2$$
+
+#### Complex Hypotheses (Combinations of Above)
+
+$$ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3$$
+
+$$ \omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_1x_2 = \beta_0 + \beta_1(x_1 + x_2)$$
+
+$$ H_0: \beta_1 = \beta_2 \text{ and } \beta_3 = 0$$
+
+### Model Dimension
+To carry out ANOVA in these cases, we will need to be able to assess the **dimension** of each model ($\text{dim}\Omega$ and $\text{dim}\omega$). The **dimension** of a model is the number of free parameters (parameters needing to be estimated) in the model; in other words, the dimension of the model space as a vector space (if you like the geometric interpretation of regression). The model with larger dimension will always match the data better (or at least as well) as the smaller one: $SSE_{\omega} < SSE_{\Omega}$.
+
+### Generalized F Statistic
+Now, informally stated, we want to compute a test statistic to measure:
+
+$$ F = \frac{\text{diff in errors, } \omega - \Omega}{\text{errors}(\Omega)} = \frac{MSE_{\omega - \Omega}}{MSE_{\Omega}} = \frac{(SSE_{\omega} - SSE_{\Omega}) / (\text{dim}\Omega - \text{dim}\omega)}{SSE_{\Omega} / (n - \text{dim}\Omega)}$$
+
+In other words, our statistic measures: how much *better* does $\Omega$ match the data than $\omega$, normalized by the MSE for $\Omega$?
+
+By an argument analogous to the one used previously, this statistic has an $F(\text{df}_1 = \text{dim}\Omega - \text{dim}\omega, \text{df}_2 = n - \text{dim}\Omega)$ distribution.
+
+## Practical Examples of Model Comparisons
+There are three common ways of carrying out these kinds of tests in R.
+
+### Model Utility Tests: `summary()`
+For **model utility tests**, the test statistic $F$ and p-value are reported in the very last line of the `summary()`.
+
+For example, consider a model to predict `gratitude_score` using the `life_rating` and the `group`.
+
+```{r}
+summary(lm(gratitude_score ~ life_rating + group, data = grateful))
+```
+
+### Removing Parameter(s)
+To carry out ANOVA to determine whether to remove/retain parameters in a multi-predictor regression, we can use `car::Anova()`.
+
+This function carries out so-called "Type II" ANOVA tests. A p-value will be reported for each parameter in the model, testing the null hypothesis that *that* parameter is 0. In other words, it compares the full model $\Omega$ with an $\omega$ that excludes only the parameter in question.
+
+```{r, echo = TRUE}
+Anova(lm(gratitude_score ~ life_rating + group, data = grateful))
+```
+
+So we conclude that adding `life_rating` to a model with intercept and `group` is worthwhile (p-value 0.015); and adding `group` to a model with intercept and `life_rating` is also worthwhile (p-value 0.000089). If we were trying to "pare down" our model to keep only the best predictors, we would likely keep both in this case.
+
+### R Note: `Anova()`, not `anova()`!
+
+Be careful not to use `anova()` to carry out tests related to removing parameters from a regression model. 
+
+`anova()` does "sequential" tests; for example, if you fit a model `y ~ pred1 + pred2 + pred3`, for `pred1` `anova()` will compare $\omega: E(Y) = \beta_0$ vs. $\Omega: E(Y) = \beta_0 + \beta_1\text{pred1}$, but for `pred2` it will compare $\omega: E(Y) = \beta_0 + \beta_1\text{pred1}$ vs. $\Omega: E(Y) = \beta_0 + \beta_1\text{pred1} + \beta_2\text{pred2}$. 
+
+In other words, with `anova()`, the order in which predictors are listed greatly affects the hypotheses tested, and the test results. *THIS IS NONSENSE.*
+
+### Model Comparisons
+In other cases, if we want to compare two models $\Omega$ and $\omega$, we can just *fit them both* and then compare them with the syntax below. 
+
+```{r, echo = TRUE, eval = FALSE}
+anova(Omega, omega)
+```
+
+(Yes, little-a `anova()` is what you want this time.)
+
+This also works for any of the above cases (removing parameters or model utility check), if you manually fit the two models `Omega` ($\Omega$) and `omega` ($\omega$).
+
+For example, what if we use this method to check whether a model with `life_rating` and `group` is preferable to one with just `group`? Give it a try...
+
+```{r practice-anova, exercise = TRUE}
+
+```
+
+```{r practice-anova-hint-1}
+Omega <- lm(gratitude_score ~ life_rating + group, data = grateful)
+```
+
+```{r practice-anova-hint-2}
+Omega <- lm(gratitude_score ~ life_rating + group, data = grateful)
+omega <- lm(gratitude_score ~ group, data = grateful)
+```
+
+```{r practice-anova-hint-3}
+Omega <- lm(gratitude_score ~ life_rating + group, data = grateful)
+omega <- lm(gratitude_score ~ group, data = grateful)
+anova(Omega, omega)
+```
+
+Note that we end up with the same result that we got before using `Anova()`.
+
+## Parting Gift
+
+Interested in thinking more about this topic?
+
+Check out this (totally optional) TED talk by Brother David Steindl-Rast, a monk and interfaith scholar, on the topic of gratitude and happiness.
+
+<div style="max-width:854px"><div style="position:relative;height:0;padding-bottom:56.25%"><iframe src="https://embed.ted.com/talks/lang/en/david_steindl_rast_want_to_be_happy_be_grateful" width="854" height="480" style="position:absolute;left:0;top:0;width:100%;height:100%" frameborder="0" scrolling="no" allowfullscreen></iframe></div></div>

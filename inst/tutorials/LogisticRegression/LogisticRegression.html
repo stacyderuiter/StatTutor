@@ -194,8 +194,8 @@ summary(bonobo_logit)</code></pre>
 <div id="section-fitted-model-equation" class="section level3">
 <h3>Fitted Model Equation</h3>
 <p>So the equation of our fitted model is:</p>
-<p><span class="math display">\[ logit(p_i) = log \bigg{(} \frac{p_i}{(1-p_i)} \bigg{)} = -3.84 + 2.42 x_i\]</span></p>
-<p><span class="math display">\[ y_i \sim Binom(1, p_i) = Binom\bigg{(}1, \frac{e^{-3.84 + 2.42x_i}}{(1 + e^{-3.84 + 2.42x_i})}\bigg{)}\]</span></p>
+<p><span class="math display">\[ logit(p_i) = log \bigg{(} \frac{p_i}{(1-p_i)} \bigg{)} = -4.388 + 2.716 x_i\]</span></p>
+<p><span class="math display">\[ y_i \sim Binom(1, p_i) = Binom\bigg{(}1, \frac{e^{-4.388 + 2.716 x_i}}{(1 + e^{-4.388 + 2.716 x_i})}\bigg{)}\]</span></p>
 </div>
 <div id="section-probability-of-what" class="section level3">
 <h3>Probability of what?</h3>
@@ -211,12 +211,15 @@ summary(bonobo_logit)</code></pre>
 <p>Now that we know what <span class="math inline">\(p\)</span> is the probability <em>of</em>, we can use our model to make predictions.</p>
 <p>Let’s say we want to estimate the Sex of a bonobo with a <code>fWHR</code> of 1.5.</p>
 <p>According to our model, <span class="math inline">\(logit(\hat{p}) = \hat{\beta_0} + \hat{\beta_1}x\)</span> so <span class="math inline">\(logit(\hat{p})\)</span> is</p>
-<pre class="r"><code>-3.84 + 2.42 * 1.5</code></pre>
-<pre><code>## [1] -0.21</code></pre>
-<p>But it would probably make more sense to compute <span class="math inline">\(\hat{p} = \frac{e^{-3.84 + 2.42x_i}}{(1 + e^{-3.84 + 2.42x_i})}\)</span>:</p>
-<pre class="r"><code>exp(-3.84 + 2.42 * 1.5) / (1 + exp(-3.84 + 2.42 * 1.5))</code></pre>
-<pre><code>## [1] 0.4476921</code></pre>
-<p>So according to our model, the probability of a bonobo with <code>fWHR</code> 1.5 being Male is about 0.45. (If we had to guess its sex, I guess we’d guess Female - but reporting the probability actually gives a bit more information.)</p>
+<pre class="r"><code>b0 &lt;- as.numeric(round(coef(bonobo_logit)[1], digits = 3))
+b1 &lt;- as.numeric(round(coef(bonobo_logit)[2], digits = 3))
+b0 + b1 * 1.5</code></pre>
+<pre><code>## [1] -0.314</code></pre>
+<p>But it would probably make more sense to compute <span class="math inline">\(\hat{p} = \frac{e^{-4.388 + 2.716 x_i}}{(1 + e^{-4.388 + 2.716 x_i})}\)</span>:</p>
+<pre class="r"><code>p_hat &lt;- exp(b0 + b1 * 1.5) / (1 + exp(b0 + b1 * 1.5))
+p_hat</code></pre>
+<pre><code>## [1] 0.4221387</code></pre>
+<p>So according to our model, the probability of a bonobo with <code>fWHR</code> 1.5 being Male is about 0.42. (If we had to guess its sex, I guess we’d guess Female - but reporting the probability actually gives a bit more information.)</p>
 <p>We can also automate these calculations in R. The function <code>predict()</code> can return either the log-odds (<span class="math inline">\(logit(p)\)</span>) or the probability; we get the first by asking for a prediction of <code>type = 'link'</code> and the probability by asking for a prediction of <code>type = 'response'</code>.</p>
 <pre class="r"><code>new_data &lt;- data.frame(fWHR = 1.5)
 predict(bonobo_logit, newdata = new_data, type = &#39;link&#39;)</code></pre>
@@ -236,7 +239,7 @@ new_data &lt;- new_data %&gt;%
   mutate(preds = predict(bonobo_logit, newdata = new_data, type = &#39;response&#39;))
 gf_line(preds ~ fWHR, data = new_data) %&gt;%
   gf_point(iSex ~ fWHR, data = bonobos, alpha = 0.3)</code></pre>
-<p><img src="LogisticRegression_files/figure-html/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p><img src="LogisticRegression_files/figure-html/unnamed-chunk-7-1.png" width="576" style="display: block; margin: auto;" /></p>
 <p>From this exploration of the predictions, it’s pretty clear that our model is not great at predicting sex from fWHR. Could we measure how well it’s doing, or test whether fWHR is a “good” predictor? Stay tuned for the last module of class to find out…</p>
 </div>
 </div>
@@ -315,7 +318,7 @@ maxLik(logit_ll, start = c(-2, 4), bonobos = bonobos)</code></pre>
 <pre><code>## Loading required package: s245</code></pre>
 <pre class="r"><code>pred_plot(bonobo_logit, &#39;fWHR&#39;) %&gt;%
   gf_labs(y = &#39;Predicted P(Male)&#39;)</code></pre>
-<p><img src="LogisticRegression_files/figure-html/unnamed-chunk-10-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p><img src="LogisticRegression_files/figure-html/unnamed-chunk-11-1.png" width="576" style="display: block; margin: auto;" /></p>
 <p><em>(No need to understand how that was done or replicate it – if you want to know, join us in STAT 245!)</em></p>
 <p>However, there <em>is</em> a (somewhat) useful way to interpret the parameters of a logistic regression model in terms of odds ratios. It’s kind of analogous to interpreting a slope of a linear regression, along the lines of, “if the predictor value increases by 1, then the response increases by [slope].”</p>
 <p>Obviously, the way we have used the logit link and the Binomial distribution means that same interpretation won’t hold for logistic regression slopes. But…</p>

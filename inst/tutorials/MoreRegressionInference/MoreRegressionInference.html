@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="true" />
+<meta name="allow-skip" content="true" />
+
+<title>(More) Inference for Linear Regression Models</title>
+
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+<!-- taken from https://github.com/rstudio/rmarkdown/blob/67b7f5fc779e4cfdfd0f021d3d7745b6b6e17149/inst/rmd/h/default.html#L296-L362 -->
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("section-TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+<!-- end tabsets -->
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<div id="section-learning-outcomes" class="section level2">
+<h2>Learning Outcomes</h2>
+<p>This module introduces several additional tests that will allow us to make more nuanced inferences, for a wider range of (linear) regression models. After our brief foray into binary data regression last week, this week will return to (multiple) linear regression, including both quantitative and categorical variables. Methods explored will include t-tests (with non-equal variance) and <strong>An</strong>alysis <strong>o</strong>f <strong>Va</strong>riance (ANOVA), which allows us to assess the utility of categorical predictors with 3+ categories, as well as comparing pairs of models to each other.</p>
+<p>By the end of the module you will:</p>
+<ol style="list-style-type: decimal">
+<li>Use a two-sample t-test as an alternative to simple linear regression with one two-level categorical predictor, to test whether the two categories have different average response variable values <em>without assuming that variance is equal between the two groups.</em></li>
+<li>Derive the F-ratio and ANOVA test in terms of SSG, MSG, SSE, and MSE, and the F-ratio</li>
+<li>Generalize your understanding of ANOVA to the case of model comparisons for deciding between a (multiple) linear regression model and a selected sub-model</li>
+<li>Synthesizing 2)-3), Be able to explain (graphically, verbally, or analytically) how ANOVA allows us to assess the utility of a quantitative predictor or a categorical predictor, or to compare models</li>
+<li>Use <code>anova()</code> or <code>car::Anova()</code> to carry out ANOVA in R</li>
+<li>Use <code>TukeyHSD()</code> in R to determine which group means are different, <strong>if</strong> a one-way ANOVA has allowed you to reject the null hypothesis that they are all the same</li>
+</ol>
+<p><em>These materials come from your text book, FAStR2 Chapters 6.4, 6.7, 7.1 - 7.3 (selection from them!).</em></p>
+</div>
+<div id="section-case-study-gratitude" class="section level2">
+<h2>Case Study: Gratitude</h2>
+<p>A growing body of research has documented the effects that practicing gratitude can have on people – providing not just spiritual and mental-health benefits, but even improving physical health.</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/_sokh9e2WGc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+</iframe>
+</div>
+<div id="section-dataset" class="section level2">
+<h2>Dataset</h2>
+<p>We will dive further into this topic – learning about ANOVA and some other tests along the way – via a case study where researchers tried to collect data to answer:</p>
+<p><strong>“How does gratitude affect peoples’ mental and physical well-being?”</strong></p>
+<p>The data are simulated based on the results of a paper published in 2003:</p>
+<p><a href="https://moodle.calvin.edu/pluginfile.php/1481445/mod_page/content/1/Counting_blessings_versus_burd.pdf"><img src="images/count-blessings.png" width="450" /></a></p>
+<p><em>Click on the image above to get the full PDF. Reading it is</em> <strong>not</strong> <em>required, but it is interesting and accesible - check it out if you have time!</em></p>
+</div>
+<div id="section-can-we-induce-gratitude" class="section level2">
+<h2>Can We Induce Gratitude?</h2>
+<p>To understand whether gratitude can <em>cause</em> improvements in mental and physical health and practices, the researchers needed to do a <strong>randomized</strong> study, in which they somehow controlled peoples’ gratitude levels. How did they do <em>that</em>?</p>
+<p>First, they recruited nearly 200 college students to participate in their study.</p>
+<p>They asked participants to complete a weekly journal, writing lists of things that they were grateful for. 1/3 of study participants were randomly assigned to this group - the <code>gratitude</code> group.</p>
+<p>Other participants were asked to write about things that <em>annoyed</em> them instead – this was the <code>hassles</code> group.</p>
+<p>Finally, a control group – the <code>events</code> group – just wrote about events in the past week that had affected them (could be either positive or negative).</p>
+<p>Before delving into any other questions, the researchers had to verify that the <code>gratitude</code> group <em>actually felt more grateful</em> than the other groups…</p>
+<div id="section-more-design-details" class="section level3">
+<h3>More Design Details</h3>
+<p>In addition to the journals, all the students had to complete weekly surveys about their behavior and state of mind.</p>
+<p>For example, they had to state how often (on a scale of 1 to 5) they experienced each of a set of feelings over the preceding week:</p>
+<p><img src="MoreRegressionInference_files/figure-html/unnamed-chunk-1-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-pulling-out-gratitude" class="section level3">
+<h3>Pulling out Gratitude</h3>
+<p>The researchers combined scores from the words <em>thankful</em>, <em>appreciative</em>, and <em>grateful</em> to assess participants’ gratitude. In our dataset, this value is called <code>gratitude_score</code>.</p>
+<p><img src="MoreRegressionInference_files/figure-html/unnamed-chunk-2-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-the-data" class="section level3">
+<h3>The Data</h3>
+<p>How do the data actually look?</p>
+<pre class="r"><code>gf_boxplot(gratitude_score ~ group, data = grateful, color = ~group)</code></pre>
+<p><img src="MoreRegressionInference_files/figure-html/unnamed-chunk-3-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>It seems like perhaps the <code>gratitude_score</code> is higher for the <code>gratitude</code> group and lower for the others, but we really need hypothesis test results to have more confidence in our judgment of whether the difference is real or if the differences between groups could just be the result of random sampling variation.</p>
+</div>
+<div id="section-our-questions" class="section level3">
+<h3>Our Questions</h3>
+<p>As Emmons and McCullough did, our first job will be to test whether the mean <code>gratitude_score</code> is the same for the different groups in the study – the <code>gratitude</code> group, the <code>hassles</code> group, and the <code>events</code> group.</p>
+<p>First, we will consider a simplified case with only two groups: the <code>gratitude</code> and <code>hassles</code> groups.</p>
+<p>But, considering the full dataset, we have <em>more than</em> two groups to compare. We also have other potential quantitative predictors we could include in our models. This will allow us to look at a few other tests (to figure out whether it is worthwhile to include a multi-level categorical predictor, or even a quantitative one; or to compare pairs of models consisting of a larger model and a smaller one that is a submodel of the larger one).</p>
+</div>
+</div>
+<div id="section-comparing-2-means-lm-way" class="section level2">
+<h2>Comparing 2 Means: <code>lm()</code> Way</h2>
+<p>We have previously seen that we can use slope estimates from <code>lm()</code> and their standard errors with t-distributions to compute CIs or carry out hypothesis tests about the slope (often, testing <span class="math inline">\(H_0: \beta_1 = 0\)</span>).</p>
+<div id="section-review-quantitative-predictors" class="section level3">
+<h3>Review: Quantitative Predictors</h3>
+<p>For example, we could consider a model to predict <code>gratitude_score</code> as a function of <code>life_rating</code> (a score measuring positivity about one’s life as a whole).</p>
+<pre class="r"><code>gf_point(gratitude_score ~ life_rating,
+         data = grateful) %&gt;%
+  gf_lm()</code></pre>
+<p><img src="MoreRegressionInference_files/figure-html/unnamed-chunk-4-1.png" width="576" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>life_model &lt;- lm(gratitude_score ~ life_rating, 
+                 data = grateful)
+msummary(life_model)</code></pre>
+<pre><code>##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   7.2008     0.8828   8.157 4.22e-14 ***
+## life_rating   0.5295     0.1806   2.932  0.00377 ** 
+## 
+## Residual standard error: 1.98 on 194 degrees of freedom
+## Multiple R-squared:  0.04243,    Adjusted R-squared:  0.03749 
+## F-statistic: 8.596 on 1 and 194 DF,  p-value: 0.003775</code></pre>
+</div>
+<div id="section-review-ci-for-slope" class="section level3">
+<h3>Review: CI for Slope</h3>
+<p>Find a 95% confidence interval for the slope coefficient of the <code>life_model</code>.</p>
+<div class="tutorial-exercise" data-label="life-model-CI" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>life_model &lt;- lm(gratitude_score ~ life_rating, 
+                 data = grateful)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="life-model-CI-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>life_model &lt;- lm(gratitude_score ~ life_rating, 
+                 data = grateful)
+beta_1 + c(-1,1) * t_star * SE</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="life-model-CI-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>life_model &lt;- lm(gratitude_score ~ life_rating, 
+                 data = grateful)
+# note: could also fill in numeric values for beta_1 and SE
+# from model summary.
+coef(life_model)[2] + c(-1,1) * 
+  qt(0.975, df = nrow(grateful) - 1) *
+  sqrt(diag(vcov(life_model)))[2]</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="life-model-CI-hint-3" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code># or short cut:
+life_model &lt;- lm(gratitude_score ~ life_rating, 
+                 data = grateful)
+confint(life_model)</code></pre>
+</div>
+</div>
+<div id="section-review-test-for-slope" class="section level3">
+<h3>Review: Test for Slope</h3>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div><div class="panel panel-default">
+<div data-label="slope-t-test-quiz-1" class="tutorial-question panel-body">
+<div id="slope-t-test-quiz-1-answer_container" class="shiny-html-output"></div>
+<div id="slope-t-test-quiz-1-message_container" class="shiny-html-output"></div>
+<div id="slope-t-test-quiz-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div></p>
+</div>
+<div id="section-categorical" class="section level3">
+<h3>Categorical?</h3>
+<p><em>Text book reference: FAStR Chapter 6.7.1</em></p>
+<p>If we consider a categorical variable with <em>only two categories</em>, everything is exactly the same (except the interpretation of the slope coefficient, which now gives the difference in means between the two categories).</p>
+<p>For example, we can reduce the dataset to exclude the third <code>events</code> group, and then model <code>gratitude_score</code> as a function of <code>group</code> to see if the <code>gratitude</code> and <code>hassles</code> groups have different average gratitude scores.</p>
+<pre class="r"><code>grateful2 &lt;- grateful %&gt;%
+  filter(group != &#39;events&#39;) %&gt;%
+  mutate(group = factor(group))
+gf_boxplot(gratitude_score ~ group, data = grateful2)</code></pre>
+<p><img src="MoreRegressionInference_files/figure-html/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-practice" class="section level3">
+<h3>Practice</h3>
+<p>Fit the model and, just as in the previous example, find a 95% CI for <span class="math inline">\(\beta_1\)</span> and test <span class="math inline">\(H_0: \beta_1 = 0\)</span>.</p>
+<div class="tutorial-exercise" data-label="two-group-lm" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="two-group-lm-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>two_group_model &lt;- lm(gratitude_score ~ group, 
+                      data = grateful2)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="two-group-lm-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>two_group_model &lt;- lm(gratitude_score ~ group, 
+                      data = grateful2)
+confint(two_group_model)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="two-group-lm-hint-3" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>two_group_model &lt;- lm(gratitude_score ~ group, 
+                      data = grateful2)
+summary(two_group_model)
+# to pull out just the p-value
+coefficients(summary(two_group_model))[&#39;grouphassles&#39;, &#39;Pr(&gt;|t|)&#39;]</code></pre>
+</div>
+<p>Easy peasy! As we mentioned before, the only real difference between this model and the one with a quantitative predictor is that we end up with an <em>indicator variable</em> instead of one with many different numeric values, so the interpretation of the slope coefficient <span class="math inline">\(\beta_1\)</span> is different.</p>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div><div class="panel panel-default">
+<div data-label="cat-slope-interp-quiz-1" class="tutorial-question panel-body">
+<div id="cat-slope-interp-quiz-1-answer_container" class="shiny-html-output"></div>
+<div id="cat-slope-interp-quiz-1-message_container" class="shiny-html-output"></div>
+<div id="cat-slope-interp-quiz-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div></p>
+</div>
+<div id="section-so-whats-the-problem" class="section level3">
+<h3>So what’s the problem?</h3>
+<p><em>Text book reference: FAStR Chapter 6.7.2</em></p>
+<p>This works, generally. But it’s subject to all the conditions of any linear regression model; the key one we want to focus on at the moment is</p>
+<div id="section-e.-constant-variance-of-residuals" class="section level4">
+<h4>E. Constant Variance of Residuals</h4>
+<p>In this case, the constant variance condition means that the variances of the two groups being compared are assumed to be <em>the same</em>.</p>
+<p>(<em>Note: in this particular case, the graph we looked at before showed very similar spread for both groups, so there is no problem with the constant-variance condition here…but it’s easy to imagine scenarios where we might want to compare group means without assuming equal variances.</em>)</p>
+<p>In some situations, though, this constant-variance assumption is not appropriate, or is unnecessarily restrictive.</p>
+<p>And in this scenario, we’re in luck: it’s not too hard to derive an alternative procedure <em>without</em> the constant-variance condition (in this context, it’s often called the “equal-variance” condition).</p>
+</div>
+</div>
+</div>
+<div id="section-comparing-2-means-2-sample-t-test" class="section level2">
+<h2>Comparing 2 Means: 2-sample t-test</h2>
+<p><em>Text book reference: FAStR Chapter 6.7.2</em></p>
+<p>If we draw samples of sizes <span class="math inline">\(n_1\)</span> and <span class="math inline">\(n_2\)</span>, independently, from two normal populations with means <span class="math inline">\(\mu_1\)</span> and <span class="math inline">\(\mu_2\)</span> and variances <span class="math inline">\(\sigma^2_1\)</span> and <span class="math inline">\(\sigma^2_2\)</span>, then the difference in means <span class="math inline">\(\bar{Y}_1 - \bar{Y}_2\)</span> will be distributed:</p>
+<p><span class="math display">\[ \bar{Y}_1 - \bar{Y}_2 \sim \text{Norm}\bigg{(} \mu_1 - \mu_2, \sqrt{\frac{\sigma^2_1}{n_1} + \frac{\sigma^2_2}{n_2}} \bigg{)}\]</span></p>
+<p>(Since the variance of a sum (or difference) is the sum of the variances (favorite. variance. rule. ever…) and the standard deviation is the square root of the variance.)</p>
+<p>Unfortunately, we do not generally know <span class="math inline">\(\sigma_1\)</span> or <span class="math inline">\(\sigma_2\)</span>; we have to estimate them using the data. It turns out that the sampling distribution for this difference in means, with unknown <span class="math inline">\(\sigma\)</span>s, does not correspond exactly to any of our standard PDF families. However, a t-distribution with <span class="math inline">\(\nu\)</span> degrees of freedom is a good approximation. <span class="math inline">\(\nu\)</span> is a bit of a pain to compute (so we generally leave it to software):</p>
+<p><span class="math display">\[ \nu = \frac{(s_1^2 / n_1 + s_2^2 / n_2)^2}{\bigg{(} \frac{(s_1^2 / n_1)^2}{(n_1-1)} + \frac{(s_2^2 / n_2)^2}{(n_2-1)}\bigg{)}}\]</span></p>
+<p>We could carry out this test “by hand”, using the expressions above to compute the standard error and the degrees of freedom (and then the <span class="math inline">\(t^*\)</span> multiplier or the p-value from the t-distribution with those degrees of freedom <span class="math inline">\(\nu\)</span>).</p>
+<p>But conveniently, the R function <code>t.test()</code> does all the work for us.</p>
+<pre class="r"><code>t.test(gratitude_score ~ group, data = grateful2)</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  gratitude_score by group
+## t = 5.0682, df = 128.97, p-value = 1.361e-06
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  0.9373433 2.1378348
+## sample estimates:
+## mean in group gratitude   mean in group hassles 
+##               10.641295                9.103706</code></pre>
+<p><em>Here, the group sizes are nearly equal and both groups have nearly the same variance, to the <code>t.test()</code> method and the <code>lm()</code> method give very similar solutions.</em></p>
+<p>Of course, the <code>t.test()</code> is preferred when the two groups under comparison have very different variances!</p>
+<p>So far, we considered a special case of a categorical predictor <em>with just two categories</em>. It’s often of interest to compare <em>more than two</em> categories. In fact, in our case study, we’d like to compare <code>gratitude_score</code>s between the <code>gratitude</code>, <code>hassles</code>, <em>and</em> <code>events</code> groups. How can we do this?</p>
+</div>
+<div id="section-hypotheses-for-anova" class="section level2">
+<h2>Hypotheses for ANOVA</h2>
+<p><em>Text book reference: FAStR2 Chapter 6.4.6, 7.1.2, 7.3</em></p>
+<p>We want to test:</p>
+<p><span class="math display">\[H_0: \mu_{gratitude} = \mu_{events} = \mu_{hassles}\]</span></p>
+<p>In other words, our null hypothesis is that the means of <em>all groups</em> are the same. (The <span class="math inline">\(\mu\)</span>s are the true population means for each of the groups.)</p>
+<p>The alternate hypothesis is that <em>at least one pair of groups has different means</em>.</p>
+<p>How do we translate this set-up into a linear regression model? We’re considering the model in which we predict <code>gratitude_score</code> with <code>group</code>:</p>
+<pre class="r"><code>grat_by_group &lt;- lm(gratitude_score ~ group, data = grateful)
+summary(grat_by_group)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = gratitude_score ~ group, data = grateful)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -4.527 -1.208 -0.128  1.160  7.016 
+## 
+## Coefficients:
+##                Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)      9.5317     0.2383  40.006  &lt; 2e-16 ***
+## groupgratitude   1.1096     0.3369   3.293  0.00118 ** 
+## grouphassles    -0.4280     0.3357  -1.275  0.20382    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.921 on 193 degrees of freedom
+## Multiple R-squared:  0.1036, Adjusted R-squared:  0.0943 
+## F-statistic: 11.15 on 2 and 193 DF,  p-value: 2.612e-05</code></pre>
+<p>There are a few equivalent ways of setting this up (depending on which group is included in the intercept), but in R the code above will yield a model like:</p>
+<p><span class="math display">\[ y_i = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \epsilon\]</span></p>
+<p>where <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> are indicator variables for the <code>gratitude</code> and <code>hassles</code> groups:</p>
+<p><span class="math display">\[ x_1 = \begin{cases} 1 \text{,  if group is gratitude}\\ 0 \text{,  otherwise} \end{cases}\]</span></p>
+<p><span class="math display">\[ x_2 = \begin{cases} 1 \text{,  if group is hassles}\\ 0 \text{,  otherwise} \end{cases}\]</span></p>
+<p>In this framework, <span class="math inline">\(\beta_0\)</span> is the mean for the <code>events</code> group. <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_2\)</span> are the differences in means between groups (<code>gratitude</code> and <code>events</code>, and <code>hassles</code> and <code>events</code>). So our intention with this ANOVA is to test <span class="math inline">\(H_0: \beta_1 = \beta_2 = 0\)</span>. If this is true, then the intercept <span class="math inline">\(\beta_0\)</span> will be the overall mean <code>gratitude_score</code>.</p>
+</div>
+<div id="section-test-stat-for-anova-f-ratio" class="section level2">
+<h2>Test Stat for ANOVA: F-ratio</h2>
+<p>The big challenge here is to come up with a <strong>test statistic</strong> – <em>one number</em> that measures evidence against the null hypothesis that all the group means are the same.</p>
+<p><strong>How can we define a good test statistic to measure how different</strong> <em>more than two</em> <strong>numbers are?</strong></p>
+<p>The video below will walk through the derivation of the F-ratio statistic. You’re welcome to download or print <a href="https://moodle.calvin.edu/pluginfile.php/1481659/mod_page/content/1/ANOVA-handout.pdf">a worksheet</a> where you can take notes and summarize the material from this video (and other key parts of the tutorial). Writing and drawing it yourself may make it easier to understand and remember.</p>
+<div id="section-part-1-what-we-need-to-measure" class="section level3">
+<h3>Part 1: What we need to measure</h3>
+<p><em>Note: in this video, <span class="math inline">\(x\)</span> is used for the variable whose mean is being estimated; for us it would make more sense to use <span class="math inline">\(y\)</span> but I’m trusting you to make the translation…</em></p>
+<p><img src="https://youtu.be/oM1lInZGs-g" width="400" /></p>
+<p>(You can also <a href="https://youtu.be/oM1lInZGs-g">watch directly on YouTube</a> if you prefer.)</p>
+</div>
+<div id="section-part-2-how-we-measure-it" class="section level3">
+<h3>Part 2: How we measure it</h3>
+<p><em>Note: again in this video, <span class="math inline">\(x\)</span> is used for the variable whose mean is being estimated; for us it would make more sense to use <span class="math inline">\(y\)</span> but I’m trusting you to make the translation…</em></p>
+<p><img src="https://youtu.be/ngh8at4ADog" width="400" /></p>
+<p>(You can also <a href="https://youtu.be/ngh8at4ADog">watch directly on YouTube</a> if you prefer.)</p>
+</div>
+</div>
+<div id="section-sampling-distribution-of-f-simulated" class="section level2">
+<h2>Sampling Distribution of F, Simulated</h2>
+<p>All right, we can compute the F-ratio now.</p>
+<p>But what is its sampling distribution?</p>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div><div class="panel panel-default">
+<div data-label="f-samp-dist-1" class="tutorial-question panel-body">
+<div id="f-samp-dist-1-answer_container" class="shiny-html-output"></div>
+<div id="f-samp-dist-1-message_container" class="shiny-html-output"></div>
+<div id="f-samp-dist-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div><div class="panel panel-default">
+<div data-label="f-samp-dist-2" class="tutorial-question panel-body">
+<div id="f-samp-dist-2-answer_container" class="shiny-html-output"></div>
+<div id="f-samp-dist-2-message_container" class="shiny-html-output"></div>
+<div id="f-samp-dist-2-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div></p>
+<div id="section-a-simulation" class="section level3">
+<h3>A Simulation</h3>
+<p>So, we know that a <em>large</em> value of F will let us reject the null. But <em>how big is “large”?</em></p>
+<p>We need to know the sampling distribution of F (when <span class="math inline">\(H_0\)</span> is true) in order to judge.</p>
+<p>Let’s first consider a simulation tailored to the case study we’re currently investigating.</p>
+</div>
+<div id="section-plan-of-attack-for-simulation" class="section level3">
+<h3>Plan of Attack for Simulation</h3>
+<ul>
+<li>We will simulate dataset with <span class="math inline">\(n =\)</span> 196 and three groups</li>
+<li>In our simulations, <span class="math inline">\(H_0\)</span> is true, so all the groups actually have the same mean (let’s make it 10).</li>
+<li>We’ll draw simulated data points from a <span class="math inline">\(N(10,2)\)</span> distribution</li>
+<li>We will allocate them randomly to the three groups</li>
+<li>For each simulated sample, we will compute <span class="math inline">\(F\)</span></li>
+<li><strong>When we have many values of <span class="math inline">\(F\)</span> for many simulated datasets, we can plot the sampling distribution of <span class="math inline">\(F\)</span> under the null hypothesis and see what it looks like.</strong></li>
+</ul>
+</div>
+<div id="section-simulation-coderesults" class="section level3">
+<h3>Simulation Code/Results</h3>
+<p>If you are interested in details of how the simulation is coded, you’re welcome to check it out (but it’s hidden because you will not be asked to re-create something like this yourself).</p>
+<details>
+<p><summary>Show code</summary></p>
+<pre class="r"><code>n_sim &lt;- 5000
+n &lt;- nrow(grateful)
+F &lt;- numeric(length = n_sim)
+
+for(i in c(1:n_sim)){
+  sim_data &lt;- data.frame(gratitude_score = 
+                           rnorm(n, mean = 10, sd = 2),
+                         group = grateful$group)
+  
+  group_means &lt;- mean(~gratitude_score | group, 
+                      data = sim_data)
+  
+  sim_data &lt;- sim_data %&gt;%
+  mutate(overall_mean = mean(~gratitude_score, 
+                             data = sim_data),
+         group_mean = group_means[group])
+  
+  F[i] &lt;- sum(~ ((group_mean - overall_mean)^2), 
+              data = sim_data) / (3 - 1) /
+  ( sum(~ (gratitude_score - group_mean)^2,
+        data = sim_data) / (nrow(sim_data) - 3) )
+}
+
+gf_density(~F)</code></pre>
+</details>
+<p><img src="MoreRegressionInference_files/figure-html/unnamed-chunk-10-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="section-sampling-distribution-of-f-derived" class="section level2">
+<h2>Sampling Distribution of F, Derived</h2>
+<p><em>Text book reference: FAStR2 Chapter 6.4.6, 7.2, 7.3.2-7.3.3</em></p>
+<ul>
+<li>It looks how we expected – bounded by 0 on the left, and right skewed.</li>
+<li>But…<em>what PDF looks like that</em>???</li>
+<li>You may have some guesses based on the simulation, but let’s think it through.</li>
+<li>If you desire a more rigorous geometric treatment of these ideas, check out the text book references listed above.</li>
+</ul>
+<div id="section-denominator-of-f-sse-n-k" class="section level3">
+<h3>Denominator of F (SSE / (n-K))</h3>
+<p>Let’s consider the denominator of F first: MSE = SSE / (n-K).</p>
+<p><strong>The residual standard error of our linear regression model is <span class="math inline">\(\sqrt{MSE}\)</span>!</strong></p>
+<p>The residuals follow a normal distribution with mean 0 and variance <span class="math inline">\(\sigma^2\)</span>. We could standardize them by subtracting the mean (0) and dividing by <span class="math inline">\(\sigma\)</span>, and then they would have a standard normal distribution. The square of a standard normal random variable has a chi-square distribution, so</p>
+<p><span class="math display">\[ \frac{SSE}{\sigma^2} \sim \text{Chisq}(n - K)\]</span></p>
+<p>Similarly, for the numerator of F,</p>
+<p><span class="math display">\[ \frac{SSG}{\sigma^2} \sim \text{Chisq}(K - 1)\]</span></p>
+<p>The ratio of two chi-square distributions is an F distribution, so</p>
+<p><span class="math display">\[ F = \frac{SSG / (K - 1)}{SSE / (n - K)} \sim F(\text{df}_1 = K - 1, \text{df}_2 = n - K)\]</span></p>
+<p>Check it out:</p>
+<pre class="r"><code>gf_density(~F) %&gt;%
+  gf_dist(dist = &#39;f&#39;, 
+          params = c(df1 = 2, df2 = (nrow(grateful) - 3))) </code></pre>
+<p><img src="MoreRegressionInference_files/figure-html/unnamed-chunk-11-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p><em>You may notice there’s a little mismatch between the simulated sampling distribution and the theoretical F distribution for very small F-values, but…where it counts, in the right tail, the match is very good. So our p-value estimates should be pretty good using this distribution (and for the record, you won’t see this issue so much with <span class="math inline">\(K &gt; 3\)</span>…)</em></p>
+</div>
+</div>
+<div id="section-p-value" class="section level2">
+<h2>P-value!</h2>
+<p>To get the p-value of our test, we just need to find the probability of getting an <span class="math inline">\(F\)</span> stat <em>at least as big as ours</em>, in a <span class="math inline">\(F_{2, 193}\)</span> distribution:</p>
+<pre class="r"><code>pf(11.15, df1 = 2, df2 = 193, lower.tail = FALSE)</code></pre>
+<pre><code>## [1] 2.61536e-05</code></pre>
+<p>This is <em>very</em> small, so we reject <span class="math inline">\(H_0\)</span>: at least one of the pairs of groups in the study had different <code>gratitude_score</code>s.</p>
+</div>
+<div id="section-letting-r-do-all-the-work" class="section level2">
+<h2>Letting R do all the work</h2>
+<p><em>Text book reference: FAStR2 Chapter 7.3.2 - 7.3.3</em></p>
+<p>Of course, we won’t do all the calculations by hand each time; there’s an R function to automate it all.</p>
+<pre class="r"><code>car::Anova(lm(gratitude_score ~ group, data = grateful))</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sum Sq"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Df"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"82.29571","2":"2","3":"11.15154","4":"2.611755e-05","_rn_":"group"},{"1":"712.14712","2":"193","3":"NA","4":"NA","_rn_":"Residuals"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>But <strong>notice</strong> – all the quantities that we used in our derivation of the F-statistic are <em>right there in the ANOVA output table</em>! (The numeric values also all match with the ones we’ve previously computed by hand.)</p>
+<ul>
+<li>The “group” row gives the SSG and its df (and the F stat and p-value)</li>
+<li>The “Residuals” row gives the SSE and its df. (<em>Residuals</em> is another statistical term for <em>errors</em>.)</li>
+<li>The “Sum Sq” column corresponds to “SS” terms (“MS” terms are not in the table, but can be computed from SSX and df from the table)</li>
+<li>The “F value” is the F-ratio (test statistic)</li>
+<li>The “Pr(&gt;F)” is the p-value of the test</li>
+</ul>
+<p>(A classic intro-stat textbook ANOVA problem is to give you a partially-filled-in ANOVA results table, and ask you to fill in the missing values.)</p>
+</div>
+<div id="section-pairwise-comparisons" class="section level2">
+<h2>Pairwise Comparisons</h2>
+<p><em>Text book reference: FAStR2 Chapter 7.3.7</em></p>
+<p><strong>Whaddaya wanna know NOW?</strong></p>
+<ul>
+<li>If we <strong>do reject <span class="math inline">\(H_0\)</span></strong>, like we do here, the test just tells us that <em>at least one</em> pair of means is different.</li>
+<li>So here, is the <code>gratitude</code> different from <code>hassles</code>? What about the control, <code>events</code> – is either <code>gratitude</code> or <code>hassles</code> different from that?</li>
+<li>With the ANOVA test, <em>we don’t know</em> which pairs are different</li>
+<li><em>BUT</em> if we <em>fail to reject</em> <span class="math inline">\(H_0\)</span>, then we know they are all the same - case closed.</li>
+<li>If we want to make pairwise comparisons, we need more tests.</li>
+</ul>
+<div id="section-maybe-a-lot-more-tests" class="section level3">
+<h3>Maybe a LOT more tests…</h3>
+<ul>
+<li>Here, with three groups, we have just three pairs of means to compare</li>
+<li>With more groups, it would be a lot worse.</li>
+<li>We want to avoid problems with multiple comparisons! Consider <strong>jelly beans</strong></li>
+</ul>
+<p><img src="https://imgs.xkcd.com/comics/significant.png" /></p>
+<p>In other words: we should be careful carrying out multiple comparisons, because the probability of making at least one Type I error increases with the number of hypotheses tested.</p>
+</div>
+<div id="section-pairwise-tests-corrected-for-multiple-tests" class="section level3">
+<h3>Pairwise tests corrected for multiple tests</h3>
+<p><em>Text book reference: FAStR Chapter 7.3.7</em></p>
+<p>What if we could do a 2-sample t-test for each pair, but <em>inflate</em> the p-value of each test a little to make up for the number of tests being done?</p>
+<p><em>(Well, that’d be great.)</em></p>
+<p><strong>Tukey’s pairwise Honest Significant Difference test</strong> (<code>TukeyHSD()</code>) in R does this for us.</p>
+<p>(<em>Note: we omit the details of the exact adjustment here, in the interest of making the size of this module a bit more reasonable. You can find them all in FAStR 7.3.7 if you wish to know.</em>)</p>
+<p>We <strong>only</strong> carry out the <code>TukeyHSD()</code> test <em>after</em> an ANOVA rejects <span class="math inline">\(H_0\)</span> and indicates that at least one pair has different means. This restraint – not doing pairwise tests unless we already have evidence there will be at least one pair that are significantly different (plus the Tukey HSD adjustment-of-the-p-values) – helps us avoid Type I errors.</p>
+<p>Coding the test in R is simple:</p>
+<pre class="r"><code>TukeyHSD(lm(gratitude_score ~ group, data = grateful), 
+         conf.level = 0.95)</code></pre>
+<pre><code>##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+## 
+## Fit: aov(formula = x)
+## 
+## $group
+##                         diff        lwr        upr     p adj
+## gratitude-events   1.1095887  0.3137355  1.9054420 0.0033649
+## hassles-events    -0.4280003 -1.2208332  0.3648326 0.4109801
+## hassles-gratitude -1.5375891 -2.3304220 -0.7447562 0.0000247</code></pre>
+<p>In the results table,</p>
+<ul>
+<li>The row labels tell us which means are being compared, and also gives the direction of subtraction</li>
+<li>The <code>diff</code> column gives the numeric difference in means for the two groups</li>
+<li>The <code>lwr</code> column gives the lower bound of a confidence interval for the difference in means. (If you want a confidence level other than 95%, just change the input <code>conf.level = ...</code> in your call to <code>TukeyHSD()</code>. If you omit it, 95% is the default.)</li>
+<li>The <code>upr</code> column gives the upper bound of a CI for the difference in means.</li>
+<li>The <code>p adj</code> column gives the p-value of a test with <span class="math inline">\(H_0: \mu_1 = \mu_2\)</span> (agains a two-sided alternate).</li>
+</ul>
+<p>Here, we see that the <code>gratitude</code> group has higher <code>gratitude_score</code>s than the <code>hassles</code> and <code>events</code> groups, but there is no evidence from the data that <code>hassles</code> and <code>events</code> are different from each other.</p>
+<p><em>That’s good news for our researchers - they successfully “induced gratitude” in the <code>gratitude</code> group!</em></p>
+</div>
+</div>
+<div id="section-practice-1" class="section level2">
+<h2>Practice</h2>
+<p>Since we’ve now demonstrated that the <code>gratitude</code> group is actually more grateful, we can now look at other hypotheses.</p>
+<p>For example, are outlook on life and physical health different between the three groups?</p>
+<p>The dataset contains four metrics that might differ between the groups:</p>
+<ul>
+<li><code>life_rating</code> is a score measuring positivity about one’s life as a whole</li>
+<li><code>week_rating</code> is a score measuring expectations of how good one’s life will be in the coming week</li>
+<li><code>illness_score</code> measures the degree to which one experienced physical illness in the past week</li>
+<li><code>exercise_hours</code> measures the number of hours spent exercising in the preceding week</li>
+</ul>
+<p>Choose one of the variables listed above.</p>
+<p>Use the dataset <code>grateful</code> and carry out an ANOVA to test whether the mean of your variable is the same for all three groups. If appropriate, follow up with a Tukey HSD test to figure out which pairs of means differ. Be sure to think through what the conclusions of each test will be, in terms of gratitude.</p>
+<div class="tutorial-exercise" data-label="anova-practice" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="anova-practice-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>car::Anova(lm(...))</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="anova-practice-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>car::Anova(lm(..., data = grateful))</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="anova-practice-hint-3" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>car::Anova(lm(your_variable_name ~ group, data = grateful))</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="anova-practice-hint-4" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>car::Anova(lm(your_variable_name ~ group, data = grateful))
+# only if ANOVA returns a small p-value:
+TukeyHSD(lm(your_variable_name ~ group, data = grateful))</code></pre>
+</div>
+<p><strong>Wow! I am always amazed that such simple practices can have such profound effects, in unexpected ways…</strong></p>
+</div>
+<div id="section-devotion-break" class="section level2">
+<h2>Devotion Break</h2>
+<p>Colossians 3:12-17 reminds us:</p>
+<p><em>Therefore, as God’s chosen people, holy and dearly loved, clothe yourselves with compassion, kindness, humility, gentleness and patience. Bear with each other and forgive one another if any of you has a grievance against someone. Forgive as the Lord forgave you. And over all these virtues put on love, which binds them all together in perfect unity.</em></p>
+<p><em>Let the peace of Christ rule in your hearts, since as members of one body you were called to peace. And be thankful. Let the message of Christ dwell among you richly as you teach and admonish one another with all wisdom through psalms, hymns, and songs from the Spirit, singing to God with gratitude in your hearts. And whatever you do, whether in word or deed, do it all in the name of the Lord Jesus, giving thanks to God the Father through him.</em></p>
+<p>We <em>do know</em> that God expects our gratitude of us. The Heidelberg catechism is pretty clear on this requirement too (from Lord’s Day 45):</p>
+<p><strong>116. Why is prayer necessary for Christians?</strong></p>
+<p><em>Because it is the chief part of thankfulness which God requires of us (Psalm 50:14-15), and because God will give His grace and Holy Spirit only to those who earnestly and without ceasing ask them of Him, and render thanks unto Him for them (Matthew 7:7–8; Luke 11:9–10, 13; Matthew 13:12; Ephesians 6:18).</em></p>
+<p>But this can all begin to feel burdensome, being told repeatedly that we <em>should</em> be thankful. It seems so unlikely to be fruitful. Being forced to be grateful – what possible good could that do?</p>
+<p>Of course, we can consider that question theologically and get profound answers.</p>
+<p>But <em>data tells us too</em>. What happened to the students in the study? <em>Someone forced them to be grateful.</em> And actually, it did them a kind of startling amount of good. How wonderful, that what is <em>required</em> of us is so <em>good</em> for us.</p>
+</div>
+<div id="section-generalization-1-a-quantitative-predictor" class="section level2">
+<h2>Generalization 1: A Quantitative Predictor</h2>
+<p>We can, if we wish, use ANOVA to measure the <em>model utility</em> of a simple linear regression with one quantitative predictor. <em>Model utility</em> means, basically, whether the model is any good – is it better to include the predictor than to stick with a simple intercept-only model? In the simple (one-predictor) linear regression case, the model utility test is basically the same as testing <span class="math inline">\(H_0: \beta_1 = 0\)</span>.</p>
+<p>Before we examine the details, let’s just try it and see what happens. As our example, we’ll try to model <code>gratitude_score</code> as a function of <code>life_rating</code>, like we did at the beginning of the module.</p>
+<pre class="r"><code>Anova(lm(gratitude_score ~ life_rating, data = grateful))</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sum Sq"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Df"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"33.70604","2":"1","3":"8.595578","4":"0.003774924","_rn_":"life_rating"},{"1":"760.73679","2":"194","3":"NA","4":"NA","_rn_":"Residuals"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>Comparing to our previous results with a t-test of <span class="math inline">\(H_0: \beta_1 = 0\)</span>:</p>
+<pre class="r"><code>summary(lm(gratitude_score ~ life_rating, data = grateful))</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = gratitude_score ~ life_rating, data = grateful)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -4.891 -1.466 -0.098  1.219  5.899 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   7.2008     0.8828   8.157 4.22e-14 ***
+## life_rating   0.5295     0.1806   2.932  0.00377 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.98 on 194 degrees of freedom
+## Multiple R-squared:  0.04243,    Adjusted R-squared:  0.03749 
+## F-statistic: 8.596 on 1 and 194 DF,  p-value: 0.003775</code></pre>
+<p><strong>We notice that the p-values for the ANOVA and the t-test are identical.</strong></p>
+<p>Clued in by the matching p-values, we can also note that the t-test statistic (2.9318) is related to the ANOVA F statistic (8.5956): <span class="math inline">\(F = t^2\)</span>.</p>
+<p><em>(Remember in a previous assignment, when I thought that you all knew what F was but you didn’t actually, you proved that? I’m sorry / you’re now welcome…)</em></p>
+<div id="section-cool.-but-does-it-make-sense" class="section level3">
+<h3>Cool. But, does it make sense?</h3>
+<p>So, the two tests are equivalent. But can we actually conceptualize the ANOVA with a quantitative predictor, analogous to the way we did for the case of the categorical predictor? Sure!</p>
+<p>Here, we usually change notation a little - instead of talking about SSG and MSG we use SSM and MSM (Sum of Squares for the <strong>Model</strong> and Mean Squares for the <strong>Model</strong>, since there’s now a regression line instead of a set of group means).</p>
+<p>Otherwise, the approach is exactly the same, but still worth walking through:</p>
+<p><img src="https://www.youtube.com/watch?v=WWqE7YHR4Jc" width="400" /></p>
+<p>(You can also <a href="https://www.youtube.com/watch?v=WWqE7YHR4Jc">watch directly on YouTube</a> if you prefer.)</p>
+</div>
+</div>
+<div id="section-generalization-2-model-comparisons" class="section level2">
+<h2>Generalization 2: Model Comparisons</h2>
+<p><em>Text book reference: FAStR2 Chapter 7.1.5</em></p>
+<p>We can also use ANOVA for multiple linear regression models (with several predictors, perhaps a mix of categorial and quantitative ones); now, there is a variety of hypotheses we might want to test.</p>
+<p>Generally, we can call these <strong>model comparison tests</strong>. These compare two models, one of which must be a submodel of the other; in other words, the its model space must be a subspace of the model space of the larger model. We want to test whether the larger model <span class="math inline">\(\Omega\)</span> is preferable to the smaller one <span class="math inline">\(\omega\)</span>.</p>
+<div id="section-hypotheses-to-test" class="section level3">
+<h3>Hypotheses to Test</h3>
+<p>To specify a test, we have to set up a null hypothesis that tells exactly how to restrict the larger model <span class="math inline">\(\Omega\)</span> in order to make it equivalent to the smaller one <span class="math inline">\(\omega\)</span>.</p>
+<p>A few examples (each section gives one representative example - of course, there are many other specimens of each type of test):</p>
+<div id="section-model-utility-test" class="section level4">
+<h4>Model Utility Test</h4>
+<p><span class="math display">\[ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2\]</span></p>
+<p><span class="math display">\[ \omega: E(Y) = \beta_0 \]</span></p>
+<p><span class="math display">\[H_0: \beta_1 = \beta_2 = 0\]</span></p>
+</div>
+<div id="section-removing-a-parameter" class="section level4">
+<h4>Removing a parameter</h4>
+<p><span class="math display">\[ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2\]</span></p>
+<p><span class="math display">\[ \omega: E(Y) = \beta_0 + \beta_1x_1 \]</span></p>
+<p><span class="math display">\[H_0: \beta_2 = 0\]</span></p>
+</div>
+<div id="section-constraints-on-parameter-values" class="section level4">
+<h4>Constraints on Parameter Values</h4>
+<p><span class="math display">\[ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2\]</span></p>
+<p><span class="math display">\[ \omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_1x_2 = \beta_0 + \beta_1(x_1 + x_2)\]</span></p>
+<p><span class="math display">\[ H_0: \beta_1 = \beta_2\]</span></p>
+</div>
+<div id="section-complex-hypotheses-combinations-of-above" class="section level4">
+<h4>Complex Hypotheses (Combinations of Above)</h4>
+<p><span class="math display">\[ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3\]</span></p>
+<p><span class="math display">\[ \omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_1x_2 = \beta_0 + \beta_1(x_1 + x_2)\]</span></p>
+<p><span class="math display">\[ H_0: \beta_1 = \beta_2 \text{ and } \beta_3 = 0\]</span></p>
+</div>
+</div>
+<div id="section-model-dimension" class="section level3">
+<h3>Model Dimension</h3>
+<p>To carry out ANOVA in these cases, we will need to be able to assess the <strong>dimension</strong> of each model (<span class="math inline">\(\text{dim}\Omega\)</span> and <span class="math inline">\(\text{dim}\omega\)</span>). The <strong>dimension</strong> of a model is the number of free parameters (parameters needing to be estimated) in the model; in other words, the dimension of the model space as a vector space (if you like the geometric interpretation of regression). The model with larger dimension will always match the data better (or at least as well) as the smaller one: <span class="math inline">\(SSE_{\omega} &lt; SSE_{\Omega}\)</span>.</p>
+</div>
+<div id="section-generalized-f-statistic" class="section level3">
+<h3>Generalized F Statistic</h3>
+<p>Now, informally stated, we want to compute a test statistic to measure:</p>
+<p><span class="math display">\[ F = \frac{\text{diff in errors, } \omega - \Omega}{\text{errors}(\Omega)} = \frac{MSE_{\omega - \Omega}}{MSE_{\Omega}} = \frac{(SSE_{\omega} - SSE_{\Omega}) / (\text{dim}\Omega - \text{dim}\omega)}{SSE_{\Omega} / (n - \text{dim}\Omega)}\]</span></p>
+<p>In other words, our statistic measures: how much <em>better</em> does <span class="math inline">\(\Omega\)</span> match the data than <span class="math inline">\(\omega\)</span>, normalized by the MSE for <span class="math inline">\(\Omega\)</span>?</p>
+<p>By an argument analogous to the one used previously, this statistic has an <span class="math inline">\(F(\text{df}_1 = \text{dim}\Omega - \text{dim}\omega, \text{df}_2 = n - \text{dim}\Omega)\)</span> distribution.</p>
+</div>
+</div>
+<div id="section-practical-examples-of-model-comparisons" class="section level2">
+<h2>Practical Examples of Model Comparisons</h2>
+<p>There are three common ways of carrying out these kinds of tests in R.</p>
+<div id="section-model-utility-tests-summary" class="section level3">
+<h3>Model Utility Tests: <code>summary()</code></h3>
+<p>For <strong>model utility tests</strong>, the test statistic <span class="math inline">\(F\)</span> and p-value are reported in the very last line of the <code>summary()</code>.</p>
+<p>For example, consider a model to predict <code>gratitude_score</code> using the <code>life_rating</code> and the <code>group</code>.</p>
+<pre class="r"><code>summary(lm(gratitude_score ~ life_rating + group, data = grateful))</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = gratitude_score ~ life_rating + group, data = grateful)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -4.7003 -1.3238 -0.1666  1.0438  6.1955 
+## 
+## Coefficients:
+##                Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)      7.5188     0.8501   8.845 5.93e-16 ***
+## life_rating      0.4352     0.1766   2.464  0.01461 *  
+## groupgratitude   0.9397     0.3397   2.767  0.00622 ** 
+## grouphassles    -0.5188     0.3334  -1.556  0.12131    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.896 on 192 degrees of freedom
+## Multiple R-squared:  0.1311, Adjusted R-squared:  0.1175 
+## F-statistic: 9.654 on 3 and 192 DF,  p-value: 5.764e-06</code></pre>
+</div>
+<div id="section-removing-parameters" class="section level3">
+<h3>Removing Parameter(s)</h3>
+<p>To carry out ANOVA to determine whether to remove/retain parameters in a multi-predictor regression, we can use <code>car::Anova()</code>.</p>
+<p>This function carries out so-called “Type II” ANOVA tests. A p-value will be reported for each parameter in the model, testing the null hypothesis that <em>that</em> parameter is 0. In other words, it compares the full model <span class="math inline">\(\Omega\)</span> with an <span class="math inline">\(\omega\)</span> that excludes only the parameter in question.</p>
+<pre class="r"><code>Anova(lm(gratitude_score ~ life_rating + group, data = grateful))</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sum Sq"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Df"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"21.83210","2":"1","3":"6.072246","4":"1.461169e-02","_rn_":"life_rating"},{"1":"70.42176","2":"2","3":"9.793339","4":"8.913311e-05","_rn_":"group"},{"1":"690.31502","2":"192","3":"NA","4":"NA","_rn_":"Residuals"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>So we conclude that adding <code>life_rating</code> to a model with intercept and <code>group</code> is worthwhile (p-value 0.015); and adding <code>group</code> to a model with intercept and <code>life_rating</code> is also worthwhile (p-value 0.000089). If we were trying to “pare down” our model to keep only the best predictors, we would likely keep both in this case.</p>
+</div>
+<div id="section-r-note-anova-not-anova" class="section level3">
+<h3>R Note: <code>Anova()</code>, not <code>anova()</code>!</h3>
+<p>Be careful not to use <code>anova()</code> to carry out tests related to removing parameters from a regression model.</p>
+<p><code>anova()</code> does “sequential” tests; for example, if you fit a model <code>y ~ pred1 + pred2 + pred3</code>, for <code>pred1</code> <code>anova()</code> will compare <span class="math inline">\(\omega: E(Y) = \beta_0\)</span> vs. <span class="math inline">\(\Omega: E(Y) = \beta_0 + \beta_1\text{pred1}\)</span>, but for <code>pred2</code> it will compare <span class="math inline">\(\omega: E(Y) = \beta_0 + \beta_1\text{pred1}\)</span> vs. <span class="math inline">\(\Omega: E(Y) = \beta_0 + \beta_1\text{pred1} + \beta_2\text{pred2}\)</span>.</p>
+<p>In other words, with <code>anova()</code>, the order in which predictors are listed greatly affects the hypotheses tested, and the test results. <em>THIS IS NONSENSE.</em></p>
+</div>
+<div id="section-model-comparisons" class="section level3">
+<h3>Model Comparisons</h3>
+<p>In other cases, if we want to compare two models <span class="math inline">\(\Omega\)</span> and <span class="math inline">\(\omega\)</span>, we can just <em>fit them both</em> and then compare them with the syntax below.</p>
+<pre class="r"><code>anova(Omega, omega)</code></pre>
+<p>(Yes, little-a <code>anova()</code> is what you want this time.)</p>
+<p>This also works for any of the above cases (removing parameters or model utility check), if you manually fit the two models <code>Omega</code> (<span class="math inline">\(\Omega\)</span>) and <code>omega</code> (<span class="math inline">\(\omega\)</span>).</p>
+<p>For example, what if we use this method to check whether a model with <code>life_rating</code> and <code>group</code> is preferable to one with just <code>group</code>? Give it a try…</p>
+<div class="tutorial-exercise" data-label="practice-anova" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="practice-anova-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>Omega &lt;- lm(gratitude_score ~ life_rating + group, data = grateful)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="practice-anova-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>Omega &lt;- lm(gratitude_score ~ life_rating + group, data = grateful)
+omega &lt;- lm(gratitude_score ~ group, data = grateful)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="practice-anova-hint-3" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>Omega &lt;- lm(gratitude_score ~ life_rating + group, data = grateful)
+omega &lt;- lm(gratitude_score ~ group, data = grateful)
+anova(Omega, omega)</code></pre>
+</div>
+<p>Note that we end up with the same result that we got before using <code>Anova()</code>.</p>
+</div>
+</div>
+<div id="section-parting-gift" class="section level2">
+<h2>Parting Gift</h2>
+<p>Interested in thinking more about this topic?</p>
+<p>Check out this (totally optional) TED talk by Brother David Steindl-Rast, a monk and interfaith scholar, on the topic of gratitude and happiness.</p>
+<div style="max-width:854px">
+<div style="position:relative;height:0;padding-bottom:56.25%">
+<iframe src="https://embed.ted.com/talks/lang/en/david_steindl_rast_want_to_be_happy_be_grateful" width="854" height="480" style="position:absolute;left:0;top:0;width:100%;height:100%" frameborder="0" scrolling="no" allowfullscreen>
+</iframe>
+</div>
+</div>
+
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(mosaic)
+library(fastR)
+library(fastR2)
+library(RColorBrewer)
+library(wordcloud)
+library(car)
+theme_set(theme_bw(base_size=16))
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5,
+  message = FALSE, warning = FALSE)
+tutorial_options(exercise.eval = FALSE)
+
+grateful <- read.csv('http://sldr.netlify.com/data/gratitude-experiment.csv') 
+
+grateful2 <- grateful %>%
+  filter(group != 'events') %>%
+  mutate(group = factor(group))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+session$onSessionEnded(function() {
+        learnr:::session_stop_event(session)
+      })
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-life-model-CI-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-life-model-CI-code-editor`)), session)
+output$`tutorial-exercise-life-model-CI-output` <- renderUI({
+  `tutorial-exercise-life-model-CI-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "slope-t-test-quiz-1",     question = structure("You test the hypothesis that the slope of the life_model is zero. What is the p-value of the test?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_5ed0f31",         option = "0.00377", value = "0.00377", label = structure("0.00377", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_285c857",         option = "4.22e-14", value = "4.22e-14", label = structure("4.22e-14", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_6414cd",         option = "0.0424", value = "0.0424", label = structure("0.0424", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_9dc1a95",         option = "Something else", value = "Something else",         label = structure("Something else", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "slope-t-test-quiz-1-answer", question = "slope-t-test-quiz-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nYou test the hypothesis that the slope of the life_model is zero. What is the p-value of the test?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 149514535.430377, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-two-group-lm-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-two-group-lm-code-editor`)), session)
+output$`tutorial-exercise-two-group-lm-output` <- renderUI({
+  `tutorial-exercise-two-group-lm-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "cat-slope-interp-quiz-1",     question = structure("In our model to compare the gratitude and hassles groups, the grouphassles coefficient estimate is about -1.54. What does this mean?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_463a74a",         option = "When the amount of 'hassles' increases by one unit, the gratitude_score goes down by 1.54 units.",         value = "When the amount of 'hassles' increases by one unit, the gratitude_score goes down by 1.54 units.",         label = structure("When the amount of &#39;hassles&#39; increases by one unit, the gratitude_score goes down by 1.54 units.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_e407bf6",         option = "The mean gratitude_score is 1.54 units lower in the hassles group than in the gratitude group.",         value = "The mean gratitude_score is 1.54 units lower in the hassles group than in the gratitude group.",         label = structure("The mean gratitude_score is 1.54 units lower in the hassles group than in the gratitude group.", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_edc3996",         option = "The mean gratitude score is 1.54 units higher in the hassles group than in the gratitude group.",         value = "The mean gratitude score is 1.54 units higher in the hassles group than in the gratitude group.",         label = structure("The mean gratitude score is 1.54 units higher in the hassles group than in the gratitude group.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_419a655",         option = "The mean gratitude_score for people in the hassles group is -1.54.",         value = "The mean gratitude_score for people in the hassles group is -1.54.",         label = structure("The mean gratitude_score for people in the hassles group is -1.54.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "cat-slope-interp-quiz-1-answer", question = "cat-slope-interp-quiz-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nIn our model to compare the gratitude and hassles groups, the grouphassles coefficient estimate is about -1.54. What does this mean?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 517634241.258958, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_checkbox", label = "f-samp-dist-1",     question = structure("If the null hypothesis is true, what will the value of the F-ratio be?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_dc8ea03",         option = "Close to 0", value = "Close to 0", label = structure("Close to 0", html = TRUE, class = c("html",         "character")), correct = TRUE, message = structure("Yes! If H0 is true, then SSG will be &#39;close to 0&#39; because the group means will be very close to the overall mean. So, MSG and the whole F-ratio will also be near 0 - but since it MSG is not exactly zero, it matters a lot what the corresponding value of MSE is...", html = TRUE, class = c("html",         "character"))), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_82ce7e6",         option = "Close to 1", value = "Close to 1", label = structure("Close to 1", html = TRUE, class = c("html",         "character")), correct = TRUE, message = structure("Yes, F will be close to 1 if the null is true and the sample sizes in the groups are equal. MSE and MSG will BOTH depend on the overall variance of the data. In terms of intuition about the F ratio, though, it can be more useful to think about what happens to MSG when H0 is true (it gets smaller, and so so does F...). Bigger F is more evidence against H0.", html = TRUE, class = c("html",         "character"))), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_d06540e",         option = "Very large", value = "Very large", label = structure("Very large", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a1b5554",         option = "It depends on the specific scenario", value = "It depends on the specific scenario",         label = structure("It depends on the specific scenario", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "f-samp-dist-1-answer", question = "f-samp-dist-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nIf the null hypothesis is true, what will the value of the F-ratio be?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 1670648750.72204, options = list()), class = c("learnr_checkbox", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "f-samp-dist-2",     question = structure("If the population group means are actually very different, with little variation within groups, what will the value of the F-ratio be?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_cdb8a46",         option = "Close to 0", value = "Close to 0", label = structure("Close to 0", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_f0860bc",         option = "Close to 1", value = "Close to 1", label = structure("Close to 1", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_592f765",         option = "Very large", value = "Very large", label = structure("Very large", html = TRUE, class = c("html",         "character")), correct = TRUE, message = structure("Yes! If H0 is very wrong, then SSG will be relatively large because the group means will be quite different from the overall mean. And SSE will be relatively small, if there is little within-group variation. So the ratio will be (big / small) = VERY BIG, providing strong evidence against the null hypothesis and allowing us to conclude that the group means are NOT the same.", html = TRUE, class = c("html",         "character"))), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_bd3afe6",         option = "It depends on the specific scenario", value = "It depends on the specific scenario",         label = structure("It depends on the specific scenario", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "f-samp-dist-2-answer", question = "f-samp-dist-2"),     loading = structure("<strong>Loading:<\u002fstrong> \nIf the population group means are actually very different, with little variation within groups, what will the value of the F-ratio be?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 875641179.092248, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-anova-practice-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-anova-practice-code-editor`)), session)
+output$`tutorial-exercise-anova-practice-output` <- renderUI({
+  `tutorial-exercise-anova-practice-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-practice-anova-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-practice-anova-code-editor`)), session)
+output$`tutorial-exercise-practice-anova-output` <- renderUI({
+  `tutorial-exercise-practice-anova-result`()
+})
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["navigation"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/navigation-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tabsets.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["default.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["5.1.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/fontawesome"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/all.css","css/v4-shims.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["idb-keyvalue"]},{"type":"character","attributes":{},"value":["3.2.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/idb-keyval"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["idb-keyval-iife-compat.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]}]}
+</script>
+<!--/html_preserve-->
+<!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="execution_dependencies">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109]}},"value":[{"type":"character","attributes":{},"value":["abind","assertthat","backports","base","broom","car","carData","cellranger","checkmate","colorspace","compiler","crayon","crosstalk","curl","data.table","datasets","digest","dplyr","ellipsis","evaluate","farver","fastmap","fastR","fastR2","forcats","foreign","generics","ggdendro","ggforce","ggformula","ggplot2","ggrepel","ggstance","glue","graphics","grDevices","grid","gridExtra","gtable","haven","hms","htmltools","htmlwidgets","httpuv","jsonlite","knitr","labeling","later","lattice","lazyeval","leaflet","learnr","lifecycle","magrittr","markdown","MASS","Matrix","maxLik","methods","mime","miscTools","mosaic","mosaicCalc","mosaicCore","mosaicData","munsell","nlme","NLP","numDeriv","openxlsx","parallel","pillar","pkgconfig","polyclip","promises","purrr","R6","RColorBrewer","Rcpp","readr","readxl","rio","rlang","rmarkdown","rprojroot","sandwich","scales","shiny","slam","splines","stats","stringi","stringr","tibble","tidyr","tidyselect","tm","tools","tweenr","utils","vctrs","withr","wordcloud","xfun","xml2","xtable","yaml","zip","zoo"]},{"type":"character","attributes":{},"value":["1.4-5","0.2.1","1.1.5","3.6.3","0.5.5","3.0-6","3.0-3","1.1.0","2.0.0","1.4-1","3.6.3","1.3.4","1.0.0","4.3","1.12.8","3.6.3","0.6.25","0.8.5","0.3.0","0.14","2.0.3","1.0.1","0.10.3","1.2.1","0.5.0","0.8-75","0.0.2","0.1-20","0.3.1","0.9.4","3.3.0","0.8.2","0.3.3","1.3.2","3.6.3","3.6.3","3.6.3","2.3","0.3.0","2.2.0","0.5.3","0.4.0","1.5.1","1.5.2","1.6.1","1.28","0.3","1.0.0","0.20-38","0.2.2","2.0.3","0.10.1","0.2.0","1.5","1.1","7.3-51.5","1.2-18","1.3-8","3.6.3","0.9","0.6-26","1.6.0","0.5.0","0.6.0","0.17.0","0.5.0","3.1-144","0.2-0","2016.8-1.1","4.1.4","3.6.3","1.4.3","2.0.3","1.10-0","1.1.0","0.3.3","2.4.1","1.1-2","1.0.4","1.3.1","1.3.1","0.5.16","0.4.5","2.1","1.3-2","2.5-1","1.1.0","1.4.0.2","0.1-47","3.6.3","3.6.3","1.4.6","1.4.0","2.1.3","1.0.2","1.0.0","0.7-7","3.6.3","1.0.1","3.6.3","0.2.4","2.1.2","2.6","0.12","1.2.5","1.8-4","2.2.1","2.0.4","1.8-7"]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">(More) Inference for Linear Regression Models</h2>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+
+</body>
+
+</html>

@@ -101,9 +101,15 @@ summary(bonobo_logit)
 
 So the equation of our fitted model is:
 
-$$ logit(p_i) = log \bigg{(} \frac{p_i}{(1-p_i)} \bigg{)} = -3.84 + 2.42 x_i$$
+```{r, echo = FALSE}
+b0 <- round(coef(bonobo_logit)[1], digits = 3)
+b1 <- round(coef(bonobo_logit)[2], digits = 3)
+```
 
-$$ y_i \sim Binom(1, p_i) = Binom\bigg{(}1, \frac{e^{-3.84 + 2.42x_i}}{(1 + e^{-3.84 + 2.42x_i})}\bigg{)}$$
+
+$$ logit(p_i) = log \bigg{(} \frac{p_i}{(1-p_i)} \bigg{)} = `r b0` + `r b1` x_i$$
+
+$$ y_i \sim Binom(1, p_i) = Binom\bigg{(}1, \frac{e^{`r b0` + `r b1` x_i}}{(1 + e^{`r b0` + `r b1` x_i})}\bigg{)}$$
 
 ### Probability of what?
 In applications, it is really important to know how a "success" has been defined in order to interpret the fitted model. Here, is $p$ the probability of being "Male", or "Female"?
@@ -126,16 +132,19 @@ Let's say we want to estimate the Sex of a bonobo with a `fWHR` of 1.5.
 According to our model, $logit(\hat{p}) = \hat{\beta_0} + \hat{\beta_1}x$ so $logit(\hat{p})$ is 
 
 ```{r}
--3.84 + 2.42 * 1.5
+b0 <- as.numeric(round(coef(bonobo_logit)[1], digits = 3))
+b1 <- as.numeric(round(coef(bonobo_logit)[2], digits = 3))
+b0 + b1 * 1.5
 ```
 
-But it would probably make more sense to compute $\hat{p} = \frac{e^{-3.84 + 2.42x_i}}{(1 + e^{-3.84 + 2.42x_i})}$:
+But it would probably make more sense to compute $\hat{p} = \frac{e^{`r b0` + `r b1` x_i}}{(1 + e^{`r b0` + `r b1` x_i})}$:
 
 ```{r}
-exp(-3.84 + 2.42 * 1.5) / (1 + exp(-3.84 + 2.42 * 1.5))
+p_hat <- exp(b0 + b1 * 1.5) / (1 + exp(b0 + b1 * 1.5))
+p_hat
 ```
 
-So according to our model, the probability of a bonobo with `fWHR` 1.5 being Male is about 0.45.  (If we had to guess its sex, I guess we'd guess Female - but reporting the probability actually gives a bit more information.)
+So according to our model, the probability of a bonobo with `fWHR` 1.5 being Male is about `r round(p_hat, digits = 2)`.  (If we had to guess its sex, I guess we'd guess Female - but reporting the probability actually gives a bit more information.)
 
 We can also automate these calculations in R.  The function `predict()` can return either the log-odds ($logit(p)$) or the probability; we get the first by asking for a prediction of `type = 'link'` and the probability by asking for a prediction of `type = 'response'`.
 
