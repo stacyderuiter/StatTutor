@@ -1,0 +1,719 @@
+---
+title: "Linear Regression"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tidyverse)
+library(ggformula)
+library(mosaic)
+theme_set(theme_bw())
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+MI_lead <- read.csv(file='http://sldr.netlify.com/data/MI_lead.csv')
+tutorial_options(exercise.eval = FALSE)
+
+set.seed(14)
+bonobos <- read.csv('http://sldr.netlify.com/data/bonobo_faces.csv') %>%
+  na.omit() 
+grateful <- read.csv('http://sldr.netlify.com/data/gratitude-experiment.csv') 
+
+earn <- foreign::read.dta('www/heights.dta') %>%
+  mutate(sex = ifelse(sex == 2, 'female', 'male')) %>%
+  na.omit() %>%
+  dplyr::filter(earn > 0)
+```
+
+
+<style type="text/css">
+  span.boxed {
+    border:5px solid gray;
+    border-radius:10px;
+    padding: 5px;
+  }
+span.invboxed {
+  border:5px solid gray;
+  padding: 5px;
+  border-radius:10px;
+  color: white;
+}
+
+table, td, th { border:0px; }
+
+/* cellpadding */
+  th, td { padding: 5px; }
+
+</style>
+
+## Learning Outcomes
+
+In this module, you will be introduced the simple linear regression. This statistical model allows us to assess the relationship between two quantitative variables.  
+
+(It's also a great stepping-stone to more advanced statistics: like bootstrap CIs and randomization tests, it can be generalized to a huge variety of problems and situations. Sound fun? Check out [STAT 245](https://catalog.calvin.edu/preview_course_nopop.php?catoid=16&coid=32249)!)
+
+After this module, you will:
+
+1. Be familiar with the model equation for simple linear regression, and be competent at fitting simple linear regression models in R using `lm()` and translating the R output into a fitted regression model equation of the form
+
+$$ y_i = \beta_0 + \beta_1x_i + \epsilon, \epsilon \sim \text{Norm}(0, \sigma)$$
+
+2. State and work with the definition of linear regression model **residuals**, including explanation of how **least-squares estimation** is used to find the slope ($\beta_1$) and intercept ($\beta_0$) that define the best-fit line.
+3. List the conditions that must hold for linear regression to be an appropriate and reliable analysis method (**L**inearity, **I**ndependence of residuals, **N**ormality of residuals, and **E**rror variance constant, plus representative sample), and use plots to check them for a given case. 
+4. Carry out hypothesis tests to check whether the true regression slope is 0 (in which case there is no association between the predictor and response variables). These can be t-tests or ANOVA, which are equivalent for a simple linear regression model.
+5. Make predictions from a fitted model, including point estimates/expected values ("the point on the line") and interval estimates (confidence or prediction intervals)
+
+*Text book reference: Lock5 Chapter 2.6 and Chapter 9*
+
+## Recap: Live Class
+*Text book reference: Lock5 Chapter 2.6*
+
+In class on Thursday, May 7, we did a quick and gentle introduction to linear regression and least-squares estimation. If you did not attend and have not yet reviewed [the class video](https://web.microsoftstream.com/video/ede1bb42-16d3-4351-8c2f-bb9628deadb9), do that first! [Related handouts and links are on Moodle](https://moodle.calvin.edu/mod/page/view.php?id=993371).
+
+Once we're all on the same page, let's start with a reminder of the form of our linear regression equation:
+
+$$ y = \beta_0 + \beta_1 x + \epsilon, \epsilon \sim \text{Norm}(0, \sigma)$$
+
+- $y$ is the response variable
+- $x$ is the predictor (or explanatory) variable
+- $\beta_0$ is the intercept. To fit the model to a specific dataset, we have to estimate the numeric value of this parameter.
+- $\beta_1$ is the slope. To fit the model to a specific dataset, we have to estimate the numeric value of this parameter.
+- $\epsilon$ are the residuals (or errors). 
+  - They measure the vertical distance between an observed data point ($y_i$ is the $i$th one) and the predicted (or fitted) value *on the line* for the same predictor variable value ($\hat{y}_i$). 
+  - They have a normal distribution with mean 0 and standard deviation $\sigma$ (some value that we can estimate once we have the slope and intercept: we compute the fitted values $\beta_0 + \beta_1x$ and subtract from the observed response variable values to get the residuals, then estimate their standard deviation $\sigma$.)
+  
+## Finding the Betas
+To find the "best-fitting" regression line for a dataset, we need to first define a metric to measure how "well" a line fits, and then find the $\beta$s (intercept and slope(s)) that maximize it. (Actually, we'll come up with a way to measure the mismatch between a line and the data, and find the $\beta$s that minimize it - but it's the same idea.)
+
+In other words, our goal at the moment is to figure out how to estimate the $\beta$s.
+
+*Side note: you may wonder at this point,* "Wouldn't using maximum likelihood estimation be a great idea (remember MLE from fitting distributions to data)?" *Well...sure. But we're going to first consider another route to the exact same solution, which may be more intuitive - at least for those with less expertise in MLE.*
+  
+## Least Squares (visually)
+In class last Thursday, we briefly explored the idea of choosing the "best-fit" line as the one that *minimizes the sum of squared residuals*. 
+
+This method is often called **Least Squares Estimation** (or *Ordinary Least Squares*).
+
+First, check out [Ordinary Least Squares Estimation (explained visually)](https://setosa.io/ev/ordinary-least-squares-regression/). *Be sure to take advantage of the interactive elements to play around!)*
+
+## Least Squares (practically)
+Next, try your hand at off-the-cuff least squares estimation. Visit [the PhET interactive simulator](https://phet.colorado.edu/sims/html/least-squares-regression/latest/least-squares-regression_en.html) and:
+
+- Pick an example from the central upper pull-down menu (or create your own dataset) and:
+  - Choose your best-guess slope and intercept (menu on the right)
+  - Compare your result with the best-fit line (menu on the left). How close were you? Why/how do you think you went wrong?
+  - View the residuals, and the squared residuals, for the best-fit line.
+  - Verify that you understand exactly what the *residuals* and the *SSE* = *RSE* = **sum of squared residuals** are measuring. In what sense does the minimal-SSE line come "closest" to the data points?
+- Repeat the exercise for at least one more example.
+
+## Least Squares (explained)
+This task is **optional**.
+
+If you would like one more presentation of the idea of least squares fitting, watch the (slightly boring but very clear) StatQuest video explanation: 
+
+![](https://www.youtube.com/watch?v=PaFPbb66DxQ){ width=400px }
+
+(You can also [watch directly on YouTube](https://www.youtube.com/watch?v=PaFPbb66DxQ) if you prefer.)
+
+
+## In R: `lm()`
+So, now we understand the principle of least squares estimation. But we certainly won't employ it via guess-and-check to actually fit models to real data!
+
+In fact, either via calculus or linear algebra, it's possible to obtain formulas for the slope and intercept that minimize the SSE for a given dataset. And, of course, software knows how to use them. *(If you want to learn to derive them yourself, plan on taking [STAT 344](https://catalog.calvin.edu/preview_course_nopop.php?catoid=16&coid=32252) 2 springs from now...and/or contact me for an extra optional tutorial that lays it out.)*
+
+The function we'll use to fit a linear regression model in R is `lm()`.
+
+The first input to `lm()` (and basically all other R functions that fit regression models) is a **model formula** of the form:
+
+&nbsp;
+<center>
+  <h2><strong><span class="boxed">lm</span> ( <span class="invboxed">&yy</span> ~ <span class="invboxed">&xx</span> , data = <span class="boxed">mydata</span> )</strong> 
+  </h2></center>
+  
+  &nbsp;
+
+  
+  How do we fill in the empty boxes?
+
+### Model Formula: Left Hand Side
+The left hand side of the formula is simplest: we just need to provide the name of the **response variable** that we want to model.
+
+&nbsp;
+<center>
+  <h2><strong><span class="boxed">lm</span> ( <span class="boxed">&nbsp;Y&nbsp;</span> ~ <span class="invboxed">&xx</span> , data = <span class="boxed">mydata</span> )</strong> 
+  </h2></center>
+  
+  &nbsp;
+  
+For example, if we use dataset `MI_lead` and our response variable is `ELL2012`, the skeleton of our formula would look like:
+
+```{r, eval = FALSE, echo = TRUE}
+my_model <- lm( ELL2012 ~ _______, data = MI_lead)
+```
+
+### Model Formula: Right Hand Side
+On the other side of the formula (after the tilde symbol $\sim$), we need to specify the name of the predictor variable.
+
+While we will focus on *simple linear regression* with just one predictor, it's possible to have multiple ones, separated by `+`.
+
+```{r}
+MI_lead <- read.csv(file='http://sldr.netlify.com/data/MI_lead.csv')
+my_model <- lm(ELL2012 ~ ELL2005 + Peninsula, 
+               data = MI_lead)
+summary(my_model)
+```
+
+### Practice
+Your turn: fit a few linear regression models of your own. You can use the `MI_lead` data, or read in one of the other suggested datasets:
+
+- <https://sldr.netlify.com/data/elephantSurvey.csv>
+- <https://sldr.netlify.com/data/gapminder_clean.csv>
+- <https://sldr.netlify.com/data/HaDiveParameters.csv>
+
+Each time, consider:
+
+- How do you choose a *response* and a *predictor* variable?
+  - Usually the *response* is the main variable of interest, that you would like to predict or understand.
+  - The *predictor* might cause, or be associated with, changes in the response; it might be easier to measure. Or, we might want to test whether it is associated with changes in the response or not.
+- See if you can express a *scientific question* which can be answered by your linear regression model.
+  - For example, a model with formula `ELL2012 ~ ELL2005` would answer, "Does the proportion of kids with elevated lead levels in a county in 2005 predict the proportion in 2012? (Do the same locations have high/low levels in the two years?)"
+
+```{r lm-formula-practice, exercise = TRUE}
+my_model <- lm(_____ ~ _____, data = ______)
+summary(my_model)
+```
+
+<!-- ### Intercepts -->
+<!-- A (potentially non-zero) intercept is always included in all `lm()` models, by default. -->
+
+<!-- If you wish, you can specifically tell R to include it (which doesn't change the default behavior, but just makes it explicit). You do this by using a right-hand-side formula like `1 + predictor`: -->
+
+<!-- ```{r, eval = FALSE, echo = TRUE} -->
+<!-- my_model <- lm(ELL2012 ~ 1 + ELL2005, data = MI_lead) -->
+<!-- ``` -->
+
+<!-- ### Omitting the Intercept -->
+<!-- You can omit estimation of an intercept by replacing that `1` with a `0` or a `-1`. This will force the intercept to be 0 (line goes through the origin). -->
+
+<!-- The 0 makes sense to me, because it's like you're forcing the first column of the model matrix to contain zeros instead of ones, multiplying the intercept by 0 to force it to be 0. -->
+
+<!-- (I'm not sure of the logic of the -1.) -->
+
+<!-- For example, -->
+
+<!-- ```{r, echo = TRUE, eval = FALSE} -->
+<!-- my_model <- lm(ELL2012 ~ 0 + ELL2005 + Peninsula, -->
+<!--                data = MI_lead) -->
+<!-- ``` -->
+
+<!-- ### Last Chance to Practice -->
+<!-- Your turn. Try fitting a model with the same response, and the same predictor(s), but using 0, 1, and -1 to specify whether to estimate an intercept. -->
+
+<!-- If you don't want to use the lead dataset, or want more practice, try: -->
+
+<!-- - <https://sldr.netlify.com/data/elephantSurvey.csv> -->
+<!-- - <https://sldr.netlify.com/data/gapminder_clean.csv> -->
+<!-- - <https://sldr.netlify.com/data/HaDiveParameters.csv> -->
+
+
+<!-- ```{r intercept-practice, exercise = TRUE} -->
+<!-- ``` -->
+
+## Interpreting `summary(lm(...))`
+Once you've fitted an `lm()` in R, how can you view and interpret the results?
+
+![](https://youtu.be/x0nsEBuLm0M){ width=400px }
+
+(You can also [watch directly on YouTube](https://youtu.be/x0nsEBuLm0M) if you prefer.)
+
+## Model Equation Practice
+
+**You should be able to use `summary(lm(...))` output to fill in numerical parameter estimates $\hat{\beta}_0$, $\hat{\beta}_1$, and $\hat{\sigma}$ in the regression equation:**
+
+$$ y_i = \beta_0 + \beta_1x_i + \epsilon, \epsilon \sim \text{Norm}(0, \sigma)$$
+
+### An example model
+
+To practice, let's fit a simple linear regression model in R.  For data, let's consider a dataset containing scores of 542 people who chose to take an online nerdiness quiz. Higher scores mean more nerdiness. The participants also provided their ages. Variables in the data include `score` and `age`. Does someone's age predict their nerdiness score?
+
+Plot the data and use `lm()` to fit a linear regression model to explore this question.  The code to read in the dataset is provided for you.
+
+```{r nerd-lm, exercise = TRUE}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+
+```
+
+```{r nerd-lm-hint-1}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+gf_point(_____ ~ _____, data = ______)
+```
+
+```{r nerd-lm-hint-2}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+gf_point(score ~ age, data = nerds)
+```
+
+```{r nerd-lm-hint-3}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+gf_point(score ~ age, data = nerds)
+nerd_model <- lm(_____ ~ _____, data = ______)
+```
+
+```{r nerd-lm-hint-4}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+gf_point(score ~ age, data = nerds)
+nerd_model <- lm(score ~ age, data = nerds)
+```
+
+```{r nerd-lm-hint-5}
+nerds <- read.csv('http://sldr.netlify.com/data/nerds.csv')
+gf_point(score ~ age, data = nerds)
+nerd_model <- lm(score ~ age, data = nerds)
+summary(nerd_model)
+```
+
+```{r nerd-eqn, echo = FALSE}
+quiz(question("What is beta0 for the model you just fitted?",
+              answer("95.8", correct = TRUE),
+              answer("-0.061", correct = FALSE),
+              answer("0.22"),
+              answer("15.81"),
+              answer('0.00092'),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+              ),
+     question("What is beta1 for the model you just fitted?",
+              answer("95.8", correct = FALSE),
+              answer("-0.061", correct = TRUE),
+              answer("0.22"),
+              answer("15.81"),
+              answer('0.00092'),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+              ),
+     question("What is sigma, the standard deviation of the residuals, for the model you just fitted?",
+              answer("95.8", correct = FALSE),
+              answer("-0.061", correct = FALSE),
+              answer("0.22"),
+              answer("15.81", correct = TRUE),
+              answer('0.00092'),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+              )
+     )
+```
+
+## Linear Regression Conditions
+Before making any statistical inferences with our regression model, we should verify that all necessary conditions for its use are met.  Otherwise, we risk presenting and interpreting inaccurate estimates and un-trustworthy conclusions!
+
+In this case, there are 5 conditions:
+
+- Representative sample: the sample data must be representative of the population of interest (as for any statistical inference).
+
+4 more conditions are more specific to linear regression:
+
+- **L**inearity of the predictor-response relationship: there is **not** a clear non-linear trend in a scatter plot of the response vs. the predictor.
+- **I**ndependence of residuals: Knowing the value of one residual doesn't help you predict the others; there are no lurking variables that affect the accuracy of the model predictions.
+- **N**ormality of residuals: The residuals should follow a normal distribution with mean 0.
+- **E**rror variance is constant: The variance (spread) of the residuals does not change with predictor variable value, or with fitted (on-the-line) value. Another word for this is *homoscedasticity*.
+
+## Model Assessment: Checking Conditions
+*(Incomplete) Text book reference: Lock5 Chapter 9.1*
+
+Consider these more detailed explanations of each condition, accompanied by details about which plots to use to check each one and how to interpret them:
+
+![](https://youtu.be/aPA877P8UHQ){ width=400px }
+
+(You can also [watch directly on YouTube](https://youtu.be/aPA877P8UHQ) if you prefer.)
+
+### Review and Practice
+To review and practice what you just learned, make a brief detour to the separate tutorial on [Regression Model Assessment](https://rsconnect.calvin.edu:3939/content/11/).
+
+**If conditions are met, then we're ready to draw conclusions from our fitted model. How?**
+
+## Inference
+*Text book reference: Lock5 Chapter 9.1*
+
+Our goal: establish a method to generate confidence intervals and carry out tests for $\beta_0$ and $\beta_1$, the intercept and slope.  In fact, we focus almost entirely on the slope, but the exact same methods work for the intercept too (it's just that the slope is almost always of much more practical interest than the intercept).
+
+We want to be able to test:
+
+$$H_0: \beta_1 = 0$$
+
+$$H_A: \beta_1 \neq 0$$
+
+If the null hypothesis above is *true*, that means there is *no* linear association between the predictor and response variables -- informally, it means *the predictor is useless at predicting the response*.
+
+If we reject the null, that suggests there *is* a real association between the two variables (and the predictor is "worthwhile" statistically to help predict the response).
+
+Before we carry out the test, let's establish an example model.
+
+### Example 
+We will use the `bonobos` dataset as an example. You may recall the dataset from earlier this term. Briefly, the dataset is from a [2019 paper by J.S. Martin and colleagues on bonobo face measurements](https://royalsocietypublishing.org/doi/10.1098/rsbl.2019.0232). The authors worked with 117 bonobos in European zoos and recorded data including their `Sex`, `Age` in years, `weight`, and some measurements about their face:
+
+```{r, echo = FALSE, out.width = '350px'}
+knitr::include_graphics('images/bonobo-face-measures.jpg')
+```
+
+Finally, they also measured each bonobo's assertiveness score (`AssR`) and dominance score (`normDS`).
+
+The dataset is at [https://sldr.netlify.com/data/bonobo_faces.csv](https://sldr.netlify.com/data/bonobo_faces.csv) and you can read the dataset in to R by running:
+
+```{r}
+bonobos <- read.csv('http://sldr.netlify.com/data/bonobo_faces.csv') %>%
+  na.omit() 
+bonobos
+```
+
+
+### Practice
+We might wonder whether size (as measured by `weight`) is a good predictor of the dominance score, `normDS`.  Graphically:
+
+```{r, echo = TRUE, fig.width = 6, fig.height = 4}
+gf_point(normDS ~ weight, data = bonobos)
+```
+
+Fit the corresponding regression model in R and view its `summary()`:
+
+```{r bonobo-lm-fit, exercise = TRUE}
+
+```
+
+```{r bonobo-lm-fit-hint-1}
+bonobo_lm <- lm(... , data = bonobos)
+summary(bonobo_lm)
+```
+
+```{r bonobo-lm-fit-hint-2}
+bonobo_lm <- lm(normDS ~ weight, data = bonobos)
+summary(bonobo_lm)
+```
+
+```{r bonobo-eqn-quiz, echo = FALSE}
+bs <- summary(lm(normDS ~ weight, data = bonobos))
+bs$coefficients <- round(bs$coefficients, digits = 3)
+bs$sigma <- round(bs$sigma, digits = 3)
+quiz(question("What is the intercept estimate for the model you just fitted?",
+              answer(paste0(bs$coefficients[1,1]), correct = TRUE),
+              answer(paste0(bs$coefficients[1,2])),
+              answer(paste0(bs$coefficients[2,1])),
+              answer(paste0(bs$coefficients[2,2])),
+              answer(paste0(bs$sigma)),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+              ),
+     question("What is the slope for the model you just fitted?",
+              answer(paste0(bs$coefficients[1,1])),
+              answer(paste0(bs$coefficients[1,2])),
+              answer(paste0(bs$coefficients[2,1]), correct = TRUE),
+              answer(paste0(bs$coefficients[2,2])),
+              answer(paste0(bs$sigma)),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+              ),
+     question("What is sigma, the standard deviation of the residuals, for the model you just fitted?",
+              answer(paste0(bs$coefficients[1,1])),
+              answer(paste0(bs$coefficients[1,2])),
+              answer(paste0(bs$coefficients[2,1])),
+              answer(paste0(bs$coefficients[2,2])),
+              answer(paste0(bs$sigma), correct = TRUE),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+              )
+     )
+```
+
+
+## SE of Sampling Distributions
+*Text book reference: Lock5 Chapter 9.1*
+
+In fact, as you may have noticed, the `summary()` of an `lm()` fit includes not only estimates of the parameters $\beta_0$ and $\beta_1$, but also the *standard errors of the corresponding sampling distributions*! (Hooray.) These are found in the coefficient table, labelled `"Std. Error"`.
+
+```{r echo = TRUE}
+bm <- lm(normDS ~ weight, data = bonobos)
+summary(bm)
+```
+
+```{r get-bonobo-se, echo = FALSE}
+quiz(question("What is the SE for the slope, for the regression to predict normDS as a function of weight for our bonobo dataset?",
+              answer(paste0(bs$coefficients[1,1])),
+              answer(paste0(bs$coefficients[1,2])),
+              answer(paste0(bs$coefficients[2,1])),
+              answer(paste0(bs$coefficients[2,2]), correct = TRUE),
+              answer(paste0(bs$sigma)),
+              random_answer_order = TRUE,
+              allow_retry = TRUE
+    )
+)
+```
+
+## CI for the slope
+*Text book reference: Lock5 Chapter 9.1*
+
+Although we won't derive the reasons why in detail, the sampling distribution for the slope has **a t distribution** with $n - 2$ degrees of freedom (where $n$ is the number of rows in the dataset).
+
+So, after all that, we can find a CI for a regression slope according to:
+
+$$ \hat{\beta}_1 \pm t_*SE(\hat{\beta}_1)$$
+Where $t_*$ is a critical value from a $t(n-2)$ distribution, and SE(\hat{\beta}_1) is the standard error of the slope from the coefficient table in the model `summary().
+
+As an example, find a 95% CI for the slope of our `bonobo` regression model.
+
+```{r bonobo-ci, exercise = TRUE}
+
+```
+
+```{r bonobo-ci-hint-1}
+bm <- lm(normDS ~ weight, data= bonobos)
+summary(bm)
+CI95 <- -0.14278 + c(-1,1) * qt(0.975, df = nrow(bonobos) - 2) * 0.06668
+CI95
+```
+
+```{r bonobo-ci-hint-2}
+# a shortcut:
+bm <- lm(normDS ~ weight, data= bonobos)
+confint(bm, "weight", level = 0.95)
+```
+
+**Notice the shortcut -- R function `confint()` returns CIs (with a default confidence level of 95%).**
+
+## Test for the slope
+*Text book reference: Lock5 Chapter 9.1*
+
+We can also test the null hypothesis $H_0: \beta_1 = \beta_{1\text{null}}$ (where $\beta_{1\text{null}}$ is some hypothetical slope value of interest) using the standardized test statistic
+
+$$ t = \frac{\hat{\beta}_1 - \beta_{1\text{null}}}{SE(\hat{\beta}_1)}$$
+
+The most common value for $\beta_{1\text{null}}$ is $0$, because if $\beta_1 = 0$ that means that there is *no* relationship between the predictor and response and the predictor is useless as a predictor. If we can reject that null hypothesis, we can conclude that the predictor *does* have some utility.
+
+To practice, carry out a two-sided test of $H_0: \beta_1 = 0$ for the `bonobo` regression.
+
+```{r bonobo-test, exercise = TRUE}
+
+```
+
+```{r bonobo-test-hint-1}
+bm <- lm(normDS ~ weight, data= bonobos)
+summary(bm)
+t_stat <- (-0.14278 - 0) / (0.06668)
+p_val <- 2 * pt(t_stat, df = nrow(bonobos) - 2, lower.tail = TRUE)
+p_val
+```
+
+```{r bonobo-test-hint-2}
+#shortcut: just use model summary
+bm <- lm(normDS ~ weight, data= bonobos)
+summary(bm)
+```
+
+**A shortcut: Notice that this p-value is already in the model summary (in the last column of the coefficient table, labelled "Pr($>\vert$t$\vert$)"). **
+
+### ANOVA?? 
+Note that for simple linear regression, the p-value reported at the very end of the model summary **is the same** as the one for the slope in the coefficient table. This is *only* the case when there's only one predictor, since the test at the bottom is testing $H_0: \text{all the slopes in the model are 0 for all predictors}$. But...it's reported along with an F-statistic -- which reminds us of ANOVA from last week -- why is this??
+
+## ANOVA for Regression
+*Text book reference: Lock5 Chapter 9.2*
+
+We can, if we wish, use ANOVA to measure the *model utility* of a simple linear regression with one quantitative predictor. *Model utility* means, basically, whether the model is any good -- is it better to include the predictor than to stick with a simple intercept-only model?  In the simple (one-predictor) linear regression case, the model utility test is basically the same as testing $H_0: \beta_1 = 0$.
+
+Before we examine the details, let's just try it and see what happens. As our example, we'll return to our case study from the ANOVA module, and try to model `gratitude_score` as a function of `life_rating`, like we did at the beginning of the module.
+
+```{r, message = FALSE, echo = TRUE}
+require(car)
+Anova(lm(gratitude_score ~ life_rating, data = grateful))
+```
+
+Comparing to our previous results with a t-test of $H_0: \beta_1 = 0$:
+
+```{r, echo = TRUE}
+summary(lm(gratitude_score ~ life_rating, data = grateful))
+```
+
+**We notice that the p-values for the ANOVA and the t-test are identical.**
+
+Clued in by the matching p-values, we can also note that the t-test statistic (`r round(summary(lm(gratitude_score ~ life_rating, data = grateful))$coefficients['life_rating', 't value'], digits = 4)`) is related to the ANOVA F statistic (`r round(Anova(lm(gratitude_score ~ life_rating, data = grateful))['life_rating', 'F value'], digits = 4)`): $F = t^2$.
+
+### Cool. But, does it make sense?
+So, the two tests are equivalent. But can we actually conceptualize the ANOVA with a quantitative predictor, analogous to the way we did for the case of comparing means of 3+ groups? Sure!
+
+Here, we usually change notation a little - instead of talking about SSG and MSG we use SSM and MSM (Sum of Squares for the **Model** and Mean Squares for the **Model**, since there's now a regression line instead of a set of group means).
+
+Otherwise, the approach is exactly the same, but with a cool twist:
+
+
+![](https://www.youtube.com/watch?v=WWqE7YHR4Jc){ width=400px }
+
+(You can also [watch directly on YouTube](https://www.youtube.com/watch?v=WWqE7YHR4Jc) if you prefer.)
+
+## Model Predictions with Uncertainty (CIs and PIs)
+
+So far, we learned to generate confidence intervals (or do hypothesis tests) for the slope and intercept parameters of a simple linear regression.
+
+But often, **we are interested in using fitted regression models to** *predict* **response variable values in specific scenarios.** In other words, we're sometimes more interested in the predicted response variable values $\hat{y}$ than the parameter estimates $\beta_0$ and $\beta_1$.
+
+It's a simple matter to compute point estimates of these fitted values: if we have an x-value of interest (let's call it $x_*$), we just compute $\hat{\beta}_0 + \hat{\beta}_1x_*$ to get our estimate.
+
+But what about uncertainty? 
+
+### Ways to Conceptualize Uncertainty in Predictions
+*Text book reference: Lock5 Chapter 9.3*
+
+We could do this two ways!
+
+- **A confidence interval:** We could find an interval that gives plausible values for "where the line is located", taking into account uncertainty in the intercept and slope estimates. Another way of thinking about this is that it gives a plausible range of values for the *expected value* (mean) of the response variable for **all hypothetical new observations with a certain predictor-variable value**.
+- **A prediction interval:** We could find and interval that gives plausible values for "the point cloud" of possible new observations, taking into account uncertainty in the slope and intercept, plus the residual variance. Another way of thinking about this is that it gives a **plausible range of values for the response for one new datapoint with a certain predictor-variable value**.  Note that we've coined the new name *prediction interval* to differentiate it from the other one, this is really also a CI (just for a very specific scenario).
+
+## Confidence vs Prediction Intervals: video
+*Text book reference: Lock5 Chapter 9.3*
+
+Let's first review a practical example just to keep the big picture front and center.
+
+*Note: this video is from a great contemporary statistician and teacher, [Mine Çetinkaya-Rundel](http://www2.stat.duke.edu/~mc301/) - she's awesome...more so even than this video suggests...*
+
+![](https://www.youtube.com/watch?v=qVCQi0KPR0s){ width=400px }
+
+(You can also [watch directly on YouTube](https://www.youtube.com/watch?v=qVCQi0KPR0s) if you prefer.
+
+
+## Confidence and Prediction Intervals in R
+*Text book reference: Lock5 Chapter 9.3*
+
+You can compute confidence or prediction intervals in R using `predict()`. Assuming you have a fitted model `m` with response `y` and predictor `x_star` in dataset `d`, and you want an interval estimate of the fitted value for $x = x_*$:
+
+```{r, echo = TRUE, eval = FALSE}
+m <- lm(y ~ x, data = d)
+new_data <- data.frame(x = x_star)
+conf_int <- predict(m, newdata = new_data, 
+        interval = 'confidence',
+        level = 0.95)
+
+pred_int <- predict(m, newdata = new_data, 
+        interval = 'prediction',
+        level = 0.95)
+```
+
+If you wanted to make interval estimates for more than one value $x_*$, you can just enter a list of values in `new_data`:
+
+```{r, echo = TRUE, eval = FALSE}
+new_data <- data_frame(x = c(x_star1, x_star2, ...))
+```
+
+Finally, if you want to plot one or both intervals on a scatter plot of the data, you can!
+
+So you can actually see the result, let's demonstrate with a regression predicting bonobo dominance score `normDS` by `weight` from the `bonobos` dataset.
+
+```{r, echo = TRUE}
+gf_point(normDS ~ weight, data =bonobos) %>%
+  gf_lm(interval = 'prediction', color = 'black', 
+        fill = 'seagreen') %>%
+    gf_lm(interval = 'confidence') 
+```
+
+## Confidence and Prediction Intervals: Practice
+*Text book reference: Lock5 Chapter 9.3*
+
+```{r pred-width, echo = FALSE}
+quiz(
+  question("In the plot above, which of the intervals is the prediction interval?",
+           answer("The narrower one"),
+           answer("The wider one", correct = TRUE, message = "Yes! The prediction interval will always be wider because it takes into account one additional source of uncertainty; or, in other words, the plausible range of values for one new observation will always be wider than that for the mean of a set of new observations."),
+           answer("Impossible to tell without plotting them individually"),
+           random_answer_order = TRUE,
+           allow_retry = TRUE),
+  question("If you wanted to use this model to compute a 95% CI for the dominance score of Kuni, a bonobo at the Jacksonville Zoo who weighs 36.7 kg, what kind of interval should you use?",
+           answer("Confidence", message = 'Not quite; we want a prediction for a single new observation, not for the expected value of a *class* of new observations'),
+           answer("Prediction", correct = TRUE,
+                  message = "Yep! This is an interval estimate for a single new observation, so a prediction interval is appropriate."),
+           allow_retry = TRUE),
+  question("If you wanted to use this model to compute an interval estimate for the dominance score of 41kg male bonobos, what kind of interval should you use?",
+           answer("Confidence", message = 'Yes! we want a prediction for the expected value of a *class* of new observations, so a confidence interval is the right choice.', correct = TRUE),
+           answer("Prediction", message = "Not quite. This is an interval estimate for the mean of a class of new observations, so a prediction interval is not appropriate."),
+           allow_retry = TRUE)
+)
+```
+
+### Practice
+
+Find an interval estimate for the assertiveness score (`AssR`) of Zeke, and 8-year-old male bonobo, based on the dataset `bonobos` (which also contains the variable `Age`).
+
+```{r zeke-pred, exercise = TRUE}
+
+```
+
+```{r zeke-pred-hint-1}
+m <- lm()
+new_data <- data.frame()
+predict()
+```
+
+```{r zeke-pred-hint-2}
+m <- lm(AssR ~ Age, data = bonobos)
+new_data <- data.frame()
+predict()
+```
+
+```{r zeke-pred-hint-3}
+m <- lm(AssR ~ Age, data = bonobos)
+new_data <- data.frame(Age = 8)
+predict()
+```
+
+```{r zeke-pred-hint-4}
+m <- lm(AssR ~ Age, data = bonobos)
+new_data <- data.frame(Age = 8)
+predict(m, newdata = new_data, interval = ...)
+```
+
+```{r zeke-pred-hint-5}
+m <- lm(AssR ~ Age, data = bonobos)
+new_data <- data.frame(Age = 8)
+predict(m, newdata = new_data, interval = 'prediction')
+```
+
+### More Practice
+
+The dataset `earn` contains data on people's income (`earn`) and their height in inches (`height`) from a 1994 survey of Americans.  Fit a model predicting income as a function of height and then produce an interval estimate for the income of people who are 6'4" (76 inches) tall.
+
+```{r tall-income, exercise = TRUE}
+
+```
+
+```{r tall-income-hint-1}
+m <- lm()
+new_data <- data.frame()
+predict()
+```
+
+```{r tall-income-hint-2}
+m <- lm(earn ~ height, data = earn)
+new_data <- data.frame()
+predict()
+```
+
+```{r tall-income-hint-3}
+m <- lm(earn ~ height, data = earn)
+new_data <- data.frame(height = 76)
+predict()
+```
+
+```{r tall-income-hint-4}
+m <- lm(earn ~ height, data = earn)
+new_data <- data.frame(height = 76)
+predict(m, newdata = new_data, interval = ...)
+```
+
+```{r tall-income-hint-5}
+m <- lm(earn ~ height, data = earn)
+new_data <- data.frame(height = 76)
+predict(m, newdata = new_data, interval = 'confidence')
+```

@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+<meta name="progressive" content="true" />
+<meta name="allow-skip" content="true" />
+
+<title>Linear Regression</title>
+
+
+<!-- highlightjs -->
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+<!-- taken from https://github.com/rstudio/rmarkdown/blob/67b7f5fc779e4cfdfd0f021d3d7745b6b6e17149/inst/rmd/h/default.html#L296-L362 -->
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("section-TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+<!-- end tabsets -->
+
+
+
+</head>
+
+<body>
+
+
+
+<div class="pageContent band">
+<div class="bandContent page">
+
+<div class="topics">
+
+<style type="text/css">
+  span.boxed {
+    border:5px solid gray;
+    border-radius:10px;
+    padding: 5px;
+  }
+span.invboxed {
+  border:5px solid gray;
+  padding: 5px;
+  border-radius:10px;
+  color: white;
+}
+
+table, td, th { border:0px; }
+
+/* cellpadding */
+  th, td { padding: 5px; }
+
+</style>
+<div id="section-learning-outcomes" class="section level2">
+<h2>Learning Outcomes</h2>
+<p>In this module, you will be introduced the simple linear regression. This statistical model allows us to assess the relationship between two quantitative variables.</p>
+<p>(It’s also a great stepping-stone to more advanced statistics: like bootstrap CIs and randomization tests, it can be generalized to a huge variety of problems and situations. Sound fun? Check out <a href="https://catalog.calvin.edu/preview_course_nopop.php?catoid=16&amp;coid=32249">STAT 245</a>!)</p>
+<p>After this module, you will:</p>
+<ol style="list-style-type: decimal">
+<li>Be familiar with the model equation for simple linear regression, and be competent at fitting simple linear regression models in R using <code>lm()</code> and translating the R output into a fitted regression model equation of the form</li>
+</ol>
+<p><span class="math display">\[ y_i = \beta_0 + \beta_1x_i + \epsilon, \epsilon \sim \text{Norm}(0, \sigma)\]</span></p>
+<ol start="2" style="list-style-type: decimal">
+<li>State and work with the definition of linear regression model <strong>residuals</strong>, including explanation of how <strong>least-squares estimation</strong> is used to find the slope (<span class="math inline">\(\beta_1\)</span>) and intercept (<span class="math inline">\(\beta_0\)</span>) that define the best-fit line.</li>
+<li>List the conditions that must hold for linear regression to be an appropriate and reliable analysis method (<strong>L</strong>inearity, <strong>I</strong>ndependence of residuals, <strong>N</strong>ormality of residuals, and <strong>E</strong>rror variance constant, plus representative sample), and use plots to check them for a given case.</li>
+<li>Carry out hypothesis tests to check whether the true regression slope is 0 (in which case there is no association between the predictor and response variables). These can be t-tests or ANOVA, which are equivalent for a simple linear regression model.</li>
+<li>Make predictions from a fitted model, including point estimates/expected values (“the point on the line”) and interval estimates (confidence or prediction intervals)</li>
+</ol>
+<p><em>Text book reference: Lock5 Chapter 2.6 and Chapter 9</em></p>
+</div>
+<div id="section-recap-live-class" class="section level2">
+<h2>Recap: Live Class</h2>
+<p><em>Text book reference: Lock5 Chapter 2.6</em></p>
+<p>In class on Thursday, May 7, we did a quick and gentle introduction to linear regression and least-squares estimation. If you did not attend and have not yet reviewed <a href="https://web.microsoftstream.com/video/ede1bb42-16d3-4351-8c2f-bb9628deadb9">the class video</a>, do that first! <a href="https://moodle.calvin.edu/mod/page/view.php?id=993371">Related handouts and links are on Moodle</a>.</p>
+<p>Once we’re all on the same page, let’s start with a reminder of the form of our linear regression equation:</p>
+<p><span class="math display">\[ y = \beta_0 + \beta_1 x + \epsilon, \epsilon \sim \text{Norm}(0, \sigma)\]</span></p>
+<ul>
+<li><span class="math inline">\(y\)</span> is the response variable</li>
+<li><span class="math inline">\(x\)</span> is the predictor (or explanatory) variable</li>
+<li><span class="math inline">\(\beta_0\)</span> is the intercept. To fit the model to a specific dataset, we have to estimate the numeric value of this parameter.</li>
+<li><span class="math inline">\(\beta_1\)</span> is the slope. To fit the model to a specific dataset, we have to estimate the numeric value of this parameter.</li>
+<li><span class="math inline">\(\epsilon\)</span> are the residuals (or errors).
+<ul>
+<li>They measure the vertical distance between an observed data point (<span class="math inline">\(y_i\)</span> is the <span class="math inline">\(i\)</span>th one) and the predicted (or fitted) value <em>on the line</em> for the same predictor variable value (<span class="math inline">\(\hat{y}_i\)</span>).</li>
+<li>They have a normal distribution with mean 0 and standard deviation <span class="math inline">\(\sigma\)</span> (some value that we can estimate once we have the slope and intercept: we compute the fitted values <span class="math inline">\(\beta_0 + \beta_1x\)</span> and subtract from the observed response variable values to get the residuals, then estimate their standard deviation <span class="math inline">\(\sigma\)</span>.)</li>
+</ul></li>
+</ul>
+</div>
+<div id="section-finding-the-betas" class="section level2">
+<h2>Finding the Betas</h2>
+<p>To find the “best-fitting” regression line for a dataset, we need to first define a metric to measure how “well” a line fits, and then find the <span class="math inline">\(\beta\)</span>s (intercept and slope(s)) that maximize it. (Actually, we’ll come up with a way to measure the mismatch between a line and the data, and find the <span class="math inline">\(\beta\)</span>s that minimize it - but it’s the same idea.)</p>
+<p>In other words, our goal at the moment is to figure out how to estimate the <span class="math inline">\(\beta\)</span>s.</p>
+<p><em>Side note: you may wonder at this point,</em> “Wouldn’t using maximum likelihood estimation be a great idea (remember MLE from fitting distributions to data)?” <em>Well…sure. But we’re going to first consider another route to the exact same solution, which may be more intuitive - at least for those with less expertise in MLE.</em></p>
+</div>
+<div id="section-least-squares-visually" class="section level2">
+<h2>Least Squares (visually)</h2>
+<p>In class last Thursday, we briefly explored the idea of choosing the “best-fit” line as the one that <em>minimizes the sum of squared residuals</em>.</p>
+<p>This method is often called <strong>Least Squares Estimation</strong> (or <em>Ordinary Least Squares</em>).</p>
+<p>First, check out <a href="https://setosa.io/ev/ordinary-least-squares-regression/">Ordinary Least Squares Estimation (explained visually)</a>. <em>Be sure to take advantage of the interactive elements to play around!)</em></p>
+</div>
+<div id="section-least-squares-practically" class="section level2">
+<h2>Least Squares (practically)</h2>
+<p>Next, try your hand at off-the-cuff least squares estimation. Visit <a href="https://phet.colorado.edu/sims/html/least-squares-regression/latest/least-squares-regression_en.html">the PhET interactive simulator</a> and:</p>
+<ul>
+<li>Pick an example from the central upper pull-down menu (or create your own dataset) and:
+<ul>
+<li>Choose your best-guess slope and intercept (menu on the right)</li>
+<li>Compare your result with the best-fit line (menu on the left). How close were you? Why/how do you think you went wrong?</li>
+<li>View the residuals, and the squared residuals, for the best-fit line.</li>
+<li>Verify that you understand exactly what the <em>residuals</em> and the <em>SSE</em> = <em>RSE</em> = <strong>sum of squared residuals</strong> are measuring. In what sense does the minimal-SSE line come “closest” to the data points?</li>
+</ul></li>
+<li>Repeat the exercise for at least one more example.</li>
+</ul>
+</div>
+<div id="section-least-squares-explained" class="section level2">
+<h2>Least Squares (explained)</h2>
+<p>This task is <strong>optional</strong>.</p>
+<p>If you would like one more presentation of the idea of least squares fitting, watch the (slightly boring but very clear) StatQuest video explanation:</p>
+<p><img src="https://www.youtube.com/watch?v=PaFPbb66DxQ" width="400" /></p>
+<p>(You can also <a href="https://www.youtube.com/watch?v=PaFPbb66DxQ">watch directly on YouTube</a> if you prefer.)</p>
+</div>
+<div id="section-in-r-lm" class="section level2">
+<h2>In R: <code>lm()</code></h2>
+<p>So, now we understand the principle of least squares estimation. But we certainly won’t employ it via guess-and-check to actually fit models to real data!</p>
+<p>In fact, either via calculus or linear algebra, it’s possible to obtain formulas for the slope and intercept that minimize the SSE for a given dataset. And, of course, software knows how to use them. <em>(If you want to learn to derive them yourself, plan on taking <a href="https://catalog.calvin.edu/preview_course_nopop.php?catoid=16&amp;coid=32252">STAT 344</a> 2 springs from now…and/or contact me for an extra optional tutorial that lays it out.)</em></p>
+<p>The function we’ll use to fit a linear regression model in R is <code>lm()</code>.</p>
+<p>The first input to <code>lm()</code> (and basically all other R functions that fit regression models) is a <strong>model formula</strong> of the form:</p>
+ 
+<center>
+<h2>
+<strong><span class="boxed">lm</span> ( <span class="invboxed">&amp;yy</span> ~ <span class="invboxed">&amp;xx</span> , data = <span class="boxed">mydata</span> )</strong>
+</h2>
+</center>
+<p> </p>
+<p>How do we fill in the empty boxes?</p>
+<div id="section-model-formula-left-hand-side" class="section level3">
+<h3>Model Formula: Left Hand Side</h3>
+<p>The left hand side of the formula is simplest: we just need to provide the name of the <strong>response variable</strong> that we want to model.</p>
+ 
+<center>
+<h2>
+<strong><span class="boxed">lm</span> ( <span class="boxed"> Y </span> ~ <span class="invboxed">&amp;xx</span> , data = <span class="boxed">mydata</span> )</strong>
+</h2>
+</center>
+<p> </p>
+<p>For example, if we use dataset <code>MI_lead</code> and our response variable is <code>ELL2012</code>, the skeleton of our formula would look like:</p>
+<pre class="r"><code>my_model &lt;- lm( ELL2012 ~ _______, data = MI_lead)</code></pre>
+</div>
+<div id="section-model-formula-right-hand-side" class="section level3">
+<h3>Model Formula: Right Hand Side</h3>
+<p>On the other side of the formula (after the tilde symbol <span class="math inline">\(\sim\)</span>), we need to specify the name of the predictor variable.</p>
+<p>While we will focus on <em>simple linear regression</em> with just one predictor, it’s possible to have multiple ones, separated by <code>+</code>.</p>
+<pre class="r"><code>MI_lead &lt;- read.csv(file=&#39;http://sldr.netlify.com/data/MI_lead.csv&#39;)
+my_model &lt;- lm(ELL2012 ~ ELL2005 + Peninsula, 
+               data = MI_lead)
+summary(my_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = ELL2012 ~ ELL2005 + Peninsula, data = MI_lead)
+## 
+## Residuals:
+##        Min         1Q     Median         3Q        Max 
+## -0.0048244 -0.0013235 -0.0006547  0.0012533  0.0072038 
+## 
+## Coefficients:
+##                  Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)     0.0012767  0.0003786   3.372  0.00116 ** 
+## ELL2005         0.1576778  0.0311305   5.065 2.67e-06 ***
+## PeninsulaUpper -0.0006220  0.0008028  -0.775  0.44083    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.002407 on 78 degrees of freedom
+##   (2 observations deleted due to missingness)
+## Multiple R-squared:  0.2758, Adjusted R-squared:  0.2573 
+## F-statistic: 14.86 on 2 and 78 DF,  p-value: 3.417e-06</code></pre>
+</div>
+<div id="section-practice" class="section level3">
+<h3>Practice</h3>
+<p>Your turn: fit a few linear regression models of your own. You can use the <code>MI_lead</code> data, or read in one of the other suggested datasets:</p>
+<ul>
+<li><a href="https://sldr.netlify.com/data/elephantSurvey.csv" class="uri">https://sldr.netlify.com/data/elephantSurvey.csv</a></li>
+<li><a href="https://sldr.netlify.com/data/gapminder_clean.csv" class="uri">https://sldr.netlify.com/data/gapminder_clean.csv</a></li>
+<li><a href="https://sldr.netlify.com/data/HaDiveParameters.csv" class="uri">https://sldr.netlify.com/data/HaDiveParameters.csv</a></li>
+</ul>
+<p>Each time, consider:</p>
+<ul>
+<li>How do you choose a <em>response</em> and a <em>predictor</em> variable?
+<ul>
+<li>Usually the <em>response</em> is the main variable of interest, that you would like to predict or understand.</li>
+<li>The <em>predictor</em> might cause, or be associated with, changes in the response; it might be easier to measure. Or, we might want to test whether it is associated with changes in the response or not.</li>
+</ul></li>
+<li>See if you can express a <em>scientific question</em> which can be answered by your linear regression model.
+<ul>
+<li>For example, a model with formula <code>ELL2012 ~ ELL2005</code> would answer, “Does the proportion of kids with elevated lead levels in a county in 2005 predict the proportion in 2012? (Do the same locations have high/low levels in the two years?)”</li>
+</ul></li>
+</ul>
+<div class="tutorial-exercise" data-label="lm-formula-practice" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>my_model &lt;- lm(_____ ~ _____, data = ______)
+summary(my_model)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<!-- ### Intercepts -->
+<!-- A (potentially non-zero) intercept is always included in all `lm()` models, by default. -->
+<!-- If you wish, you can specifically tell R to include it (which doesn't change the default behavior, but just makes it explicit). You do this by using a right-hand-side formula like `1 + predictor`: -->
+<!-- ```{r, eval = FALSE, echo = TRUE} -->
+<!-- my_model <- lm(ELL2012 ~ 1 + ELL2005, data = MI_lead) -->
+<!-- ``` -->
+<!-- ### Omitting the Intercept -->
+<!-- You can omit estimation of an intercept by replacing that `1` with a `0` or a `-1`. This will force the intercept to be 0 (line goes through the origin). -->
+<!-- The 0 makes sense to me, because it's like you're forcing the first column of the model matrix to contain zeros instead of ones, multiplying the intercept by 0 to force it to be 0. -->
+<!-- (I'm not sure of the logic of the -1.) -->
+<!-- For example, -->
+<!-- ```{r, echo = TRUE, eval = FALSE} -->
+<!-- my_model <- lm(ELL2012 ~ 0 + ELL2005 + Peninsula, -->
+<!--                data = MI_lead) -->
+<!-- ``` -->
+<!-- ### Last Chance to Practice -->
+<!-- Your turn. Try fitting a model with the same response, and the same predictor(s), but using 0, 1, and -1 to specify whether to estimate an intercept. -->
+<!-- If you don't want to use the lead dataset, or want more practice, try: -->
+<!-- - <https://sldr.netlify.com/data/elephantSurvey.csv> -->
+<!-- - <https://sldr.netlify.com/data/gapminder_clean.csv> -->
+<!-- - <https://sldr.netlify.com/data/HaDiveParameters.csv> -->
+<!-- ```{r intercept-practice, exercise = TRUE} -->
+<!-- ``` -->
+</div>
+</div>
+<div id="section-interpreting-summarylm..." class="section level2">
+<h2>Interpreting <code>summary(lm(...))</code></h2>
+<p>Once you’ve fitted an <code>lm()</code> in R, how can you view and interpret the results?</p>
+<p><img src="https://youtu.be/x0nsEBuLm0M" width="400" /></p>
+<p>(You can also <a href="https://youtu.be/x0nsEBuLm0M">watch directly on YouTube</a> if you prefer.)</p>
+</div>
+<div id="section-model-equation-practice" class="section level2">
+<h2>Model Equation Practice</h2>
+<p><strong>You should be able to use <code>summary(lm(...))</code> output to fill in numerical parameter estimates <span class="math inline">\(\hat{\beta}_0\)</span>, <span class="math inline">\(\hat{\beta}_1\)</span>, and <span class="math inline">\(\hat{\sigma}\)</span> in the regression equation:</strong></p>
+<p><span class="math display">\[ y_i = \beta_0 + \beta_1x_i + \epsilon, \epsilon \sim \text{Norm}(0, \sigma)\]</span></p>
+<div id="section-an-example-model" class="section level3">
+<h3>An example model</h3>
+<p>To practice, let’s fit a simple linear regression model in R. For data, let’s consider a dataset containing scores of 542 people who chose to take an online nerdiness quiz. Higher scores mean more nerdiness. The participants also provided their ages. Variables in the data include <code>score</code> and <code>age</code>. Does someone’s age predict their nerdiness score?</p>
+<p>Plot the data and use <code>lm()</code> to fit a linear regression model to explore this question. The code to read in the dataset is provided for you.</p>
+<div class="tutorial-exercise" data-label="nerd-lm" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>nerds &lt;- read.csv(&#39;http://sldr.netlify.com/data/nerds.csv&#39;)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="nerd-lm-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>nerds &lt;- read.csv(&#39;http://sldr.netlify.com/data/nerds.csv&#39;)
+gf_point(_____ ~ _____, data = ______)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="nerd-lm-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>nerds &lt;- read.csv(&#39;http://sldr.netlify.com/data/nerds.csv&#39;)
+gf_point(score ~ age, data = nerds)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="nerd-lm-hint-3" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>nerds &lt;- read.csv(&#39;http://sldr.netlify.com/data/nerds.csv&#39;)
+gf_point(score ~ age, data = nerds)
+nerd_model &lt;- lm(_____ ~ _____, data = ______)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="nerd-lm-hint-4" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>nerds &lt;- read.csv(&#39;http://sldr.netlify.com/data/nerds.csv&#39;)
+gf_point(score ~ age, data = nerds)
+nerd_model &lt;- lm(score ~ age, data = nerds)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="nerd-lm-hint-5" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>nerds &lt;- read.csv(&#39;http://sldr.netlify.com/data/nerds.csv&#39;)
+gf_point(score ~ age, data = nerds)
+nerd_model &lt;- lm(score ~ age, data = nerds)
+summary(nerd_model)</code></pre>
+</div>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div><div class="panel panel-default">
+<div data-label="nerd-eqn-1" class="tutorial-question panel-body">
+<div id="nerd-eqn-1-answer_container" class="shiny-html-output"></div>
+<div id="nerd-eqn-1-message_container" class="shiny-html-output"></div>
+<div id="nerd-eqn-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div><div class="panel panel-default">
+<div data-label="nerd-eqn-2" class="tutorial-question panel-body">
+<div id="nerd-eqn-2-answer_container" class="shiny-html-output"></div>
+<div id="nerd-eqn-2-message_container" class="shiny-html-output"></div>
+<div id="nerd-eqn-2-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div><div class="panel panel-default">
+<div data-label="nerd-eqn-3" class="tutorial-question panel-body">
+<div id="nerd-eqn-3-answer_container" class="shiny-html-output"></div>
+<div id="nerd-eqn-3-message_container" class="shiny-html-output"></div>
+<div id="nerd-eqn-3-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div></p>
+</div>
+</div>
+<div id="section-linear-regression-conditions" class="section level2">
+<h2>Linear Regression Conditions</h2>
+<p>Before making any statistical inferences with our regression model, we should verify that all necessary conditions for its use are met. Otherwise, we risk presenting and interpreting inaccurate estimates and un-trustworthy conclusions!</p>
+<p>In this case, there are 5 conditions:</p>
+<ul>
+<li>Representative sample: the sample data must be representative of the population of interest (as for any statistical inference).</li>
+</ul>
+<p>4 more conditions are more specific to linear regression:</p>
+<ul>
+<li><strong>L</strong>inearity of the predictor-response relationship: there is <strong>not</strong> a clear non-linear trend in a scatter plot of the response vs. the predictor.</li>
+<li><strong>I</strong>ndependence of residuals: Knowing the value of one residual doesn’t help you predict the others; there are no lurking variables that affect the accuracy of the model predictions.</li>
+<li><strong>N</strong>ormality of residuals: The residuals should follow a normal distribution with mean 0.</li>
+<li><strong>E</strong>rror variance is constant: The variance (spread) of the residuals does not change with predictor variable value, or with fitted (on-the-line) value. Another word for this is <em>homoscedasticity</em>.</li>
+</ul>
+</div>
+<div id="section-model-assessment-checking-conditions" class="section level2">
+<h2>Model Assessment: Checking Conditions</h2>
+<p><em>(Incomplete) Text book reference: Lock5 Chapter 9.1</em></p>
+<p>Consider these more detailed explanations of each condition, accompanied by details about which plots to use to check each one and how to interpret them:</p>
+<p><img src="https://youtu.be/aPA877P8UHQ" width="400" /></p>
+<p>(You can also <a href="https://youtu.be/aPA877P8UHQ">watch directly on YouTube</a> if you prefer.)</p>
+<div id="section-review-and-practice" class="section level3">
+<h3>Review and Practice</h3>
+<p>To review and practice what you just learned, make a brief detour to the separate tutorial on <a href="https://rsconnect.calvin.edu:3939/content/11/">Regression Model Assessment</a>.</p>
+<p><strong>If conditions are met, then we’re ready to draw conclusions from our fitted model. How?</strong></p>
+</div>
+</div>
+<div id="section-inference" class="section level2">
+<h2>Inference</h2>
+<p><em>Text book reference: Lock5 Chapter 9.1</em></p>
+<p>Our goal: establish a method to generate confidence intervals and carry out tests for <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>, the intercept and slope. In fact, we focus almost entirely on the slope, but the exact same methods work for the intercept too (it’s just that the slope is almost always of much more practical interest than the intercept).</p>
+<p>We want to be able to test:</p>
+<p><span class="math display">\[H_0: \beta_1 = 0\]</span></p>
+<p><span class="math display">\[H_A: \beta_1 \neq 0\]</span></p>
+<p>If the null hypothesis above is <em>true</em>, that means there is <em>no</em> linear association between the predictor and response variables – informally, it means <em>the predictor is useless at predicting the response</em>.</p>
+<p>If we reject the null, that suggests there <em>is</em> a real association between the two variables (and the predictor is “worthwhile” statistically to help predict the response).</p>
+<p>Before we carry out the test, let’s establish an example model.</p>
+<div id="section-example" class="section level3">
+<h3>Example</h3>
+<p>We will use the <code>bonobos</code> dataset as an example. You may recall the dataset from earlier this term. Briefly, the dataset is from a <a href="https://royalsocietypublishing.org/doi/10.1098/rsbl.2019.0232">2019 paper by J.S. Martin and colleagues on bonobo face measurements</a>. The authors worked with 117 bonobos in European zoos and recorded data including their <code>Sex</code>, <code>Age</code> in years, <code>weight</code>, and some measurements about their face:</p>
+<p><img src="images/bonobo-face-measures.jpg" width="350px" style="display: block; margin: auto;" /></p>
+<p>Finally, they also measured each bonobo’s assertiveness score (<code>AssR</code>) and dominance score (<code>normDS</code>).</p>
+<p>The dataset is at <a href="https://sldr.netlify.com/data/bonobo_faces.csv">https://sldr.netlify.com/data/bonobo_faces.csv</a> and you can read the dataset in to R by running:</p>
+<pre class="r"><code>bonobos &lt;- read.csv(&#39;http://sldr.netlify.com/data/bonobo_faces.csv&#39;) %&gt;%
+  na.omit() 
+bonobos</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Name"],"name":[1],"type":["fctr"],"align":["left"]},{"label":["Group"],"name":[2],"type":["fctr"],"align":["left"]},{"label":["Sex"],"name":[3],"type":["fctr"],"align":["left"]},{"label":["Age"],"name":[4],"type":["int"],"align":["right"]},{"label":["fWHR"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["AssR"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["normDS"],"name":[7],"type":["dbl"],"align":["right"]},{"label":["weight"],"name":[8],"type":["dbl"],"align":["right"]}],"data":[{"1":"Zuani","2":"Apenheul","3":"Female","4":"22","5":"1.475052","6":"5.36","7":"1.430","8":"24.0","_rn_":"1"},{"1":"Zuani","2":"Apenheul","3":"Female","4":"22","5":"1.321814","6":"5.36","7":"1.430","8":"24.0","_rn_":"2"},{"1":"Zamba","2":"Apenheul","3":"Male","4":"14","5":"1.880866","6":"4.74","7":"3.035","8":"41.6","_rn_":"8"},{"1":"Zamba","2":"Apenheul","3":"Male","4":"14","5":"1.491453","6":"4.74","7":"3.035","8":"41.6","_rn_":"9"},{"1":"Zamba","2":"Apenheul","3":"Male","4":"14","5":"1.578947","6":"4.74","7":"3.035","8":"41.6","_rn_":"10"},{"1":"Vifijo","2":"Planckendael","3":"Male","4":"18","5":"1.351490","6":"2.68","7":"2.165","8":"38.0","_rn_":"11"},{"1":"Vifijo","2":"Planckendael","3":"Male","4":"18","5":"1.506261","6":"2.68","7":"2.165","8":"38.0","_rn_":"12"},{"1":"Vifijo","2":"Planckendael","3":"Male","4":"18","5":"1.468293","6":"2.68","7":"2.165","8":"38.0","_rn_":"13"},{"1":"Vifijo","2":"Planckendael","3":"Male","4":"18","5":"1.385714","6":"2.68","7":"2.165","8":"38.0","_rn_":"14"},{"1":"Vifijo","2":"Planckendael","3":"Male","4":"18","5":"1.501613","6":"2.68","7":"2.165","8":"38.0","_rn_":"15"},{"1":"Muhdeblu","2":"Wuppertal","3":"Female","4":"12","5":"1.364119","6":"2.62","7":"2.943","8":"36.5","_rn_":"16"},{"1":"Muhdeblu","2":"Wuppertal","3":"Female","4":"12","5":"1.381593","6":"2.62","7":"2.943","8":"36.5","_rn_":"17"},{"1":"Muhdeblu","2":"Wuppertal","3":"Female","4":"12","5":"1.269620","6":"2.62","7":"2.943","8":"36.5","_rn_":"18"},{"1":"Mobikisi","2":"Wilhelma","3":"Male","4":"34","5":"1.600529","6":"3.97","7":"2.627","8":"43.5","_rn_":"19"},{"1":"Mixi","2":"Frankfurt","3":"Female","4":"11","5":"1.919492","6":"4.12","7":"3.944","8":"36.0","_rn_":"20"},{"1":"Mixi","2":"Frankfurt","3":"Female","4":"11","5":"1.826446","6":"4.12","7":"3.944","8":"36.0","_rn_":"21"},{"1":"Mixi","2":"Frankfurt","3":"Female","4":"11","5":"1.572016","6":"4.12","7":"3.944","8":"36.0","_rn_":"22"},{"1":"Mato","2":"Wuppertal","3":"Male","4":"49","5":"1.534819","6":"5.38","7":"4.421","8":"50.6","_rn_":"23"},{"1":"Mato","2":"Wuppertal","3":"Male","4":"49","5":"1.607558","6":"5.38","7":"4.421","8":"50.6","_rn_":"24"},{"1":"Mato","2":"Wuppertal","3":"Male","4":"49","5":"1.798387","6":"5.38","7":"4.421","8":"50.6","_rn_":"25"},{"1":"Margrit","2":"Frankfurt","3":"Female","4":"62","5":"1.158965","6":"4.28","7":"3.615","8":"31.0","_rn_":"30"},{"1":"Margrit","2":"Frankfurt","3":"Female","4":"62","5":"1.237267","6":"4.28","7":"3.615","8":"31.0","_rn_":"31"},{"1":"Lusambo","2":"Wuppertal","3":"Male","4":"32","5":"1.590494","6":"5.27","7":"4.333","8":"41.5","_rn_":"32"},{"1":"Lusambo","2":"Wuppertal","3":"Male","4":"32","5":"1.532718","6":"5.27","7":"4.333","8":"41.5","_rn_":"33"},{"1":"Ludwig","2":"Frankfurt","3":"Male","4":"29","5":"1.454054","6":"2.51","7":"4.262","8":"53.3","_rn_":"39"},{"1":"Lina","2":"Planckendael","3":"Female","4":"27","5":"1.323834","6":"5.38","7":"1.722","8":"33.8","_rn_":"49"},{"1":"Lina","2":"Planckendael","3":"Female","4":"27","5":"1.595411","6":"5.38","7":"1.722","8":"33.8","_rn_":"50"},{"1":"Lina","2":"Planckendael","3":"Female","4":"27","5":"1.543860","6":"5.38","7":"1.722","8":"33.8","_rn_":"51"},{"1":"Lina","2":"Planckendael","3":"Female","4":"27","5":"1.384753","6":"5.38","7":"1.722","8":"33.8","_rn_":"52"},{"1":"Lina","2":"Planckendael","3":"Female","4":"27","5":"1.391304","6":"5.38","7":"1.722","8":"33.8","_rn_":"53"},{"1":"Liboso","2":"Wilhelma","3":"Female","4":"16","5":"1.410670","6":"4.15","7":"4.365","8":"30.0","_rn_":"54"},{"1":"Liboso","2":"Wilhelma","3":"Female","4":"16","5":"1.415541","6":"4.15","7":"4.365","8":"30.0","_rn_":"55"},{"1":"Kumbuka","2":"Apenheul","3":"Female","4":"13","5":"1.488706","6":"4.79","7":"3.131","8":"34.6","_rn_":"59"},{"1":"Kumbuka","2":"Apenheul","3":"Female","4":"13","5":"1.485714","6":"4.79","7":"3.131","8":"34.6","_rn_":"60"},{"1":"Kichele","2":"Twycross","3":"Female","4":"24","5":"1.453608","6":"4.87","7":"3.044","8":"38.5","_rn_":"63"},{"1":"Kichele","2":"Twycross","3":"Female","4":"24","5":"1.307600","6":"4.87","7":"3.044","8":"38.5","_rn_":"64"},{"1":"Kichele","2":"Twycross","3":"Female","4":"24","5":"1.545019","6":"4.87","7":"3.044","8":"38.5","_rn_":"65"},{"1":"Kichele","2":"Twycross","3":"Female","4":"24","5":"1.454351","6":"4.87","7":"3.044","8":"38.5","_rn_":"66"},{"1":"Kamiti","2":"Frankfurt","3":"Female","4":"26","5":"1.324324","6":"4.97","7":"2.570","8":"33.8","_rn_":"70"},{"1":"Kakowet","2":"Twycross","3":"Male","4":"32","5":"1.436533","6":"3.13","7":"1.682","8":"43.5","_rn_":"71"},{"1":"Kakowet","2":"Twycross","3":"Male","4":"32","5":"1.401934","6":"3.13","7":"1.682","8":"43.5","_rn_":"72"},{"1":"Kakowet","2":"Twycross","3":"Male","4":"32","5":"1.350806","6":"3.13","7":"1.682","8":"43.5","_rn_":"73"},{"1":"Kakowet","2":"Twycross","3":"Male","4":"32","5":"1.310127","6":"3.13","7":"1.682","8":"43.5","_rn_":"74"},{"1":"Hortense","2":"Apenheul","3":"Female","4":"34","5":"1.200653","6":"3.05","7":"1.755","8":"40.0","_rn_":"75"},{"1":"Hortense","2":"Apenheul","3":"Female","4":"34","5":"1.324219","6":"3.05","7":"1.755","8":"40.0","_rn_":"76"},{"1":"Hortense","2":"Apenheul","3":"Female","4":"34","5":"1.317881","6":"3.05","7":"1.755","8":"40.0","_rn_":"77"},{"1":"Hortense","2":"Apenheul","3":"Female","4":"34","5":"1.291840","6":"3.05","7":"1.755","8":"40.0","_rn_":"78"},{"1":"Hermien","2":"Wilhelma","3":"Female","4":"36","5":"1.436447","6":"5.74","7":"2.257","8":"43.2","_rn_":"79"},{"1":"Hermien","2":"Wilhelma","3":"Female","4":"36","5":"1.920319","6":"5.74","7":"2.257","8":"43.2","_rn_":"80"},{"1":"Hermien","2":"Wilhelma","3":"Female","4":"36","5":"1.272059","6":"5.74","7":"2.257","8":"43.2","_rn_":"81"},{"1":"Hermien","2":"Wilhelma","3":"Female","4":"36","5":"1.424928","6":"5.74","7":"2.257","8":"43.2","_rn_":"82"},{"1":"Eja","2":"Wuppertal","3":"Female","4":"22","5":"1.399533","6":"5.00","7":"1.536","8":"41.0","_rn_":"83"},{"1":"Eja","2":"Wuppertal","3":"Female","4":"22","5":"1.438679","6":"5.00","7":"1.536","8":"41.0","_rn_":"84"},{"1":"Eja","2":"Wuppertal","3":"Female","4":"22","5":"1.350282","6":"5.00","7":"1.536","8":"41.0","_rn_":"85"},{"1":"Eja","2":"Wuppertal","3":"Female","4":"22","5":"1.370031","6":"5.00","7":"1.536","8":"41.0","_rn_":"86"},{"1":"Eja","2":"Wuppertal","3":"Female","4":"22","5":"1.745066","6":"5.00","7":"1.536","8":"41.0","_rn_":"87"},{"1":"Eja","2":"Wuppertal","3":"Female","4":"22","5":"1.325000","6":"5.00","7":"1.536","8":"41.0","_rn_":"88"},{"1":"Diatou","2":"Twycross","3":"Female","4":"36","5":"1.224274","6":"5.64","7":"1.073","8":"39.2","_rn_":"93"},{"1":"Diatou","2":"Twycross","3":"Female","4":"36","5":"1.196787","6":"5.64","7":"1.073","8":"39.2","_rn_":"94"},{"1":"Diatou","2":"Twycross","3":"Female","4":"36","5":"1.351385","6":"5.64","7":"1.073","8":"39.2","_rn_":"95"},{"1":"Bondo","2":"Frankfurt","3":"Male","4":"21","5":"1.384401","6":"1.79","7":"2.241","8":"41.5","_rn_":"100"},{"1":"Bondo","2":"Frankfurt","3":"Male","4":"21","5":"1.045894","6":"1.79","7":"2.241","8":"41.5","_rn_":"101"},{"1":"Bondo","2":"Frankfurt","3":"Male","4":"21","5":"1.188350","6":"1.79","7":"2.241","8":"41.5","_rn_":"102"},{"1":"Bondo","2":"Frankfurt","3":"Male","4":"21","5":"1.762040","6":"1.79","7":"2.241","8":"41.5","_rn_":"103"},{"1":"Birogu","2":"Wuppertal","3":"Male","4":"23","5":"1.668502","6":"4.92","7":"1.122","8":"44.0","_rn_":"107"},{"1":"Birogu","2":"Wuppertal","3":"Male","4":"23","5":"1.502890","6":"4.92","7":"1.122","8":"44.0","_rn_":"108"},{"1":"Birogu","2":"Wuppertal","3":"Male","4":"23","5":"1.632236","6":"4.92","7":"1.122","8":"44.0","_rn_":"109"},{"1":"Birogu","2":"Wuppertal","3":"Male","4":"23","5":"1.744000","6":"4.92","7":"1.122","8":"44.0","_rn_":"110"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+<div id="section-practice-1" class="section level3">
+<h3>Practice</h3>
+<p>We might wonder whether size (as measured by <code>weight</code>) is a good predictor of the dominance score, <code>normDS</code>. Graphically:</p>
+<pre class="r"><code>gf_point(normDS ~ weight, data = bonobos)</code></pre>
+<p><img src="LinearRegressionFast_files/figure-html/unnamed-chunk-5-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>Fit the corresponding regression model in R and view its <code>summary()</code>:</p>
+<div class="tutorial-exercise" data-label="bonobo-lm-fit" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="bonobo-lm-fit-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>bonobo_lm &lt;- lm(... , data = bonobos)
+summary(bonobo_lm)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="bonobo-lm-fit-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>bonobo_lm &lt;- lm(normDS ~ weight, data = bonobos)
+summary(bonobo_lm)</code></pre>
+</div>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div><div class="panel panel-default">
+<div data-label="bonobo-eqn-quiz-1" class="tutorial-question panel-body">
+<div id="bonobo-eqn-quiz-1-answer_container" class="shiny-html-output"></div>
+<div id="bonobo-eqn-quiz-1-message_container" class="shiny-html-output"></div>
+<div id="bonobo-eqn-quiz-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div><div class="panel panel-default">
+<div data-label="bonobo-eqn-quiz-2" class="tutorial-question panel-body">
+<div id="bonobo-eqn-quiz-2-answer_container" class="shiny-html-output"></div>
+<div id="bonobo-eqn-quiz-2-message_container" class="shiny-html-output"></div>
+<div id="bonobo-eqn-quiz-2-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div><div class="panel panel-default">
+<div data-label="bonobo-eqn-quiz-3" class="tutorial-question panel-body">
+<div id="bonobo-eqn-quiz-3-answer_container" class="shiny-html-output"></div>
+<div id="bonobo-eqn-quiz-3-message_container" class="shiny-html-output"></div>
+<div id="bonobo-eqn-quiz-3-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div></p>
+</div>
+</div>
+<div id="section-se-of-sampling-distributions" class="section level2">
+<h2>SE of Sampling Distributions</h2>
+<p><em>Text book reference: Lock5 Chapter 9.1</em></p>
+<p>In fact, as you may have noticed, the <code>summary()</code> of an <code>lm()</code> fit includes not only estimates of the parameters <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>, but also the <em>standard errors of the corresponding sampling distributions</em>! (Hooray.) These are found in the coefficient table, labelled <code>"Std. Error"</code>.</p>
+<pre class="r"><code>bm &lt;- lm(normDS ~ weight, data = bonobos)
+summary(bm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = normDS ~ weight, data = bonobos)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.3794 -0.8138 -0.2354  0.6043  2.0207 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)  
+## (Intercept)  2.00774    0.92555   2.169   0.0337 *
+## weight       0.01122    0.02334   0.481   0.6322  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.031 on 66 degrees of freedom
+## Multiple R-squared:  0.003491,   Adjusted R-squared:  -0.01161 
+## F-statistic: 0.2312 on 1 and 66 DF,  p-value: 0.6322</code></pre>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div><div class="panel panel-default">
+<div data-label="get-bonobo-se-1" class="tutorial-question panel-body">
+<div id="get-bonobo-se-1-answer_container" class="shiny-html-output"></div>
+<div id="get-bonobo-se-1-message_container" class="shiny-html-output"></div>
+<div id="get-bonobo-se-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div></p>
+</div>
+<div id="section-ci-for-the-slope" class="section level2">
+<h2>CI for the slope</h2>
+<p><em>Text book reference: Lock5 Chapter 9.1</em></p>
+<p>Although we won’t derive the reasons why in detail, the sampling distribution for the slope has <strong>a t distribution</strong> with <span class="math inline">\(n - 2\)</span> degrees of freedom (where <span class="math inline">\(n\)</span> is the number of rows in the dataset).</p>
+<p>So, after all that, we can find a CI for a regression slope according to:</p>
+<p><span class="math display">\[ \hat{\beta}_1 \pm t_*SE(\hat{\beta}_1)\]</span> Where <span class="math inline">\(t_*\)</span> is a critical value from a <span class="math inline">\(t(n-2)\)</span> distribution, and SE(_1) is the standard error of the slope from the coefficient table in the model `summary().</p>
+<p>As an example, find a 95% CI for the slope of our <code>bonobo</code> regression model.</p>
+<div class="tutorial-exercise" data-label="bonobo-ci" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="bonobo-ci-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>bm &lt;- lm(normDS ~ weight, data= bonobos)
+summary(bm)
+CI95 &lt;- -0.14278 + c(-1,1) * qt(0.975, df = nrow(bonobos) - 2) * 0.06668
+CI95</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="bonobo-ci-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code># a shortcut:
+bm &lt;- lm(normDS ~ weight, data= bonobos)
+confint(bm, &quot;weight&quot;, level = 0.95)</code></pre>
+</div>
+<p><strong>Notice the shortcut – R function <code>confint()</code> returns CIs (with a default confidence level of 95%).</strong></p>
+</div>
+<div id="section-test-for-the-slope" class="section level2">
+<h2>Test for the slope</h2>
+<p><em>Text book reference: Lock5 Chapter 9.1</em></p>
+<p>We can also test the null hypothesis <span class="math inline">\(H_0: \beta_1 = \beta_{1\text{null}}\)</span> (where <span class="math inline">\(\beta_{1\text{null}}\)</span> is some hypothetical slope value of interest) using the standardized test statistic</p>
+<p><span class="math display">\[ t = \frac{\hat{\beta}_1 - \beta_{1\text{null}}}{SE(\hat{\beta}_1)}\]</span></p>
+<p>The most common value for <span class="math inline">\(\beta_{1\text{null}}\)</span> is <span class="math inline">\(0\)</span>, because if <span class="math inline">\(\beta_1 = 0\)</span> that means that there is <em>no</em> relationship between the predictor and response and the predictor is useless as a predictor. If we can reject that null hypothesis, we can conclude that the predictor <em>does</em> have some utility.</p>
+<p>To practice, carry out a two-sided test of <span class="math inline">\(H_0: \beta_1 = 0\)</span> for the <code>bonobo</code> regression.</p>
+<div class="tutorial-exercise" data-label="bonobo-test" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="bonobo-test-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>bm &lt;- lm(normDS ~ weight, data= bonobos)
+summary(bm)
+t_stat &lt;- (-0.14278 - 0) / (0.06668)
+p_val &lt;- 2 * pt(t_stat, df = nrow(bonobos) - 2, lower.tail = TRUE)
+p_val</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="bonobo-test-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>#shortcut: just use model summary
+bm &lt;- lm(normDS ~ weight, data= bonobos)
+summary(bm)</code></pre>
+</div>
+<p><strong>A shortcut: Notice that this p-value is already in the model summary (in the last column of the coefficient table, labelled “Pr(<span class="math inline">\(&gt;\vert\)</span>t<span class="math inline">\(\vert\)</span>)”). </strong></p>
+<div id="section-anova" class="section level3">
+<h3>ANOVA??</h3>
+<p>Note that for simple linear regression, the p-value reported at the very end of the model summary <strong>is the same</strong> as the one for the slope in the coefficient table. This is <em>only</em> the case when there’s only one predictor, since the test at the bottom is testing <span class="math inline">\(H_0: \text{all the slopes in the model are 0 for all predictors}\)</span>. But…it’s reported along with an F-statistic – which reminds us of ANOVA from last week – why is this??</p>
+</div>
+</div>
+<div id="section-anova-for-regression" class="section level2">
+<h2>ANOVA for Regression</h2>
+<p><em>Text book reference: Lock5 Chapter 9.2</em></p>
+<p>We can, if we wish, use ANOVA to measure the <em>model utility</em> of a simple linear regression with one quantitative predictor. <em>Model utility</em> means, basically, whether the model is any good – is it better to include the predictor than to stick with a simple intercept-only model? In the simple (one-predictor) linear regression case, the model utility test is basically the same as testing <span class="math inline">\(H_0: \beta_1 = 0\)</span>.</p>
+<p>Before we examine the details, let’s just try it and see what happens. As our example, we’ll return to our case study from the ANOVA module, and try to model <code>gratitude_score</code> as a function of <code>life_rating</code>, like we did at the beginning of the module.</p>
+<pre class="r"><code>require(car)
+Anova(lm(gratitude_score ~ life_rating, data = grateful))</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sum Sq"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Df"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"33.70604","2":"1","3":"8.595578","4":"0.003774924","_rn_":"life_rating"},{"1":"760.73679","2":"194","3":"NA","4":"NA","_rn_":"Residuals"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p>Comparing to our previous results with a t-test of <span class="math inline">\(H_0: \beta_1 = 0\)</span>:</p>
+<pre class="r"><code>summary(lm(gratitude_score ~ life_rating, data = grateful))</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = gratitude_score ~ life_rating, data = grateful)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -4.891 -1.466 -0.098  1.219  5.899 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)   7.2008     0.8828   8.157 4.22e-14 ***
+## life_rating   0.5295     0.1806   2.932  0.00377 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.98 on 194 degrees of freedom
+## Multiple R-squared:  0.04243,    Adjusted R-squared:  0.03749 
+## F-statistic: 8.596 on 1 and 194 DF,  p-value: 0.003775</code></pre>
+<p><strong>We notice that the p-values for the ANOVA and the t-test are identical.</strong></p>
+<p>Clued in by the matching p-values, we can also note that the t-test statistic (2.9318) is related to the ANOVA F statistic (8.5956): <span class="math inline">\(F = t^2\)</span>.</p>
+<div id="section-cool.-but-does-it-make-sense" class="section level3">
+<h3>Cool. But, does it make sense?</h3>
+<p>So, the two tests are equivalent. But can we actually conceptualize the ANOVA with a quantitative predictor, analogous to the way we did for the case of comparing means of 3+ groups? Sure!</p>
+<p>Here, we usually change notation a little - instead of talking about SSG and MSG we use SSM and MSM (Sum of Squares for the <strong>Model</strong> and Mean Squares for the <strong>Model</strong>, since there’s now a regression line instead of a set of group means).</p>
+<p>Otherwise, the approach is exactly the same, but with a cool twist:</p>
+<p><img src="https://www.youtube.com/watch?v=WWqE7YHR4Jc" width="400" /></p>
+<p>(You can also <a href="https://www.youtube.com/watch?v=WWqE7YHR4Jc">watch directly on YouTube</a> if you prefer.)</p>
+</div>
+</div>
+<div id="section-model-predictions-with-uncertainty-cis-and-pis" class="section level2">
+<h2>Model Predictions with Uncertainty (CIs and PIs)</h2>
+<p>So far, we learned to generate confidence intervals (or do hypothesis tests) for the slope and intercept parameters of a simple linear regression.</p>
+<p>But often, <strong>we are interested in using fitted regression models to</strong> <em>predict</em> <strong>response variable values in specific scenarios.</strong> In other words, we’re sometimes more interested in the predicted response variable values <span class="math inline">\(\hat{y}\)</span> than the parameter estimates <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>.</p>
+<p>It’s a simple matter to compute point estimates of these fitted values: if we have an x-value of interest (let’s call it <span class="math inline">\(x_*\)</span>), we just compute <span class="math inline">\(\hat{\beta}_0 + \hat{\beta}_1x_*\)</span> to get our estimate.</p>
+<p>But what about uncertainty?</p>
+<div id="section-ways-to-conceptualize-uncertainty-in-predictions" class="section level3">
+<h3>Ways to Conceptualize Uncertainty in Predictions</h3>
+<p><em>Text book reference: Lock5 Chapter 9.3</em></p>
+<p>We could do this two ways!</p>
+<ul>
+<li><strong>A confidence interval:</strong> We could find an interval that gives plausible values for “where the line is located”, taking into account uncertainty in the intercept and slope estimates. Another way of thinking about this is that it gives a plausible range of values for the <em>expected value</em> (mean) of the response variable for <strong>all hypothetical new observations with a certain predictor-variable value</strong>.</li>
+<li><strong>A prediction interval:</strong> We could find and interval that gives plausible values for “the point cloud” of possible new observations, taking into account uncertainty in the slope and intercept, plus the residual variance. Another way of thinking about this is that it gives a <strong>plausible range of values for the response for one new datapoint with a certain predictor-variable value</strong>. Note that we’ve coined the new name <em>prediction interval</em> to differentiate it from the other one, this is really also a CI (just for a very specific scenario).</li>
+</ul>
+</div>
+</div>
+<div id="section-confidence-vs-prediction-intervals-video" class="section level2">
+<h2>Confidence vs Prediction Intervals: video</h2>
+<p><em>Text book reference: Lock5 Chapter 9.3</em></p>
+<p>Let’s first review a practical example just to keep the big picture front and center.</p>
+<p><em>Note: this video is from a great contemporary statistician and teacher, <a href="http://www2.stat.duke.edu/~mc301/">Mine Çetinkaya-Rundel</a> - she’s awesome…more so even than this video suggests…</em></p>
+<p><img src="https://www.youtube.com/watch?v=qVCQi0KPR0s" width="400" /></p>
+<p>(You can also <a href="https://www.youtube.com/watch?v=qVCQi0KPR0s">watch directly on YouTube</a> if you prefer.</p>
+</div>
+<div id="section-confidence-and-prediction-intervals-in-r" class="section level2">
+<h2>Confidence and Prediction Intervals in R</h2>
+<p><em>Text book reference: Lock5 Chapter 9.3</em></p>
+<p>You can compute confidence or prediction intervals in R using <code>predict()</code>. Assuming you have a fitted model <code>m</code> with response <code>y</code> and predictor <code>x_star</code> in dataset <code>d</code>, and you want an interval estimate of the fitted value for <span class="math inline">\(x = x_*\)</span>:</p>
+<pre class="r"><code>m &lt;- lm(y ~ x, data = d)
+new_data &lt;- data.frame(x = x_star)
+conf_int &lt;- predict(m, newdata = new_data, 
+        interval = &#39;confidence&#39;,
+        level = 0.95)
+
+pred_int &lt;- predict(m, newdata = new_data, 
+        interval = &#39;prediction&#39;,
+        level = 0.95)</code></pre>
+<p>If you wanted to make interval estimates for more than one value <span class="math inline">\(x_*\)</span>, you can just enter a list of values in <code>new_data</code>:</p>
+<pre class="r"><code>new_data &lt;- data_frame(x = c(x_star1, x_star2, ...))</code></pre>
+<p>Finally, if you want to plot one or both intervals on a scatter plot of the data, you can!</p>
+<p>So you can actually see the result, let’s demonstrate with a regression predicting bonobo dominance score <code>normDS</code> by <code>weight</code> from the <code>bonobos</code> dataset.</p>
+<pre class="r"><code>gf_point(normDS ~ weight, data =bonobos) %&gt;%
+  gf_lm(interval = &#39;prediction&#39;, color = &#39;black&#39;, 
+        fill = &#39;seagreen&#39;) %&gt;%
+    gf_lm(interval = &#39;confidence&#39;) </code></pre>
+<p><img src="LinearRegressionFast_files/figure-html/unnamed-chunk-11-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+<div id="section-confidence-and-prediction-intervals-practice" class="section level2">
+<h2>Confidence and Prediction Intervals: Practice</h2>
+<p><em>Text book reference: Lock5 Chapter 9.3</em></p>
+<p><div class="panel-heading tutorial-quiz-title">Quiz</div><div class="panel panel-default">
+<div data-label="pred-width-1" class="tutorial-question panel-body">
+<div id="pred-width-1-answer_container" class="shiny-html-output"></div>
+<div id="pred-width-1-message_container" class="shiny-html-output"></div>
+<div id="pred-width-1-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div><div class="panel panel-default">
+<div data-label="pred-width-2" class="tutorial-question panel-body">
+<div id="pred-width-2-answer_container" class="shiny-html-output"></div>
+<div id="pred-width-2-message_container" class="shiny-html-output"></div>
+<div id="pred-width-2-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div><div class="panel panel-default">
+<div data-label="pred-width-3" class="tutorial-question panel-body">
+<div id="pred-width-3-answer_container" class="shiny-html-output"></div>
+<div id="pred-width-3-message_container" class="shiny-html-output"></div>
+<div id="pred-width-3-action_button_container" class="shiny-html-output"></div>
+<script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
+</div>
+</div></p>
+<div id="section-practice-2" class="section level3">
+<h3>Practice</h3>
+<p>Find an interval estimate for the assertiveness score (<code>AssR</code>) of Zeke, and 8-year-old male bonobo, based on the dataset <code>bonobos</code> (which also contains the variable <code>Age</code>).</p>
+<div class="tutorial-exercise" data-label="zeke-pred" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="zeke-pred-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>m &lt;- lm()
+new_data &lt;- data.frame()
+predict()</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="zeke-pred-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>m &lt;- lm(AssR ~ Age, data = bonobos)
+new_data &lt;- data.frame()
+predict()</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="zeke-pred-hint-3" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>m &lt;- lm(AssR ~ Age, data = bonobos)
+new_data &lt;- data.frame(Age = 8)
+predict()</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="zeke-pred-hint-4" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>m &lt;- lm(AssR ~ Age, data = bonobos)
+new_data &lt;- data.frame(Age = 8)
+predict(m, newdata = new_data, interval = ...)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="zeke-pred-hint-5" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>m &lt;- lm(AssR ~ Age, data = bonobos)
+new_data &lt;- data.frame(Age = 8)
+predict(m, newdata = new_data, interval = &#39;prediction&#39;)</code></pre>
+</div>
+</div>
+<div id="section-more-practice" class="section level3">
+<h3>More Practice</h3>
+<p>The dataset <code>earn</code> contains data on people’s income (<code>earn</code>) and their height in inches (<code>height</code>) from a 1994 survey of Americans. Fit a model predicting income as a function of height and then produce an interval estimate for the income of people who are 6’4" (76 inches) tall.</p>
+<div class="tutorial-exercise" data-label="tall-income" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6,"fig.height":2.5,"fig.retina":2,"fig.align":"center","fig.keep":"high","fig.show":"asis","out.width":576,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="tall-income-hint-1" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>m &lt;- lm()
+new_data &lt;- data.frame()
+predict()</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="tall-income-hint-2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>m &lt;- lm(earn ~ height, data = earn)
+new_data &lt;- data.frame()
+predict()</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="tall-income-hint-3" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>m &lt;- lm(earn ~ height, data = earn)
+new_data &lt;- data.frame(height = 76)
+predict()</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="tall-income-hint-4" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>m &lt;- lm(earn ~ height, data = earn)
+new_data &lt;- data.frame(height = 76)
+predict(m, newdata = new_data, interval = ...)</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="tall-income-hint-5" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>m &lt;- lm(earn ~ height, data = earn)
+new_data &lt;- data.frame(height = 76)
+predict(m, newdata = new_data, interval = &#39;confidence&#39;)</code></pre>
+</div>
+
+<script type="application/shiny-prerendered" data-context="server-start">
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tidyverse)
+library(ggformula)
+library(mosaic)
+theme_set(theme_bw())
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+MI_lead <- read.csv(file='http://sldr.netlify.com/data/MI_lead.csv')
+tutorial_options(exercise.eval = FALSE)
+
+set.seed(14)
+bonobos <- read.csv('http://sldr.netlify.com/data/bonobo_faces.csv') %>%
+  na.omit() 
+grateful <- read.csv('http://sldr.netlify.com/data/gratitude-experiment.csv') 
+
+earn <- foreign::read.dta('www/heights.dta') %>%
+  mutate(sex = ifelse(sex == 2, 'female', 'male')) %>%
+  na.omit() %>%
+  dplyr::filter(earn > 0)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::register_http_handlers(session, metadata = NULL)
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+session$onSessionEnded(function() {
+        learnr:::session_stop_event(session)
+      })
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-lm-formula-practice-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-lm-formula-practice-code-editor`)), session)
+output$`tutorial-exercise-lm-formula-practice-output` <- renderUI({
+  `tutorial-exercise-lm-formula-practice-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-nerd-lm-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-nerd-lm-code-editor`)), session)
+output$`tutorial-exercise-nerd-lm-output` <- renderUI({
+  `tutorial-exercise-nerd-lm-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "nerd-eqn-1", question = structure("What is beta0 for the model you just fitted?", html = TRUE, class = c("html", "character")), answers = list(structure(list(id = "lnr_ans_41085ad",     option = "95.8", value = "95.8", label = structure("95.8", html = TRUE, class = c("html",     "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a348a66",     option = "-0.061", value = "-0.061", label = structure("-0.061", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_f50a509",     option = "0.22", value = "0.22", label = structure("0.22", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_8d73b40",     option = "15.81", value = "15.81", label = structure("15.81", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_fbaa49c",     option = "0.00092", value = "0.00092", label = structure("0.00092", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html", "character")), try_again = structure("Try Again", html = TRUE, class = c("html", "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html", "character")), try_again = structure("Incorrect", html = TRUE, class = c("html", "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", "character")), message = NULL, post_message = NULL), ids = list(    answer = "nerd-eqn-1-answer", question = "nerd-eqn-1"), loading = structure("<strong>Loading:<\u002fstrong> \nWhat is beta0 for the model you just fitted?\n<br/><br/><br/>", html = TRUE, class = c("html", "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 1098381767.48853, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "nerd-eqn-2", question = structure("What is beta1 for the model you just fitted?", html = TRUE, class = c("html", "character")), answers = list(structure(list(id = "lnr_ans_eecd830",     option = "95.8", value = "95.8", label = structure("95.8", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_6dad706",     option = "-0.061", value = "-0.061", label = structure("-0.061", html = TRUE, class = c("html",     "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_7c4f4eb",     option = "0.22", value = "0.22", label = structure("0.22", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_61b3f5d",     option = "15.81", value = "15.81", label = structure("15.81", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_e41992c",     option = "0.00092", value = "0.00092", label = structure("0.00092", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html", "character")), try_again = structure("Try Again", html = TRUE, class = c("html", "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html", "character")), try_again = structure("Incorrect", html = TRUE, class = c("html", "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", "character")), message = NULL, post_message = NULL), ids = list(    answer = "nerd-eqn-2-answer", question = "nerd-eqn-2"), loading = structure("<strong>Loading:<\u002fstrong> \nWhat is beta1 for the model you just fitted?\n<br/><br/><br/>", html = TRUE, class = c("html", "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 351736275.33621, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "nerd-eqn-3", question = structure("What is sigma, the standard deviation of the residuals, for the model you just fitted?", html = TRUE, class = c("html", "character")), answers = list(structure(list(id = "lnr_ans_7960e05",     option = "95.8", value = "95.8", label = structure("95.8", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_d9e8fa8",     option = "-0.061", value = "-0.061", label = structure("-0.061", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_db82be9",     option = "0.22", value = "0.22", label = structure("0.22", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_bd5bfa5",     option = "15.81", value = "15.81", label = structure("15.81", html = TRUE, class = c("html",     "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5a64bde",     option = "0.00092", value = "0.00092", label = structure("0.00092", html = TRUE, class = c("html",     "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html", "character")), try_again = structure("Try Again", html = TRUE, class = c("html", "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html", "character")), try_again = structure("Incorrect", html = TRUE, class = c("html", "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", "character")), message = NULL, post_message = NULL), ids = list(    answer = "nerd-eqn-3-answer", question = "nerd-eqn-3"), loading = structure("<strong>Loading:<\u002fstrong> \nWhat is sigma, the standard deviation of the residuals, for the model you just fitted?\n<br/><br/><br/>", html = TRUE, class = c("html", "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 1446057684.32663, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-bonobo-lm-fit-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-bonobo-lm-fit-code-editor`)), session)
+output$`tutorial-exercise-bonobo-lm-fit-output` <- renderUI({
+  `tutorial-exercise-bonobo-lm-fit-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "bonobo-eqn-quiz-1",     question = structure("What is the intercept estimate for the model you just fitted?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_da00606",         option = "2.008", value = "2.008", label = structure("2.008", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_9869625",         option = "0.926", value = "0.926", label = structure("0.926", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_59d647e",         option = "0.011", value = "0.011", label = structure("0.011", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_6b6c23a",         option = "0.023", value = "0.023", label = structure("0.023", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_9e20fc1",         option = "1.031", value = "1.031", label = structure("1.031", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "bonobo-eqn-quiz-1-answer", question = "bonobo-eqn-quiz-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhat is the intercept estimate for the model you just fitted?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 1482342429.80973, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "bonobo-eqn-quiz-2",     question = structure("What is the slope for the model you just fitted?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_bffacb0",         option = "2.008", value = "2.008", label = structure("2.008", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_9e73cdf",         option = "0.926", value = "0.926", label = structure("0.926", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_62844d8",         option = "0.011", value = "0.011", label = structure("0.011", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_85f946d",         option = "0.023", value = "0.023", label = structure("0.023", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_afef38b",         option = "1.031", value = "1.031", label = structure("1.031", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "bonobo-eqn-quiz-2-answer", question = "bonobo-eqn-quiz-2"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhat is the slope for the model you just fitted?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 168573125.421502, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "bonobo-eqn-quiz-3",     question = structure("What is sigma, the standard deviation of the residuals, for the model you just fitted?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_cfb3369",         option = "2.008", value = "2.008", label = structure("2.008", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_2327efd",         option = "0.926", value = "0.926", label = structure("0.926", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_f800143",         option = "0.011", value = "0.011", label = structure("0.011", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a77b3c4",         option = "0.023", value = "0.023", label = structure("0.023", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_f24d1ca",         option = "1.031", value = "1.031", label = structure("1.031", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "bonobo-eqn-quiz-3-answer", question = "bonobo-eqn-quiz-3"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhat is sigma, the standard deviation of the residuals, for the model you just fitted?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 268604411.874921, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "get-bonobo-se-1",     question = structure("What is the SE for the slope, for the regression to predict normDS as a function of weight for our bonobo dataset?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_8dcb516",         option = "2.008", value = "2.008", label = structure("2.008", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_782ffb2",         option = "0.926", value = "0.926", label = structure("0.926", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_dc99c6a",         option = "0.011", value = "0.011", label = structure("0.011", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_9dbecaa",         option = "0.023", value = "0.023", label = structure("0.023", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_1a44b30",         option = "1.031", value = "1.031", label = structure("1.031", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "get-bonobo-se-1-answer", question = "get-bonobo-se-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhat is the SE for the slope, for the regression to predict normDS as a function of weight for our bonobo dataset?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 2067959476.03703, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-bonobo-ci-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-bonobo-ci-code-editor`)), session)
+output$`tutorial-exercise-bonobo-ci-output` <- renderUI({
+  `tutorial-exercise-bonobo-ci-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-bonobo-test-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-bonobo-test-code-editor`)), session)
+output$`tutorial-exercise-bonobo-test-output` <- renderUI({
+  `tutorial-exercise-bonobo-test-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "pred-width-1",     question = structure("In the plot above, which of the intervals is the prediction interval?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_6bd9f29",         option = "The narrower one", value = "The narrower one",         label = structure("The narrower one", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_74071de",         option = "The wider one", value = "The wider one", label = structure("The wider one", html = TRUE, class = c("html",         "character")), correct = TRUE, message = structure("Yes! The prediction interval will always be wider because it takes into account one additional source of uncertainty; or, in other words, the plausible range of values for one new observation will always be wider than that for the mean of a set of new observations.", html = TRUE, class = c("html",         "character"))), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_8e2305c",         option = "Impossible to tell without plotting them individually",         value = "Impossible to tell without plotting them individually",         label = structure("Impossible to tell without plotting them individually", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "pred-width-1-answer", question = "pred-width-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nIn the plot above, which of the intervals is the prediction interval?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = TRUE, allow_retry = TRUE,     seed = 456120729.787602, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "pred-width-2",     question = structure("If you wanted to use this model to compute a 95% CI for the dominance score of Kuni, a bonobo at the Jacksonville Zoo who weighs 36.7 kg, what kind of interval should you use?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_63d69d1",         option = "Confidence", value = "Confidence", label = structure("Confidence", html = TRUE, class = c("html",         "character")), correct = FALSE, message = structure("Not quite; we want a prediction for a single new observation, not for the expected value of a <em>class<\u002fem> of new observations", html = TRUE, class = c("html",         "character"))), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_375beaf",         option = "Prediction", value = "Prediction", label = structure("Prediction", html = TRUE, class = c("html",         "character")), correct = TRUE, message = structure("Yep! This is an interval estimate for a single new observation, so a prediction interval is appropriate.", html = TRUE, class = c("html",         "character"))), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "pred-width-2-answer", question = "pred-width-2"),     loading = structure("<strong>Loading:<\u002fstrong> \nIf you wanted to use this model to compute a 95% CI for the dominance score of Kuni, a bonobo at the Jacksonville Zoo who weighs 36.7 kg, what kind of interval should you use?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = TRUE,     seed = 1633832949.23919, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "pred-width-3",     question = structure("If you wanted to use this model to compute an interval estimate for the dominance score of 41kg male bonobos, what kind of interval should you use?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_b015f07",         option = "Confidence", value = "Confidence", label = structure("Confidence", html = TRUE, class = c("html",         "character")), correct = TRUE, message = structure("Yes! we want a prediction for the expected value of a <em>class<\u002fem> of new observations, so a confidence interval is the right choice.", html = TRUE, class = c("html",         "character"))), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_38be7c5",         option = "Prediction", value = "Prediction", label = structure("Prediction", html = TRUE, class = c("html",         "character")), correct = FALSE, message = structure("Not quite. This is an interval estimate for the mean of a class of new observations, so a prediction interval is not appropriate.", html = TRUE, class = c("html",         "character"))), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "pred-width-3-answer", question = "pred-width-3"),     loading = structure("<strong>Loading:<\u002fstrong> \nIf you wanted to use this model to compute an interval estimate for the dominance score of 41kg male bonobos, what kind of interval should you use?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = TRUE,     seed = 321406542.850333, options = list()), class = c("learnr_radio", "tutorial_question")))
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-zeke-pred-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-zeke-pred-code-editor`)), session)
+output$`tutorial-exercise-zeke-pred-output` <- renderUI({
+  `tutorial-exercise-zeke-pred-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-tall-income-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-tall-income-code-editor`)), session)
+output$`tutorial-exercise-tall-income-output` <- renderUI({
+  `tutorial-exercise-tall-income-result`()
+})
+</script>
+ <!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="dependencies">
+{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootstrap"]},{"type":"character","attributes":{},"value":["3.3.5"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/bootstrap"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["viewport"]}},"value":[{"type":"character","attributes":{},"value":["width=device-width, initial-scale=1"]}]},{"type":"character","attributes":{},"value":["js/bootstrap.min.js","shim/html5shiv.min.js","shim/respond.min.js"]},{"type":"character","attributes":{},"value":["css/cerulean.min.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["pagedtable"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/pagedtable-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["js/pagedtable.js"]},{"type":"character","attributes":{},"value":["css/pagedtable.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["textmate.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-format"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmarkdown/templates/tutorial/resources"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-format.js"]},{"type":"character","attributes":{},"value":["tutorial-format.css","rstudio-theme.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["navigation"]},{"type":"character","attributes":{},"value":["1.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/navigation-1.1"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tabsets.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["highlightjs"]},{"type":"character","attributes":{},"value":["9.12.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/highlightjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["highlight.js"]},{"type":"character","attributes":{},"value":["default.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["jquery"]},{"type":"character","attributes":{},"value":["1.11.3"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/jquery"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["jquery.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["font-awesome"]},{"type":"character","attributes":{},"value":["5.1.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["rmd/h/fontawesome"]}]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["css/all.css","css/v4-shims.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["rmarkdown"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["2.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["bootbox"]},{"type":"character","attributes":{},"value":["4.4.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/bootbox"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["bootbox.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["idb-keyvalue"]},{"type":"character","attributes":{},"value":["3.2.0"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/idb-keyval"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["idb-keyval-iife-compat.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial.js"]},{"type":"character","attributes":{},"value":["tutorial.css"]},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-autocompletion"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-autocompletion.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["tutorial-diagnostics"]},{"type":"character","attributes":{},"value":["0.10.1"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/tutorial"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["tutorial-diagnostics.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["ace"]},{"type":"character","attributes":{},"value":["1.2.6"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/ace"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["ace.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","version","src","meta","script","stylesheet","head","attachment","package","all_files","pkgVersion"]},"class":{"type":"character","attributes":{},"value":["html_dependency"]}},"value":[{"type":"character","attributes":{},"value":["clipboardjs"]},{"type":"character","attributes":{},"value":["1.5.15"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["file"]}},"value":[{"type":"character","attributes":{},"value":["lib/clipboardjs"]}]},{"type":"NULL"},{"type":"character","attributes":{},"value":["clipboard.min.js"]},{"type":"NULL"},{"type":"NULL"},{"type":"NULL"},{"type":"character","attributes":{},"value":["learnr"]},{"type":"logical","attributes":{},"value":[true]},{"type":"character","attributes":{},"value":["0.10.1"]}]}]}
+</script>
+<!--/html_preserve-->
+<!--html_preserve-->
+<script type="application/shiny-prerendered" data-context="execution_dependencies">
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107]}},"value":[{"type":"character","attributes":{},"value":["abind","assertthat","backports","base","broom","car","carData","cellranger","checkmate","cli","colorspace","compiler","crayon","crosstalk","curl","data.table","datasets","DBI","dbplyr","digest","dplyr","ellipsis","evaluate","fansi","farver","fastmap","forcats","foreign","fs","generics","ggdendro","ggforce","ggformula","ggplot2","ggrepel","ggstance","glue","graphics","grDevices","grid","gridExtra","gtable","haven","hms","htmltools","htmlwidgets","httpuv","httr","jsonlite","knitr","labeling","later","lattice","lazyeval","leaflet","learnr","lifecycle","lubridate","magrittr","markdown","MASS","Matrix","methods","mime","modelr","mosaic","mosaicCore","mosaicData","munsell","nlme","openxlsx","pillar","pkgconfig","polyclip","promises","purrr","R6","Rcpp","readr","readxl","reprex","rio","rlang","rmarkdown","rprojroot","rstudioapi","rvest","scales","shiny","splines","stats","stringi","stringr","tibble","tidyr","tidyselect","tidyverse","tools","tweenr","utils","vctrs","withr","xfun","xml2","xtable","yaml","zip"]},{"type":"character","attributes":{},"value":["1.4-5","0.2.1","1.1.5","3.6.3","0.5.5","3.0-6","3.0-3","1.1.0","2.0.0","2.0.2","1.4-1","3.6.3","1.3.4","1.0.0","4.3","1.12.8","3.6.3","1.1.0","1.4.2","0.6.25","0.8.5","0.3.0","0.14","0.4.1","2.0.3","1.0.1","0.5.0","0.8-75","1.3.2","0.0.2","0.1-20","0.3.1","0.9.4","3.3.0","0.8.2","0.3.3","1.3.2","3.6.3","3.6.3","3.6.3","2.3","0.3.0","2.2.0","0.5.3","0.4.0","1.5.1","1.5.2","1.4.1","1.6.1","1.28","0.3","1.0.0","0.20-38","0.2.2","2.0.3","0.10.1","0.2.0","1.7.4","1.5","1.1","7.3-51.5","1.2-18","3.6.3","0.9","0.1.6","1.6.0","0.6.0","0.17.0","0.5.0","3.1-144","4.1.4","1.4.3","2.0.3","1.10-0","1.1.0","0.3.3","2.4.1","1.0.4","1.3.1","1.3.1","0.3.0","0.5.16","0.4.5","2.1","1.3-2","0.11","0.3.5","1.1.0","1.4.0.2","3.6.3","3.6.3","1.4.6","1.4.0","2.1.3","1.0.2","1.0.0","1.3.0","3.6.3","1.0.1","3.6.3","0.2.4","2.1.2","0.12","1.2.5","1.8-4","2.2.1","2.0.4"]}]}]}
+</script>
+<!--/html_preserve-->
+</div>
+</div>
+
+</div> <!-- topics -->
+
+<div class="topicsContainer">
+<div class="topicsPositioner">
+<div class="band">
+<div class="bandContent topicsListContainer">
+
+<!-- begin doc-metadata -->
+<div id="doc-metadata">
+<h2 class="title toc-ignore" style="display:none;">Linear Regression</h2>
+</div>
+<!-- end doc-metadata -->
+
+</div> <!-- bandContent.topicsListContainer -->
+</div> <!-- band -->
+</div> <!-- topicsPositioner -->
+</div> <!-- topicsContainer -->
+
+
+</div> <!-- bandContent page -->
+</div> <!-- pageContent band -->
+
+
+
+
+<script>
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+
+</body>
+
+</html>
