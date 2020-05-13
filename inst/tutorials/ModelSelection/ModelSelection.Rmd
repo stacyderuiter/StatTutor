@@ -1,0 +1,311 @@
+---
+title: "Model Selection for Regression"
+output: 
+  learnr::tutorial:
+    progressive: TRUE
+    allow_skip: TRUE
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(mosaic)
+library(fastR)
+library(fastR2)
+library(RColorBrewer)
+library(wordcloud)
+library(car)
+theme_set(theme_bw(base_size=16))
+# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5,
+  message = FALSE, warning = FALSE)
+tutorial_options(exercise.eval = FALSE)
+
+grateful <- read.csv('http://sldr.netlify.com/data/gratitude-experiment.csv') 
+
+grateful2 <- grateful %>%
+  filter(group != 'events') %>%
+  mutate(group = factor(group))
+```
+
+## Learning Outcomes
+
+We have some metrics and tests that allow us to compare the "goodness" of pairs of models, and help us to decide whether or not individual predictor variables are useful for predicting a given response. But as the number of candidate predictors grows, the number of possible models (with some subset of the predictors) gets huge.  How is a statistican to choose which one is best? 
+
+By the end of the module you will learn some concepts and rules of thumb to guide this process of **Model Selection.**
+
+You will:
+
+1) Consider the process and goals of model selection, understanding that there is no one "best" objective way to choose a single best statistical model
+2) Interpret $r^2$ (the squared correlation coefficient) as $\frac{SSM}{SST}$: the proportion of the total response variance that is explained by the model
+3) Be able to define and compute Akaike's Information Criterion (AIC), describing how it balances maximizing the model-data match while minimizing the size of the model (number of parameters)
+4) Compare regression models using AIC
+
+*These materials come from your text book, FAStR2 mainly Chapter 7.2 and 7.5*
+
+## Preview
+If you were not in class on May 7, if you could use a second look at the material we discussed, be sure to [review the class video](https://web.microsoftstream.com/video/fa2446e4-f0ac-4a61-a7f5-77cb7465691b) before doing this tutorial.
+
+[Supporting materials are also on Moodle](). 
+
+**Specifically, make sure you took the time to review the [edited slides](https://moodle.calvin.edu/mod/page/view.php?id=1021942), checking out the examples of forward and backward stepwise selection that I added after class.**
+
+After Thursday, we have a sense of *one* way to choose the "best" of a set of candidate models, but there are many ways to do so - in this tutorial we'll investiage a few.
+
+## Proportion Variance Explained
+One way of measuring how closely a model fits a dataset is to try to measure how big the residuals are: how close do model predictions get to the dataset?
+
+One statistic we've used in the past to try to quantify this difference is the correlation coefficient, $r$.
+
+$$ r = \frac{1}{(n-1)} \sum_{i=1}^n \bigg{(}  \frac{(x_i - \bar{x})}{s_x} \cdot \frac{(y_i - \bar{y})}{s_y} \bigg{)}$$
+
+With some algebra, it is possible to demonstrate that the *square* of this correlation coefficient, $r^2$, is:
+
+$$ r^2 = \frac{SSM}{(SSM + SSE)} = \frac{SSM}{SST}$$
+
+Where $SSM$ is the sum of squares for the model (variation explained by the model); $SSE$ is the residual sum of squares (variation not explained by the model); and $SST$ is the total variation of the response. (*Note that some authors and software use $R^2$ and some $r^2$ but it's the same quantity in both cases.*)
+
+In other words, **$r^2$ gives the proportion of the total variance in the response that is explained by a model**.
+
+### Bigger is Better
+Clearly, larger values of $r^2$ (closer to the upper bound of 1) indicate a closer match between the data and a model.
+
+And the $r^2$ values are, pleasantly, on an *absolute* rather than a relative scale; so it would seem that we can compare them across models and datasets to get a sense of how "good" a model is.
+
+Unfortunately, it's not that simple. Basically, it's because explaining a set proportion of the response variance is *harder* in some scenarios than others.  Measuring some physical quantity in a controlled physics lab experiment? If your $r^2$ isn't huge, it means you messed up.  Measuring a score indicating subjective happiness in people? An $r^2$ of 0.1 might be a cause to rejoice.
+
+I recommend reporting and thinking about $r^2$ values strictly in terms of the proportion of variance explained, rather than using them to decide a model is "good" or "bad" based on some universal $r^2$ threshold value.
+
+## Adjusted $r^2$
+*Text book reference: FAStR2 Chapter 7.2.1*
+
+When predictors are *added* to a regression model, its residuals can either get smaller, or stay the same. They won't get larger.
+
+Therefore, adding more predictors to a regression (even if they aren't particularly good ones) tends to increase $r^2$ by a small amount.
+
+This makes $r^2$ a dubious candidate for model comparison -- it's clearly biased to select models with more predictors as "better" (higher $r^2$).
+
+One option is to adjust the formula for computing $r^2$ to correct for this phenomenon.
+
+Recall, we said that $r^2 = \frac{SSM}{SST}$, with $SST = SSM + SSE$.  So we can rearrange:
+
+$$ r^2 = \frac{SSM}{(SSM + SSE)} =  \frac{SST - SSE}{SST} = 1 - \frac{SSE}{SST} = 1 - \frac{SSE/n}{SST/n}$$
+
+In the last expression, if we substitute the appropriate degrees of freedom $(n - k - 1)$ (on the top) and $(n - 1)$ (on the bottom), we get the "adjusted" $r^2$,
+
+$$r^2_{adj}  = 1 - \frac{SSE/(n - k - 1)}{SST/(n - 1)} = 1 - \frac{MSE}{MST}$$
+
+This value is a little bit less straightforward to interpret than the original, but does have the desirable property of not automatically growing larger when more predictors are added to a model.
+
+Specifically, $r^2_{adj}$ will increase if a predictor is added to a linear regression model, and it improves the fit *more* than the expected improvement obtained by adding a random predictor that is independent of the response variable.
+
+## Computing $r^2$ values
+R's model `summary()` returns both the "regular" and adjusted $r^2$ values, labelled `Multiple R-squared` and `Adjusted R-squared` on the second-to-last line of the `summary()` output.
+
+- Try adding one or more variables from the `grateful` dataset to a model predicting `gratitude_score` as a function of `group` (this is the same gratitude dataset used in our previous ANOVA tutorial). 
+- How do $r^2$ and adjusted $r^2$ change...
+  - If you add a predictor that is "good" according to ANOVA/t-test?
+  - If you add one that is *not* "good" according to ANOVA/t-test?
+
+```{r grateful-r, exercise = TRUE}
+summary(lm(gratitude_score ~ group, data = grateful))
+```
+
+```{r grateful-r-hint-1}
+summary(lm(gratitude_score ~ group, data = grateful))
+# add a good predictor: both r^2 go up
+summary(lm(gratitude_score ~ group + life_rating, data = grateful))
+```
+
+```{r grateful-r-hint-2}
+summary(lm(gratitude_score ~ group, data = grateful))
+# add a good predictor: both r^2 go up
+summary(lm(gratitude_score ~ group + life_rating, data = grateful))
+# add a bad predictor: only un-adjusted r^2 goes up
+summary(lm(gratitude_score ~ group + life_rating + exercise_hours, data = grateful))
+```
+
+## Using $r^2$
+We could envision using $r^2$ as a criterion for model selection, preferring models with higher values.
+
+In practice, this is seldom done; instead, other criteria are preferred (often p-values, information criteria (defined next), or predictive performance). Then, the $r^2$ (probably adjusted) value is reported as an additional piece of information quantifying the model's goodness-of-fit.
+
+So, if we don't use $r^2$ to choose the best from a set of models, what *do* we use?
+
+## Information Entropy
+
+![Claude Shannon](https://spectrum.ieee.org/image/MjczMTQ1OQ)
+
+In an [an incredibly influential 1948 paper](http://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf), Claude Shannon laid out the foundations of Information Theory, a mathematical way of thinking about information and communication, signal and noise.
+
+**In the video below, please watch from 41:01 to 48:40 (link begins at the right point).** (*Of course, watch more if you want. Note that this is background information that is foundational/peripheral to the content of this section - if you must skip something for lack of time this is it.*)
+
+<iframe width="644" height="362" src="https://www.youtube.com/embed/VVtkTimsJtY?start=2463" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+## Akaike's Information Criterion
+
+Information theory has influenced many fields, including statistics. In 1974, Japanese statistician Hirotugu Akaike
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Akaike.jpg/330px-Akaike.jpg)
+
+used information theory to [derive a new criterion, now known as Akaike's Information Criterion (AIC),](http://bayes.acs.unt.edu:8083/BayesContent/class/Jon/MiscDocs/Akaike_1974.pdf) to allow comparison of a set of statistical models fitted to a dataset.
+
+The basic idea is to quantify *information loss*.  Imagine that data is generated by process $f$.  We propose several models ($g_1$, $g_2$, $g_3$) to represent the data-generating process $f$.  AIC measures the relative amount of information *lost* by approximating $f$ with $g_1$ or $g_2$ or $g_3$ (etc.).  AIC provides a *relative* measure of information loss, not an absolute one (since $f$ is not known); but a *smaller* AIC corresponds to *less* information loss by a given model.
+
+*Akaike's paper (linked above) should be accessible to you if you are interested in the details, although you won't be held responsible for its content.*
+
+### Pause for Reflection
+If you have time, check out Hirotugu Akaike's musings in 2006, on the occasion of receiving the 2006 Kyoto Prize in Basic Sciences.
+
+<iframe width="483" height="362" src="https://www.youtube.com/embed/R28zmilcqnk" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+## AIC Definition
+
+AIC is defined as:
+
+$$ \text{AIC} = 2k - 2(\hat{\ell})$$
+
+Where $k$ is the size of the model (number of parameters being estimated), and $\hat{\ell}$ is the maximum value of the (base $e$) log-likelihood fuction.
+
+- The first term, $2k$, *inflates* the AIC value, causing *larger* models to have *worse* AIC values. This is often thought of as a "penalty" on model size.
+- The second term, $-2\hat{\ell}$, means that (better-fitting) models with higher log-likelihoods have better AIC values.
+
+*The direct connection between this and Shannon's information theory is subtle, and is left to the exploration of the curious student who wants to read both of their papers...*
+
+This definition of AIC can be used for *any* statistical model fitted via maximum-likelihood estimation - a class of models *much* larger than just regression models, of course!
+
+## AIC defined using RSS = SSE
+*Text book reference: FAStR2 Chapter 7.2.2*
+
+We can consider an alternate definition of AIC specifically for linear regression.
+
+Recall that the MLE for $\sigma^2$ (the residual variance) was $\frac{RSS}{n} = \frac{\sum_{i-1}^{n} (y_i - \hat{y}_i)^2}{n}$.
+
+And these residuals, of course, have a normal distribution.  
+
+We recall from the [Beyond Least Squares tutorial]() that the likelihood function for a regression model is
+
+$$L(\beta_0, \beta_1, \sigma; \mathbf{x}, \mathbf{y}) = \prod_{i = 1}^n \frac{1}{\sigma \sqrt{2\pi}} e^{\frac{- (e_i - 0)^2}{2 \sigma^2}} = \prod_{i = 1}^n \frac{1}{\sigma \sqrt{2\pi}} e^{\frac{- (y_i - \beta_0 - \beta_1x_i)^2}{2 \sigma^2}}$$
+
+with log-likelihood
+
+$$ \ell(\beta_0, \beta_1, \sigma; \mathbf{x}, \mathbf{y}) = \sum_{i = 1}^{n} -log(\sigma) - \frac{1}{2} log(2\pi) - \frac{(y_i - \hat{y}_i )^2}{2\sigma^2}$$
+
+### A constant
+At the MLE, $\sigma^2 = \hat{\sigma}^2 = \frac{RSS}{n}$, and the term with the $\pi$ is a constant that depends on the dataset but not the model or its parameters; let's call it $C_1$. Then we get
+
+$$\hat{\ell} = C_1 - \frac{n}{2} log(\hat{\sigma}^2) - \frac{1}{2\hat{\sigma}^2} RSS = C_1 - \frac{n}{2} log(\frac{RSS}{n}) - \frac{n}{2RSS} RSS$$
+
+### Another constant
+
+Now it's clear the last term $- \frac{n}{2RSS} RSS = \frac{n}{2} = C_2$ is another constant not dependent on the model, only the data; so let's define $C_3 = C_1 + C_2$. Then we have
+
+$$ \hat{\ell} = C_3 - \frac{n}{2} \text{log}(\frac{RSS}{n}) = C_3 - \frac{n}{2}\text{log}(RSS) + \frac{n}{2}\text{log}(n)$$
+
+### Yet another constant
+Again, the last term is a constant ($C_4$) with respect to the model, depending only on the data; so we have $C = C_3 + C_4$ and
+
+$$\hat{\ell} = C - \frac{n}{2}\text{log}(RSS)$$
+
+### Subbing into AIC
+
+We defined AIC as:
+
+$$AIC = 2k - 2\hat{\ell}$$
+
+
+So, substituting our expression for $\hat{\ell}$ for a linear regression, but omitting the constant since AIC is a relative measure anyway, we get
+
+$$ AIC = 2k  - 2\bigg{[} -\frac{n}{2} \text{log}(RSS)\bigg{]}$$
+$$ = 2k + n\text{log}(RSS)$$
+
+Nice!
+
+
+R functions `AIC()` and `extractAIC()` compute the AIC for fitted `lm()` models. (Note that they don't agree on absolute AIC scores, since they include/exclude different constants (our $C$s from the derivation above) in the result; but as long as you use the same R function on all models you wish to compare, it's fine, since AIC is only a relative value anyway.)
+
+## AIC Practice
+We can use AIC to choose the "best" of a pair (or a larger group) of models.
+
+For example, last week we used ANOVA to decide whether `group` ("gratitude", "hassles", and "events") is a good predictor of `gratitude` score:
+
+```{r}
+car::Anova(lm(gratitude_score ~ group, data = grateful))
+```
+
+We can make the same comparison with AIC.
+
+First, we find the AIC for the full model with the `group` predictor:
+
+```{r}
+AIC(lm(gratitude_score ~ group, data = grateful))
+```
+
+Hmmm...this number means **nothing** in isolation. The only way to get meaning from it is to compare it to the AIC for *another model* fitted to the *same exact dataset* and see which is better (smaller).
+
+Do the rest of the comparison: what is the AIC of the intercept-only model, and which model is better according to AIC?
+
+```{r grateful-AIC, exercise = TRUE}
+
+```
+
+```{r grateful-AIC-hint-1}
+AIC(lm(gratitude_score ~ 1, data = grateful))
+```
+
+```{r grateful-AIC-hint-2}
+AIC(lm(gratitude_score ~ 1, data = grateful))
+AIC(lm(gratitude_score ~ group, data = grateful))
+```
+
+```{r grateful-AIC-hint-3}
+AIC(lm(gratitude_score ~ 1, data = grateful)) -
+AIC(lm(gratitude_score ~ group, data = grateful))
+```
+
+```{r grateful-AIC-quiz, echo = FALSE}
+quiz(question("What is the difference in AIC between the two gratitude models you just fitted?",
+              answer("17.4; the model with the group predictor has lower AIC.", correct = TRUE),
+              answer("17.4; the intercept-only model has lower AIC"),
+              answer("The AIC values for the two models are about the same"),
+              answer("834.5; the model with the group predictor has lower AIC."),
+              random_answer_order = TRUE,
+              allow_retry = TRUE),
+     question("Which model is better, according to AIC?",
+              answer("Intercept-only model"),
+              answer("Model with group predictor", correct = TRUE, message = "Yes. Lower AIC is better"),
+              answer("They are both about the same"),
+              random_answer_order = TRUE,
+              allow_retry = TRUE)
+     )
+```
+
+## How big a difference?
+
+Strictly and simply using AIC, we can say that a model with *lower* AIC is *better* (regardless of how small the difference between the AIC values is).
+
+In practice, if using AIC to choose between two models, analysts often require some minimal AIC improvement to justify *adding* an additional parameter/predictor to a model.  (Common thresholds are 2, 3, or maybe 6).  So, one might not prefer a larger model unless it reduces AIC by *at least 2-3 units*.
+
+For a **lot** more excellent information about practical use of AIC, the interested reader can check out the classic book by Burnham and Anderson:
+
+![[](https://www.springer.com/gp/book/9780387953649)](https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1348034206i/623279._UY400_SS400_.jpg)
+
+## Practical AIC Use
+
+There are a few different ways to use AIC to choose models. These mirror the options discussed in class on May 7.
+
+- **Stepwise Selection** We can do forward or backward (or both) stepwise selection (just as we did on May 7 with ANOVA), but using AIC rather than ANOVA-derived p-values to choose which model is better. This has all the same drawbacks as stepwise selection using p-values.
+  - If using AIC as the criterion, the R function `step()` automates the process. We call it via: `step(fitted_model, direction = "backward")` (`direction` can also be `"forward"` or `"both"`).
+- **Selective Selection** (*Unlike the rest, this isn't a widely used name - I made it up just for you.*) We can "control for" effects of a set of nuisance variables that we think probably affect the response, but are not of interest in our study, keeping them in all models; then use AIC to compare models with/without one or a few key potential predictors that we really are interested in.
+- **All-subsets Selection** We can compute AICs for *all possible subsets* of a "full" model with a suite of predictors of interest. (This may be *a lot* of models). Unlike stepwise selection, this is guaranteed to find the best model in the set, but it can be time-consuming
+  - the function `dredge()` from package `MuMIn` automates the process
+- **Model Averaging** We can assign **weights** to each of a set of candidate models based on their AIC scores. First we compute the relative likelihood of each model: $ e^{ -0.5 \Delta \text{AIC}}$, where $\Delta \text{AIC}$ is the difference between the AIC of the current model and the AIC of the best one in the set. Then, we divide by the sum of all the relative likelihoods for the set of models. (These weights are between 0 and 1 and sum to 1 for all models in the set.) Finally, rather than choosing one best model, we make predictions using a weighted average of all the models of interest in our comparison set.
+
+**We will not practice all of these (check out STAT 245 if you want to...), but they are presented here to give you an idea of what can be done with the tools -- especially ANOVA and AIC -- now at your disposal.**

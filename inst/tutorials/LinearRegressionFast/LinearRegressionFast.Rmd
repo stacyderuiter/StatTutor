@@ -555,13 +555,23 @@ Otherwise, the approach is exactly the same, but with a cool twist:
 
 (You can also [watch directly on YouTube](https://www.youtube.com/watch?v=WWqE7YHR4Jc) if you prefer.)
 
-## Model Predictions with Uncertainty (CIs and PIs)
+## Model Predictions
 
 So far, we learned to generate confidence intervals (or do hypothesis tests) for the slope and intercept parameters of a simple linear regression.
 
 But often, **we are interested in using fitted regression models to** *predict* **response variable values in specific scenarios.** In other words, we're sometimes more interested in the predicted response variable values $\hat{y}$ than the parameter estimates $\beta_0$ and $\beta_1$.
 
 It's a simple matter to compute point estimates of these fitted values: if we have an x-value of interest (let's call it $x_*$), we just compute $\hat{\beta}_0 + \hat{\beta}_1x_*$ to get our estimate.
+
+### Graphing Predictions
+We can compute numerical predictions using the model equation (or `predict()` - see below).  But often it's also desirable to show a plot of the data with the fitted regression line overlaid. Luckily, R function `gf_lm()` makes it easy:
+
+```{r, echo = TRUE}
+gf_point(gratitude_score ~ life_rating, data = grateful) %>%
+  gf_lm()
+```
+
+## Model Predictions with Uncertainty (CIs and PIs)
 
 But what about uncertainty? 
 

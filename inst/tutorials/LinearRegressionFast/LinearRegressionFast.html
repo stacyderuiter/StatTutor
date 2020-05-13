@@ -595,11 +595,21 @@ Anova(lm(gratitude_score ~ life_rating, data = grateful))</code></pre>
 <p>(You can also <a href="https://www.youtube.com/watch?v=WWqE7YHR4Jc">watch directly on YouTube</a> if you prefer.)</p>
 </div>
 </div>
-<div id="section-model-predictions-with-uncertainty-cis-and-pis" class="section level2">
-<h2>Model Predictions with Uncertainty (CIs and PIs)</h2>
+<div id="section-model-predictions" class="section level2">
+<h2>Model Predictions</h2>
 <p>So far, we learned to generate confidence intervals (or do hypothesis tests) for the slope and intercept parameters of a simple linear regression.</p>
 <p>But often, <strong>we are interested in using fitted regression models to</strong> <em>predict</em> <strong>response variable values in specific scenarios.</strong> In other words, we’re sometimes more interested in the predicted response variable values <span class="math inline">\(\hat{y}\)</span> than the parameter estimates <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>.</p>
 <p>It’s a simple matter to compute point estimates of these fitted values: if we have an x-value of interest (let’s call it <span class="math inline">\(x_*\)</span>), we just compute <span class="math inline">\(\hat{\beta}_0 + \hat{\beta}_1x_*\)</span> to get our estimate.</p>
+<div id="section-graphing-predictions" class="section level3">
+<h3>Graphing Predictions</h3>
+<p>We can compute numerical predictions using the model equation (or <code>predict()</code> - see below). But often it’s also desirable to show a plot of the data with the fitted regression line overlaid. Luckily, R function <code>gf_lm()</code> makes it easy:</p>
+<pre class="r"><code>gf_point(gratitude_score ~ life_rating, data = grateful) %&gt;%
+  gf_lm()</code></pre>
+<p><img src="LinearRegressionFast_files/figure-html/unnamed-chunk-9-1.png" width="576" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="section-model-predictions-with-uncertainty-cis-and-pis" class="section level2">
+<h2>Model Predictions with Uncertainty (CIs and PIs)</h2>
 <p>But what about uncertainty?</p>
 <div id="section-ways-to-conceptualize-uncertainty-in-predictions" class="section level3">
 <h3>Ways to Conceptualize Uncertainty in Predictions</h3>
@@ -640,7 +650,7 @@ pred_int &lt;- predict(m, newdata = new_data,
   gf_lm(interval = &#39;prediction&#39;, color = &#39;black&#39;, 
         fill = &#39;seagreen&#39;) %&gt;%
     gf_lm(interval = &#39;confidence&#39;) </code></pre>
-<p><img src="LinearRegressionFast_files/figure-html/unnamed-chunk-11-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p><img src="LinearRegressionFast_files/figure-html/unnamed-chunk-12-1.png" width="576" style="display: block; margin: auto;" /></p>
 </div>
 <div id="section-confidence-and-prediction-intervals-practice" class="section level2">
 <h2>Confidence and Prediction Intervals: Practice</h2>
