@@ -572,8 +572,6 @@ y-axis.
 
 ```{r, q-v-c, exercise = TRUE}
 gf_point( births ~ wday, data = Births1978)
-gf_violin(births ~ wday, data = Births1978) %>%
-gf_sina( births ~ wday, data = Births1978)
 ```
 
 All those dots kind of run together.  Let's try some improvements:
@@ -603,7 +601,7 @@ extra space.  This makes our data easier to see (because it takes up more
 space).  But sometimes this distorts our view of the data.  We can tell
 R exactly what range to use using `gf_lims()`. Here is an example:
 
-```{r gf-lims, exerciese = TRUE}
+```{r gf-lims, exercise = TRUE}
 gf_violin(births ~ wday, data = Births1978) %>%
   gf_sina(births ~ wday, data = Births1978) %>%
   gf_lims(y = c(0, NA))
@@ -626,7 +624,7 @@ The most interesting plots have multiple variables, but sometimes it
 is useful to look at just one variable.  In this case, we only need one 
 slot in our formula.  For example, to make a histogram we use
 
-```{r histogram, exericse = TRUE}
+```{r histogram, exercise = TRUE}
 gf_histogram( ~ births, data = Births1978) 
 ```
 
