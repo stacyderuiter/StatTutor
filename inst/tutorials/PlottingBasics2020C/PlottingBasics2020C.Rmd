@@ -1,0 +1,211 @@
+---
+title: "More Practice with the ggformula Package"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+  
+```{r setup, include=FALSE}
+library(learnr)
+library(tibble)
+library(ggformula)
+library(ggthemes)
+library(mosaic)
+library(palmerpenguins)
+library(readr)
+library(NHANES)
+data("NHANES", package = "NHANES")
+theme_set(theme_bw())
+D <- data.frame(
+  group = LETTERS[1:3],
+  count = c(20, 25, 18)
+)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+```
+
+
+<style type="text/css">
+  span.boxed {
+    border:5px solid gray;
+    border-radius:10px;
+    padding: 5px;
+  }
+span.invboxed {
+  border:5px solid gray;
+  padding: 5px;
+  border-radius:10px;
+  color: white;
+}
+
+table, td, th { border:0px; }
+
+/* cellpadding */
+  th, td { padding: 5px; }
+
+</style>
+  
+
+## Data Sets
+
+This tutorial is designed to give you some more practice with `ggformula` 
+and to introduce a few more features of the system. Mostly you will get 
+a chance to explore on your own and try things out.
+
+Here are four data sets you can use in this tutorial.
+
+* `HELPrct` has data from a study of people addicted to alcohol, cocaine, or heroine
+* `KidsFeet` has information about some kids' feet.
+* `penguins` has some information about some penguins.
+* `NHANES` has lots of variables for 10,000 people in a health study.
+
+To find out more about the data sets use `?HELPrct`, `?KidsFeet`, `?penguins`,
+or `?NHANES`.
+To see the first few rows of the data, you can use `head()`.
+
+```{r, head, exercise = TRUE}
+head(penguins)
+```
+
+Another useful command for looking at the data is `glimpse()`. It will show the
+first few values for each variable (like head does) but it flips this around so
+each variable is on a row, which often works better on a screen or piece of
+paper.
+
+To get a list of functions available in `ggformula`, run this code chunk.
+
+```{r, apropos, exercise = TRUE}
+# list all functions starting gf_
+apropos("gf_")
+```
+
+#### Your Turn
+
+Make some plots to explore one or more of these data sets.
+
+* Experiment with different types of plots.
+* Use mapping and/or facets to reveal groups.
+* You can put more than one plot in a code chunk, but we've provided two chunks
+in case you want to separate your work that way.  Use one chunk for experimenting
+and copy and paste your favorites to the other chunk if you like.
+
+```{r, explore, exercise = TRUE}
+gf_point(length ~ width, data = KidsFeet)
+head(KidsFeet)
+?KidsFeet
+```
+
+```{r, explore-more, exercise = TRUE}
+
+```
+
+Post your favorite plot(s) here by making a new slide in this google presentation:
+
+ * [Favorite Plots Google Slides](https://docs.google.com/presentation/d/16wu5IVPkXtuCAybGbF5vxF3GQ_h4xqU3syFL3S6Gkq4/edit?usp=sharing)
+ 
+You may work in a group of 2--3, but then you must submit as many plots
+as there are people in your group.
+
+## More Customization
+
+You may be wondering how to have more control over 
+things like:
+
+* the colors, shapes, and sizes chosen when mapping attributes
+* labeling, including titles and axis labels
+* fonts, colors, and sizes of text
+* color of plot elements like background, gridlines, facet labels, etc.
+
+As you can imagine, all of these things can be adjusted pretty much however you
+like.  We will cover a few of the most common options here.
+
+## Custom axis labels
+
+One of the most common customizations you will want to make to your plots will
+be to change the title, subtitle, and axis labels (and maybe add a caption).
+All these things can be done by chaining (`%>%`) the function `gf_labs()` with a
+plot layer.
+
+Check out the example below, and try changing the text labels to ones that make
+sense to you. Note that all the input arguments to `gf_labs` are optional. So,
+for example, you could alter *only* the x-axis label by chaining the command
+`gf_labs(x='My X Axis Label')` with your plot.
+
+```{r gf-labs-example, exercise=TRUE}
+gf_bar(~Race1, data = NHANES) %>%
+  gf_labs(title = "Race in NHANES Data",
+    subtitle = "(2009-2012)",
+    caption = "These data were collected by the US National Center for Health Statistics (NCHS), which has conducted a series of health and nutrition surveys since the early 1960's.",
+    x = "",  # empty quotes here results in no x-axis label!
+    y = "Number of Observations"
+  )
+```
+
+## Custom axis limits
+
+One way to zoom in (or out) is to filter the dataset so that only the data you
+wish to plot is included.
+
+You can also use `gf_lims()` to set custom x and y axis limits. 
+
+1. Try different axis limits to see how the plot changes.
+2. What happens if you set the min or max value for an axis to NA? (Hint: compare the plot to a plot with *no* custom axis limits.)
+3. What happens if you set the axis limits to be c(max, min) instead of c(min,max)?
+
+```{r axis-limits, exercise=TRUE}
+gf_point(births ~ day_of_year, data = Births1978) %>%
+  gf_lims(x = c(100, 200), y = c(8000, 9000))
+```
+
+## Axis Labels that Don't Fit
+
+Sometimes - particularly for bar graphs of categorical variables with long category names - axis tick labels overlap in an ugly way. For example:
+
+```{r, echo=TRUE, fig.width=4}
+gf_bar( ~ Education, data = NHANES)
+```
+
+### Flip the Axes
+
+If you have already made your plot and notice that there isn't room
+for the labels, one simple solution to solve this problem is to flip 
+the x and y axes of the plot.
+
+```{r, coord-flip, exercise = TRUE, echo=TRUE}
+gf_bar( ~ Education, data = NHANES) %>%
+  gf_refine(coord_flip())
+```
+
+If you design you plot that way from the beginning,
+you can just flip the formula around.  But there is a catch: 
+**Formulas must always have a right hand side**, so we need to
+put a dot on the right side as an empty placeholder:
+
+```{r, native-horizontal, exercise = TRUE, echo=TRUE}
+gf_bar(Education ~ ., data = NHANES) 
+```
+
+### Rotate the Labels
+
+Another solution is to rotate the axis labels. We can do that by modifying the `angle` and `hjust` values for the x tick labels in the plot's `theme`.  `angle` is the angle in degrees by which to rotate the labels, and `hjust` moves them up and down (positive `hjust` moves down, and negative moves up). For example:
+
+```{r, rotate-labels, exercise = TRUE, echo=TRUE}
+gf_bar( ~ Education, data = NHANES) %>% 
+    gf_theme(axis.text.x = element_text(angle = 65, hjust = 1))
+```
+
+Try adjusting `angle` and `hjust` to see how those arguments work.
+
+### Your Turn!
+The dataset at <http://sldr.netlify.com/data/MammalMetabolicRates.csv> provides data on mammal metabolic rates.  Read it in and make a bar graph of the number of observations per Order (or per Family, Genus, or Species) with legible axis tick labels.
+
+```{r mmr, exercise=TRUE, fig.height = 5}
+Metabolic <- 
+  read_csv('http://sldr.netlify.com/data/MammalMetabolicRates.csv')
+Metabolic
+```
+

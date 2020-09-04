@@ -1,0 +1,412 @@
+---
+title: "Plots with the ggformula package (NHANES)"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+  
+```{r setup, include=FALSE}
+library(learnr)
+# library(checkr)
+# library(statPREP)
+library(tibble)
+library(ggformula)
+library(ggthemes)
+library(mosaic)
+library(NHANES)
+library(readr)
+theme_set(theme_bw())
+data(NHANES, package = "NHANES")
+D <- data.frame(
+  group = LETTERS[1:3],
+  count = c(20, 25, 18)
+)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.align = "center",
+  fig.width = 6, fig.height = 2.5)
+```
+
+
+<style type="text/css">
+  span.boxed {
+    border:5px solid gray;
+    border-radius:10px;
+    padding: 5px;
+  }
+span.invboxed {
+  border:5px solid gray;
+  padding: 5px;
+  border-radius:10px;
+  color: white;
+}
+
+table, td, th { border:0px; }
+
+/* cellpadding */
+  th, td { padding: 5px; }
+
+</style>
+  
+## Acknowledgements
+
+This tutorial was created based closely on the "Introduction" tutorial provided with the `ggformula` package. 
+
+This tutorial assumes you are already familiar with the basics of 
+`ggformula`, perhaps from the tutorial about births in the United States.
+
+
+## NHANES data
+
+Time for some new data, some review, a few new wrinkles (like bar charts).
+
+The `NHANES` dataset contains measurements from 10,000 human subjects in
+the National Health and Nutrition Evaluation Survey.  To learn more about the data,
+try one or more of these:
+
+  * `?NHANES`
+  * `names(NHANES)`
+  * `glimpse(NHANES)`
+  * `inspect(NHANES)`
+
+```{r, NHANES, exercise = TRUE}
+?NHANES
+```
+
+Because `NHANES` has so many more (and more kinds of) variables, 
+we can create even more kinds of plots with `NHANES`.
+
+## Histograms
+
+### The basics
+
+A histogram can help you visualize the distribution of one **quantitative** variable.
+
+Histograms are bit different from scatter plots:
+
+  * Instead of using `gf_point()`, we will use `gf_histogram()`.  (You probably
+  guessed that.)
+  
+  * We only need to tell R about one variable (the x-variable).  R will calculate the 
+  information for the y-variable for us!
+  
+  * So we use a formula with only one variable in it:  `~ x`.  (Notice that `x` goes on 
+  the right side.)
+  
+### Practice with histograms
+
+1. Try the example below as-is by hitting "Run Code".
+
+2. Now experiment with plotting different **quantitative** variables from the `NHANES`
+dataset. (Remember you can use `?` or `names(NHANES)` or
+`glimpse(NHANES)` to get the variable names and more information.)
+
+3. You can change the size of the bins using either `bins` (the number of bins)
+or `binwidth` (the width of the bins).  Experiment with different bins.  (If you
+don't provide `bins` or `binwidth` information, R will just make something up.
+You can usually do better if you take control.)
+
+4. To get density instead of counts on the y-axis, switch from function
+`gf_histogram()` to `gf_dhistogram()`.
+
+
+```{r hist, exercise=TRUE}
+gf_histogram( ~ BPSysAve, data = NHANES, bins = 30)
+```
+
+## Density plots
+
+A density plot is a smoothed contour tracing the shape of a dataset's
+distribution.  The `gf_density()` and `gf_dens()` functions produce these plots
+(in slightly different ways).  To compare with a histogram apples-to-apples, we
+will use a **density histogram** (`gf_dhistogram()`).
+
+<!-- [^dhistogram] -->
+
+<!-- [^dhistogram]: A density histogram is rescaled so that the **total area** -->
+<!-- of the histogram is **always 1**. -->
+
+```{r, hist-dens, exercise = TRUE}
+gf_dhistogram( ~ BPSysAve, data = NHANES) 
+gf_dens( ~ BPSysAve, data = NHANES) 
+```
+
+#### Your turn
+
+ 1. Use `%>%` to overlay the two layers.
+
+ 2. Use `size = 2` or `size = 3` to make the density curve thicker.
+ 
+ 3. Change `gf_dens()` to `gf_density()`.
+ 
+ 4. Can you make the density (use `gf_density()`) plot a different color and
+ partly transparent?  That will make it easier to see the histogram.
+ 
+ 5. Replace `BPSysAve` with a different quantitative variable.
+
+## Boxplots and violin plots
+
+Boxplots and violin plots provde a quick comparison of the distribution of 
+a quantitative variable in different groups.
+
+### Give it a try
+
+1. Run the code below to see how this works (You're plotting systolic blood
+pressure for seven groups who watch different amounts of TV each day).
+
+2. Change `gf_boxplot()` to `gf_violin()` and see what happens.
+
+3. Try changing the order of `x` and `y` in the formula -- what happens?
+
+4. If you are interested, try different variables. Remember, `y` must be
+quantitative (that is what you'll make boxplots of) and `x` must be categorical
+(that defines the groups).
+
+5. Change `gf_boxplot()` to `gf_point()`.  What happens?  Is this a useful plot?
+
+6. Now try `gf_jitter()`.  Can you figure out what this does?  (You might like to 
+set `alpha` to a smallish number.)
+
+
+```{r, boxplot-groups, exercise=TRUE}
+gf_boxplot(BPSysAve ~ TVHrsDay, data = NHANES)
+```
+
+Note: If you haven't seen these plots before, we will talk more about what they are
+later.
+
+### Just one variable?
+
+Both `gf_boxplot()` and `gf_violin()` require a **two-sided formula**, so if you want to plot just one quantitative variable you have to replace the $x$ in the formula with empty quotes "".
+
+```{r, boxplot, exercise=TRUE}
+gf_boxplot( BPSysAve ~ "", data = NHANES)
+```
+
+Boxplots are usually most useful to compare the distribution of a variable
+between several groups.  (If we have only one variable, we can use histograms
+or density plots instead.)
+
+## Bar graphs
+
+Bar graphs help visualize the distribution of a **categorical** variable, 
+and we can create them with `gf_bar()`. 
+
+```{r, bar-graphs, exercise=TRUE}
+gf_bar( ~ TVHrsDay, data = NHANES)
+```
+
+### Percents and Proportions?
+What if we want to show the percent or proportion in each category, rather than the number of observations? `gf_percents()` and `gf_props()` to the rescue! Try changing the function from `gf_bar()` to `gf_percents()` or `gf_props()` and see what happens.
+
+You can also add an 'h' at the end of each function to make the plots 'horizontal' with `gf_barh()`, `gf_propsh()`, and `gf_percentsh()`. Try that too!
+
+
+```{r, prop-graphs, exercise=TRUE}
+gf_bar( ~ TVHrsDay, data = NHANES)
+```
+
+```{r, prop-graphs-hint-1}
+gf_props( ~ TVHrsDay, data = NHANES)
+```
+
+```{r, prop-graphs-hint-2}
+gf_percents( ~ TVHrsDay, data = NHANES)
+```
+
+```{r, prop-graphs-hint-3}
+gf_percentsh( ~ TVHrsDay, data = NHANES)
+```
+
+
+
+### Your Turn
+
+ 1. Create a bar graph for a different (categorical) variable.
+ 2. What happens if you use a quantitative variable?
+
+```{r, more-bar-graphs, exercise=TRUE}
+gf_bar( ~ TVHrsDay, data = NHANES)
+```
+
+## Bar graphs by groups
+
+What if you want to show a set of proportions for each of several groups?  For
+example, the NHANES data also includes a variable `Marijuana` that indicates
+whether the person has used marijuana.  Is there a relationship?
+
+```{r, echo=TRUE}
+gf_bar( ~ TVHrsDay | Marijuana, data = NHANES)
+```
+
+## Stacked bar graphs
+
+What if, instead of one figure panel per group, you want to see a stacked bar
+graph for the same data?  Here's an example.  You use the input 
+
+  * `fill= ~ variable_name` to specify the name of the variable that defines the groups
+(here, `Marijuana`).
+
+```{r, echo=TRUE}
+gf_bar( ~ TVHrsDay, fill = ~ Marijuana, data = NHANES)
+```
+
+## Side-by-Side bar graphs
+
+What if, instead of stacked bars, you want side-by-side bars? 
+Simply add the additional argument
+
+  * `position='dodge'`.
+
+```{r, echo=TRUE}
+gf_bar( ~ TVHrsDay, fill = ~ Marijuana, data = NHANES, position = 'dodge')
+```
+
+### Other groups?
+
+Try to make a similar plot to one or more of the bar graph variations shown
+above, but using a variable other than `Marijuana` to specify the groups. First,
+we will look at the `head()` of the dataset to see what variables are there -
+then it's up to you to choose one to plot, and modify the code above to make the
+figure.
+
+```{r, not-mari, exercise=TRUE}
+head(NHANES)
+```
+
+## Bar graph with pre-tabulated data
+
+Sometimes, you may be given data that is already tabulated. Instead of a dataset with one row for every case, you will have one row for every group, and a variable that gives the number of observations in each group.  For example, the simple dataset below is pre-tabulated:
+
+```{r, echo=FALSE}
+D <- data.frame(
+  group = LETTERS[1:3],
+  count = c(20, 25, 18)
+)
+D
+```
+
+We can use the function `gf_col` to make a bar graph of pre-tabulated data.
+This function always expects the counts as the `y` part of the formula, and the
+group names as `x` (after the tilde).
+
+```{r col-plot, exercise=TRUE}
+gf_col(count ~ group, data = D)
+```
+
+
+## Multiple layers with %>%
+
+We said that `gf_point()` creates a plot with points.
+This isn't quite true. Technically, it creates a **layer** with points.
+A single plot may have multiple layers. For example, you might want a scatter plot with a trend line overlaid on it, or a histogram with a standard normal curve overlaid.
+
+To create a multi-layered plot, simply
+append `%>%` at the end of the code for one layer and follow that with
+another layer. *(The `%>%` symbol is called a "pipe" because it sends the results of one operation on to the next operation for further processing)*
+
+#### Exercise
+
+1. If you run the following code as is, you will get two separate plots.
+2. Combine these two layers into a single plot by appending `%>%` at
+the end of the first line.
+3. Try adding another layer for a third variable.
+
+
+```{r multi-layers, exercise = TRUE}
+gf_density(~ BPSysAve, data = NHANES)
+gf_density(~ BPDiaAve, data = NHANES, fill = "blue")
+```
+
+<!-- #### Linear regression line -->
+
+<!-- Adding a (simple) linear regression line to a scatter plot is a relatively common task, and ggformula provides an easy way to do it with the function `gf_lm()`. -->
+
+<!-- For example, we might investigate whether there is a linear relationship between total cholesterol and weight using the NHANES data: -->
+
+<!-- ```{r, lm-example, exercise=TRUE} -->
+<!-- gf_point(TotChol ~ Weight, data = NHANES, alpha = 0.1) %>% gf_lm() -->
+<!-- ``` -->
+
+
+## Facets (Multi-panel plots)
+
+If we want to look at all 20 years of birth data, overlaying the data is likely
+to put too much information in too little space and make it hard to tell which
+data is from which year.  (Even with good color and symbol choices, deciphering
+20 colors or 20 shapes is hard.) Instead, we can put each year in separate
+**facet** or sub-plot.  By default the coordinate systems will be shared across
+the facets which can make comparisons across facets easier.
+
+There are two ways to create facets.  The simplest way is to add a vertical bar `|` to
+our formula.
+
+
+```{r, births-facets, exercise = TRUE, fig.height = 6}
+gf_point(births ~ day_of_year | year, data = Births, size = 0.5)
+```
+
+The second way is to add on a facet command using `%>%`:
+
+```{r, births-facets-wrap, exercise = TRUE, fig.height = 6}
+gf_point(births ~ day_of_year, data = Births, size = 0.5) %>%
+gf_facet_wrap( ~ year)
+```
+
+#### Practice with facets
+
+Edit the plot below to:
+
+1. make one facet for each day of the week (`wday`)
+2. map color to `year`
+
+```{r, births-facets-ex1, exercise = TRUE, fig.height = 6}
+gf_point(births ~ day_of_year, data = Births, 
+         size = 0.5, color = "blue")
+```
+
+```{r births-facets-ex1-hint}
+gf_point(births ~ day_of_year | wday, data = Births, 
+         size = 0.5, color = ~ year)
+```
+
+## Facet Grids and Facet Wraps 
+
+The faceting we did on the previous page is called facet wrapping.  If the facets
+don't fit nicely in one row, the facets continue onto additional rows.
+
+A facet grid uses rows, or columns, or both in a fixed way.
+
+Notice that after the `|` there is now a *formula* instead of a single variable.  Try generating the plot below - can you figure out what the formula does?  If you need a hint, try changing `year ~ wday` to `wday ~ year` and see what happens... 
+
+```{r, facet-grid, exercise = TRUE, fig.height = 9}
+gf_point(births ~ day_of_year | year ~ wday, data = Births, size = 0.5)
+```
+
+## The facet grid formula 
+
+Hopefully, you figured out that the facet grid formula is interpreted as "row
+variable ~ column variable" -- the resulting plot will have one row of facets
+for every value of the first variable, and one column of facets for every value
+of the second variable.
+
+#### Pracice with the facet grid formula
+
+Recreate the plot below using `gf_facet_grid()`.  This works much like
+`gf_facet_wrap()` and accepts a formula with one of three shapes
+
+* `y ~ x` (facets along both axes)
+* ` ~ x`  (facets only along x-axis)
+* `y ~ .` (facets only along y-axis; notice the important dot in this one)  
+
+(These three formula shapes can also be used on the right side of `|`.)
+
+
+```{r, facet-grid2, exercise = TRUE, fig.height = 9}
+gf_bar( ~ TVHrsDay | Marijuana ~ Gender, fill = ~ Marijuana, data = NHANES)
+```
+
+Feel free to try some other variables or other types of plots.
+
