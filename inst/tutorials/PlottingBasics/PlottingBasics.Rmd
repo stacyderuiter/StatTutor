@@ -16,6 +16,7 @@ library(ggformula)
 library(ggthemes)
 library(mosaic)
 library(NHANES)
+library(readr)
 theme_set(theme_bw())
 # data(Births78, package = "mosaicData")
 # Births78 <- Births78 %>% mutate(date = as.Date(date))
@@ -965,7 +966,7 @@ for example, you could alter *only* the x-axis label by chaining the command
 `gf_labs(x='My X Axis Label')` with your plot.
 
 ```{r gf-labs-example, exercise=TRUE}
-gf_bar(~Race1, data=NHANES) %>%
+gf_bar(~Race1, data = NHANES) %>%
   gf_labs(title = "Race in NHANES Data",
     subtitle = "(2009-2012)",
     caption = "These data were collected by the US National Center for Health Statistics (NCHS), which has conducted a series of health and nutrition surveys since the early 1960's.",
@@ -994,29 +995,47 @@ gf_point(births ~ day_of_year, data = Births1978) %>%
 Sometimes - particularly for bar graphs of categorical variables with long category names - axis tick labels overlap in an ugly way. For example:
 
 ```{r, echo=TRUE, fig.width=4}
-gf_bar(~Education, data=NHANES)
+gf_bar( ~ Education, data = NHANES)
 ```
 
 ### Flip the Axes
-One simple way to solve this problem is to flip the x and y axes of the plot.
 
-```{r, echo=TRUE}
-gf_bar(~Education, data=NHANES) %>%
+If you have already made your plot and notice that there isn't room
+for the labels, one simple solution to solve this problem is to flip 
+the x and y axes of the plot.
+
+```{r, coord-flip, exercise = TRUE, echo=TRUE}
+gf_bar( ~ Education, data = NHANES) %>%
   gf_refine(coord_flip())
 ```
 
+If you design you plot that way from the beginning,
+you can just flip the formula around.  But there is a catch: 
+**Formulas must always have a right hand side**, so we need to
+put a dot on the right side as an empty placeholder:
+
+```{r, native-horizontal, exercise = TRUE, echo=TRUE}
+gf_bar(Education ~ ., data = NHANES) 
+```
+
 ### Rotate the Labels
+
 Another solution is to rotate the axis labels. We can do that by modifying the `angle` and `hjust` values for the x tick labels in the plot's `theme`.  `angle` is the angle in degrees by which to rotate the labels, and `hjust` moves them up and down (positive `hjust` moves down, and negative moves up). For example:
 
-```{r, echo=TRUE}
-gf_bar(~Education, data=NHANES) %>% 
-    gf_theme(axis.text.x=element_text(angle=65, hjust=1))
+```{r, rotate-labels, exercise = TRUE, echo=TRUE}
+gf_bar( ~ Education, data = NHANES) %>% 
+    gf_theme(axis.text.x = element_text(angle = 65, hjust = 1))
 ```
+
+Try adjusting `angle` and `hjust` to see how those arguments work.
 
 ### Your Turn!
 The dataset at <http://sldr.netlify.com/data/MammalMetabolicRates.csv> provides data on mammal metabolic rates.  Read it in and make a bar graph of the number of observations per Order (or per Family, Genus, or Species) with legible axis tick labels.
 
-```{r mmr, exercise=TRUE}
+```{r mmr, exercise=TRUE, fig.height = 5}
+Metabolic <- 
+  read_csv('http://sldr.netlify.com/data/MammalMetabolicRates.csv')
+Metabolic
 ```
 
 
@@ -1024,10 +1043,10 @@ The dataset at <http://sldr.netlify.com/data/MammalMetabolicRates.csv> provides 
 ## Figure size in RMarkdown
 You will almost certainly want to adjust figure sizes in your own RMarkdown documents. There are several ways - you can set a file-wide default in the header of the Rmd file as is done in the STAT homework template - or you can set the figure size for one R code chunk in the chunk header, as shown below.
 
-The values of `fig.width` and `fig.height` are expected to be given in inches, by default.
+The values of `fig.width` and `fig.height` are expected to be given in inches, by default. Just add these values to the chunk header like this:
 
-```{r, echo=FALSE, fig.width = 6, fig.height = 0.7}
-knitr::include_graphics('images/fig-size.png')
+```{r echo = FALSE, results = 'asis', comment = NA}
+cat("```{r fig.width = 6, fig.height = 4}")
 ```
 
  
@@ -1041,8 +1060,14 @@ The first of these creates side by side boxplots.  The second does side-by-side 
 
 ```{r numbers1, exercise = TRUE}
 gf_boxplot(BPSysAve ~ TVHrsDay, data = NHANES)
-      mean(BPSysAve ~ TVHrsDay, data = NHANES)
+      mean(BPSysAve ~ TVHrsDay, data = NHANES, na.rm = TRUE)
 ```
+
+Why `na.rm = TRUE`?  Edit the code above to remove that part and 
+see what happens.  To R's way of thinking, if some of the values are 
+missing, you can't know what the sample mean is, so it reports NA.
+`na.rm = TRUE` says "Please remove all missing values first, then
+compute the mean for me.  Thanks!"
 
 <!-- ### Your turn -->
 
