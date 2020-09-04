@@ -410,7 +410,7 @@ gf_point(births ~ date, data = Births1978)
 Note: You can create multiple plots in the same code box, just put each
 one on a separate line.  Then you can see multiple plots at once and compare them.
 
-## Stacking layers
+## Stacking layers with %>%
 
 Want to see two (or more) plots one "on top of" the other?  Just add `%>%` at 
 the end of one plot, and the next will be layered on top of it.
@@ -612,7 +612,10 @@ gf_histogram( ~ BPSysAve, data = NHANES, bins = 30)
 A density plot is a smoothed contour tracing the shape of a dataset's
 distribution.  The `gf_density()` and `gf_dens()` functions produce these plots
 (in slightly different ways).  To compare with a histogram apples-to-apples, we
-will use a **density histogram** (`gf_dhistogram()`).
+will use a **density histogram** (`gf_dhistogram()`).[^dhistogram]
+
+[^dhistogram]: A density histogram is rescaled so that the **total area**
+of the histogram is **always 1**.
 
 ```{r, hist-dens, exercise = TRUE}
 gf_dhistogram( ~ BPSysAve, data = NHANES) 
