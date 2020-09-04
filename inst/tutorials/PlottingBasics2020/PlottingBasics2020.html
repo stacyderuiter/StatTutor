@@ -347,18 +347,20 @@ name of data set
 </div>
 <div id="section-using-formulas-to-describe-plots" class="section level2">
 <h2>Using formulas to describe plots</h2>
-<div id="section-the-tilde-wiggle" class="section level3">
-<h3>The tilde (wiggle)</h3>
-<p>The most distinctive feature of <code>ggformula</code> plots is the use of formulas to describe the positional information of a plot. Formulas in R always involve the tilde character, which is easy to overlook. It looks like this:</p>
- 
-<center>
-<h2>
-<strong> <span class="boxed"> ~ </span> </strong>
-</h2>
-</center>
-<p> </p>
-<p>Make sure you know where the tilde is located on your computer’s keyboard! It is often near the upper left-hand corner on American keyboards.</p>
-<p><img src="images/keyboard-tilde.png" width="40%" style="display: block; margin: auto;" /></p>
+<!-- ### The tilde (wiggle) -->
+<!-- The most distinctive feature of `ggformula` plots is the use of formulas to  -->
+<!-- describe the positional information of a plot. -->
+<!-- Formulas in R always involve the tilde character, which is easy to overlook. -->
+<!-- It looks like this:   -->
+<!-- &nbsp; -->
+<!-- <center> -->
+<!--   <h2><strong> <span class="boxed">&nbsp;~&nbsp;</span> </strong>  -->
+<!--   </h2></center> -->
+<!--   &nbsp; -->
+<!-- Make sure you know where the tilde is located on your computer's keyboard! It is often near the upper left-hand corner on American keyboards. -->
+<!-- ```{r echo = FALSE, fig.align = "center", out.width = "40%"} -->
+<!-- knitr::include_graphics("images/keyboard-tilde.png") -->
+<!-- ``` -->
 <!-- #### Exercise -->
 <!-- Find the ![](images/tilde-small.png) on your keyboard and type `births ~ date` in  -->
 <!-- the code block.  That's the formula we need for our plot. -->
@@ -366,7 +368,6 @@ name of data set
 <p><!-- ``` --></p>
 <p><!-- ```{r type-tilde-check, echo = FALSE} --> <!-- set_success_message("Good. That's all this exercise was about: typing a formula.") --> <!-- t1 <- find_call("whatever ~ whatever", message = "do you have a tilde (~)?  Does your formula have two sides?") --> <!-- t2 <- find_call("births ~ date", message = "you need to have the y-axis variable on the left and the x-axis variable on the right") --></p>
 <p><!-- USER_CODE %>% t1 %>% t2  --> <!-- ``` --></p>
-</div>
 <div id="section-formula-shapes" class="section level3">
 <h3>Formula shapes</h3>
 <p>Most <code>gf_</code> functions take a formula that describes the positional attributes of the plot. Using one of these functions with no arguments will show you the “shape” of the formula it requires.</p>
@@ -823,7 +824,7 @@ gf_dens( ~ BPSysAve, data = NHANES) </code></pre>
 <h2>Bar graphs by groups</h2>
 <p>What if you want to show a set of proportions for each of several groups? For example, the NHANES data also includes a variable <code>Marijuana</code> that indicates whether the person has used marijuana. Is there a relationship?</p>
 <pre class="r"><code>gf_bar( ~ TVHrsDay | Marijuana, data = NHANES)</code></pre>
-<p><img src="PlottingBasics2020_files/figure-html/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p><img src="PlottingBasics2020_files/figure-html/unnamed-chunk-5-1.png" width="576" style="display: block; margin: auto;" /></p>
 </div>
 <div id="section-stacked-bar-graphs" class="section level2">
 <h2>Stacked bar graphs</h2>
@@ -832,7 +833,7 @@ gf_dens( ~ BPSysAve, data = NHANES) </code></pre>
 <li><code>fill= ~ variable_name</code> to specify the name of the variable that defines the groups (here, <code>Marijuana</code>).</li>
 </ul>
 <pre class="r"><code>gf_bar( ~ TVHrsDay, fill = ~ Marijuana, data = NHANES)</code></pre>
-<p><img src="PlottingBasics2020_files/figure-html/unnamed-chunk-7-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p><img src="PlottingBasics2020_files/figure-html/unnamed-chunk-6-1.png" width="576" style="display: block; margin: auto;" /></p>
 </div>
 <div id="section-side-by-side-bar-graphs" class="section level2">
 <h2>Side-by-Side bar graphs</h2>
@@ -841,7 +842,7 @@ gf_dens( ~ BPSysAve, data = NHANES) </code></pre>
 <li><code>position='dodge'</code>.</li>
 </ul>
 <pre class="r"><code>gf_bar( ~ TVHrsDay, fill = ~ Marijuana, data = NHANES, position = &#39;dodge&#39;)</code></pre>
-<p><img src="PlottingBasics2020_files/figure-html/unnamed-chunk-8-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p><img src="PlottingBasics2020_files/figure-html/unnamed-chunk-7-1.png" width="576" style="display: block; margin: auto;" /></p>
 <div id="section-other-groups" class="section level3">
 <h3>Other groups?</h3>
 <p>Try to make a similar plot to one or more of the bar graph variations shown above, but using a variable other than <code>Marijuana</code> to specify the groups. First, we will look at the <code>head()</code> of the dataset to see what variables are there - then it’s up to you to choose one to plot, and modify the code above to make the figure.</p>
@@ -1034,7 +1035,7 @@ head(KidsFeet)
 <h2>Axis Labels that Don’t Fit</h2>
 <p>Sometimes - particularly for bar graphs of categorical variables with long category names - axis tick labels overlap in an ugly way. For example:</p>
 <pre class="r"><code>gf_bar( ~ Education, data = NHANES)</code></pre>
-<p><img src="PlottingBasics2020_files/figure-html/unnamed-chunk-10-1.png" width="384" style="display: block; margin: auto;" /></p>
+<p><img src="PlottingBasics2020_files/figure-html/unnamed-chunk-9-1.png" width="384" style="display: block; margin: auto;" /></p>
 <div id="section-flip-the-axes" class="section level3">
 <h3>Flip the Axes</h3>
 <p>If you have already made your plot and notice that there isn’t room for the labels, one simple solution to solve this problem is to flip the x and y axes of the plot.</p>
@@ -1135,7 +1136,7 @@ output$`tutorial-exercise-gf_point-xy-output` <- renderUI({
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
-learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "keyboard-quiz-1",     question = structure("What is the largest key on your keyboard?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_c1c5bb3",         option = "return/enter", value = "return/enter", label = structure("return/enter", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_8c9510f",         option = "caps lock", value = "caps lock", label = structure("caps lock", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_39e4fbd",         option = "delete", value = "delete", label = structure("delete", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_efb7b91",         option = "the arrow keys", value = "the arrow keys",         label = structure("the arrow keys", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_8477c32",         option = "space bar", value = "space bar", label = structure("space bar", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "keyboard-quiz-1-answer", question = "keyboard-quiz-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhat is the largest key on your keyboard?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 1335623775.87805, options = list()), class = c("learnr_radio", "tutorial_question")))
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "keyboard-quiz-1",     question = structure("What is the largest key on your keyboard?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_34a6880",         option = "return/enter", value = "return/enter", label = structure("return/enter", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_c046b6f",         option = "caps lock", value = "caps lock", label = structure("caps lock", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a4a8e42",         option = "delete", value = "delete", label = structure("delete", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_2d7d101",         option = "the arrow keys", value = "the arrow keys",         label = structure("the arrow keys", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_ebb6d89",         option = "space bar", value = "space bar", label = structure("space bar", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "keyboard-quiz-1-answer", question = "keyboard-quiz-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhat is the largest key on your keyboard?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 1255863930.91519, options = list()), class = c("learnr_radio", "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
@@ -1202,11 +1203,11 @@ output$`tutorial-exercise-color-mapping-output` <- renderUI({
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
-learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "color-mapping-quiz-1",     question = structure("Does it appear that the conjecture about weekends is generally correct?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_35bb57f",         option = "yes", value = "yes", label = structure("yes", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_2737d98",         option = "no", value = "no", label = structure("no", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "color-mapping-quiz-1-answer", question = "color-mapping-quiz-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nDoes it appear that the conjecture about weekends is generally correct?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 1034304666.51836, options = list()), class = c("learnr_radio", "tutorial_question")))
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "color-mapping-quiz-1",     question = structure("Does it appear that the conjecture about weekends is generally correct?", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_61d94ef",         option = "yes", value = "yes", label = structure("yes", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a3ba392",         option = "no", value = "no", label = structure("no", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "color-mapping-quiz-1-answer", question = "color-mapping-quiz-1"),     loading = structure("<strong>Loading:<\u002fstrong> \nDoes it appear that the conjecture about weekends is generally correct?\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 1999527793.0689, options = list()), class = c("learnr_radio", "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
-learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "color-mapping-quiz-2",     question = structure("What actually happens if you omit the <code>~<\u002fcode> before <code>~ wday<\u002fcode>?  (Try it and see.)", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_9401e33",         option = "It works just the same.  The tilde isn't required.",         value = "It works just the same.  The tilde isn't required.",         label = structure("It works just the same.  The tilde isn&#39;t required.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_ec5ce40",         option = "All the dots are the same color.", value = "All the dots are the same color.",         label = structure("All the dots are the same color.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_d7430bc",         option = "There is an error message: 'wday' not found.",         value = "There is an error message: 'wday' not found.",         label = structure("There is an error message: &#39;wday&#39; not found.", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "color-mapping-quiz-2-answer", question = "color-mapping-quiz-2"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhat actually happens if you omit the <code>~<\u002fcode> before <code>~ wday<\u002fcode>?  (Try it and see.)\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 1789612646.16665, options = list()), class = c("learnr_radio", "tutorial_question")))
+learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "color-mapping-quiz-2",     question = structure("What actually happens if you omit the <code>~<\u002fcode> before <code>~ wday<\u002fcode>?  (Try it and see.)", html = TRUE, class = c("html",     "character")), answers = list(structure(list(id = "lnr_ans_170eda9",         option = "It works just the same.  The tilde isn't required.",         value = "It works just the same.  The tilde isn't required.",         label = structure("It works just the same.  The tilde isn&#39;t required.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_db4270c",         option = "All the dots are the same color.", value = "All the dots are the same color.",         label = structure("All the dots are the same color.", html = TRUE, class = c("html",         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer")), structure(list(id = "lnr_ans_d6e2439",         option = "There is an error message: 'wday' not found.",         value = "There is an error message: 'wday' not found.",         label = structure("There is an error message: &#39;wday&#39; not found.", html = TRUE, class = c("html",         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer",     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html",     "character")), try_again = structure("Try Again", html = TRUE, class = c("html",     "character"))), messages = list(correct = structure("Correct!", html = TRUE, class = c("html",     "character")), try_again = structure("Incorrect", html = TRUE, class = c("html",     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html",     "character")), message = NULL, post_message = NULL), ids = list(        answer = "color-mapping-quiz-2-answer", question = "color-mapping-quiz-2"),     loading = structure("<strong>Loading:<\u002fstrong> \nWhat actually happens if you omit the <code>~<\u002fcode> before <code>~ wday<\u002fcode>?  (Try it and see.)\n<br/><br/><br/>", html = TRUE, class = c("html",     "character")), random_answer_order = FALSE, allow_retry = FALSE,     seed = 1269402157.40889, options = list()), class = c("learnr_radio", "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
