@@ -269,25 +269,25 @@ Births1978 %>% head(3) %>% select(births, date, day_of_year)
 
 ## Using formulas to describe plots
 
-### The tilde (wiggle)
+<!-- ### The tilde (wiggle) -->
 
-The most distinctive feature of `ggformula` plots is the use of formulas to 
-describe the positional information of a plot.
-Formulas in R always involve the tilde character, which is easy to overlook.
-It looks like this:  
-  
-&nbsp;
-<center>
-  <h2><strong> <span class="boxed">&nbsp;~&nbsp;</span> </strong> 
-  </h2></center>
-  
-  &nbsp;
+<!-- The most distinctive feature of `ggformula` plots is the use of formulas to  -->
+<!-- describe the positional information of a plot. -->
+<!-- Formulas in R always involve the tilde character, which is easy to overlook. -->
+<!-- It looks like this:   -->
 
-Make sure you know where the tilde is located on your computer's keyboard! It is often near the upper left-hand corner on American keyboards.
+<!-- &nbsp; -->
+<!-- <center> -->
+<!--   <h2><strong> <span class="boxed">&nbsp;~&nbsp;</span> </strong>  -->
+<!--   </h2></center> -->
 
-```{r echo = FALSE, fig.align = "center", out.width = "40%"}
-knitr::include_graphics("images/keyboard-tilde.png")
-```
+<!--   &nbsp; -->
+
+<!-- Make sure you know where the tilde is located on your computer's keyboard! It is often near the upper left-hand corner on American keyboards. -->
+
+<!-- ```{r echo = FALSE, fig.align = "center", out.width = "40%"} -->
+<!-- knitr::include_graphics("images/keyboard-tilde.png") -->
+<!-- ``` -->
 
 <!-- #### Exercise -->
 
