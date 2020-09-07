@@ -18,7 +18,7 @@ output:
 # load packages that are going to be used
 library(mosaic)      # this loads ggformula (for plotting), etc. too
 library(openintro)   # this loads data sets intro to modern stats 
-library(oibiostats)  # this loads data sets open intro biostats 
+library(oibiostat)   # this loads data sets open intro biostats 
 library(pander)      # for tables
 
 # Some customization. You can alter or delete as desired (if you know what you are doing).
