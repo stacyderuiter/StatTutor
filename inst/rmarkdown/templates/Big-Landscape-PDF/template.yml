@@ -1,0 +1,4 @@
+name: Stat 245 big landscape PDF
+description: >
+ A template Rmd document for Stat 245 homework to be posted on VoiceThread (landscape mode PDF output with very large font)
+create_dir: false
