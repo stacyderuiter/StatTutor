@@ -16,8 +16,12 @@ output:
 
 ```{r, setup, include = FALSE, message=FALSE}
 # load packages that are going to be used
-require(mosaic)      # this loads ggformula (for plotting), etc. too
-require(Lock5withR)  # this loads data sets from our book
+library(mosaic)      # this loads ggformula (for plotting), etc. too
+library(fastR2)      # some data sets
+library(Lock5withR)  # more data sets
+library(palmerpenguins)  # penguin data
+library(pander)      # nicely formatted tables with pander()
+library(patchwork)   # for combining plots
 
 # Some customization. You can alter or delete as desired (if you know what you are doing).
 
@@ -25,6 +29,8 @@ theme_set(theme_bw())     # change theme for ggplot2/ggformula
 
 knitr::opts_chunk$set(
   tidy = FALSE,     # display code as typed (rather than reformatted)
+  fig.width = 4,    # adjust this to make figures wider or narrower
+  fig.height = 2.5, # adjust this to make figures taller or shorrter
   size = "small")   # slightly smaller font for code
 ```
 
