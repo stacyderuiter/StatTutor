@@ -178,3 +178,11 @@ gf_point(resid(mr1) ~ fitted(mr1))
 ```
 
 If this condition does not hold, the most common pattern to see is a "trumpet" shape like the one above, where the residuals become more spread out for larger fitted values.  However, any non-constant spread is a cause for concern.
+
+### Variable by Variable
+It is also a good idea to plot residuals as a function of each predictor.  Constant variance should hold here just as it does when plotting as a function of fitted value.
+
+```{r, resid-error-vs-pred, exercise=TRUE}
+gf_point(resid(mr1) ~ Water_Filter,
+         data = lead)
+```
