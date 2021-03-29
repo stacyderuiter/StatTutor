@@ -331,7 +331,7 @@ That was a lot of code!
 
 Don't forget you can return to this tutorial anytime to view the examples.
 
-There are also examples of these calculations on [the class R reference site](https://rsconnect.calvin.edu:3939/content/23/R-Examples.html). (If there is something that should be there and isn't, let Prof DR know.)
+There are also examples of these calculations on [the class R reference site](https://rsconnect.calvin.edu:3939/connect/#/apps/142/access). (If there is something that should be there and isn't, let Prof DR know.)
 
 ## The Actual Bootstrap
 Whoa, that was a lot of sample statistics you just calculated. Wasn't this supposed to be about practicing bootstrap CIs?

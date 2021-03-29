@@ -266,7 +266,7 @@ prop(~Rank == ...,
 ```
 
 ```{r oldestbstat-solution, eval=FALSE, echo=FALSE, results='hide'}
-prop(~Rank == 'Youngest', 
+prop(~Rank == 'Oldest', 
      data = resample(students))
 ```
 
@@ -317,7 +317,7 @@ glimpse(BSD)
 *Notice the somewhat strange variable name `prop_TRUE`...*
 
 ### shortcut rflip() method
-There is another way (a bit of a shortcut) to find a bootstrap distribution that **only works if the parameter of interest is one proportion**.  It uses the function `rflip()`, which flips and imaginary coin a certain number of times. You can specify the probability of getting "heads" on each imaginary coin-flip.  
+There is another way (a bit of a shortcut) to find a bootstrap distribution that **only works if the parameter of interest is one proportion**.  It uses the function `rflip()`, which flips an imaginary coin a certain number of times. You can specify the probability of getting "heads" on each imaginary coin-flip.  
 
 For the `students` data, the sample proportion wannabe-grad-students from the real data was 0.33 and the size of the dataset was 131 observations:
 

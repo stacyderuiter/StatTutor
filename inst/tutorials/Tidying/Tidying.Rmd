@@ -68,7 +68,7 @@ glimpse(both_together)
 
 
 ## Combining data files by key
-To join together several tables using a **key** variable, you want to `join` them. I very often use  `left_join()` (which means that I want to keep all the rows in the first dataset you name, and no more). Other options are covered at: <https://dplyr.tidyverse.org/reference/join.html>.
+To join together several tables using a **key** variable, you want to `join` them. I very often use  `left_join()` (which means that I want to keep all the rows in the first dataset I name, and no more). Other options are covered at: <https://dplyr.tidyverse.org/reference/join.html>.
 
 You can find examples of this in HW2, where we worked with the gapminder dataset. 
 
