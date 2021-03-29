@@ -15,7 +15,7 @@ library(ggformula)
 library(ggthemes)
 library(mosaic)
 library(NHANES)
-library(GGally)
+library(tidyverse)
 theme_set(theme_bw())
 
 knitr::opts_chunk$set(
@@ -31,7 +31,7 @@ The goal of this tutorial is to demonstrate how to create a simple Shiny App (we
 
 Through most of this tutorial, you'll be using the dataset `faithful` which is built in to R. However, for your Project 1 app, you'll need to use a different dataset.  And...you'll need to figure out how to read that data into R within your app and get it ready to use.
 
-As an example, we'll use the student survey dataset we created recently in class.  This will allow us to demonstrate a few somewhat *optional*, but quite *useful*, R coding skills before we start actually working on our app:
+As an example, we'll use the student survey dataset some students created recently in class.  This will allow us to demonstrate a few somewhat *optional*, but quite *useful*, R coding skills before we start actually working on our app:
 
 - Reading in a dataset from a Google Sheet
 - "Tidy"ing a messy dataset
@@ -39,7 +39,7 @@ As an example, we'll use the student survey dataset we created recently in class
 ## Reading data from Google Sheets
 There are several ways to read data from Google Sheets.
 
-The most reliable, but not the easiest, is the one demonstrated in the R Basics tutorial at <http://rsconnect.calvin.edu:3939/connect/#/apps/17/>:  Export the sheet as a .csv file, upload the file to the RStudio server, and then read in the data from the local file.  Pretty foolproof, but a bit of an annoying process.
+The most reliable, but not the easiest, is:  Export the sheet as a .csv file, upload the file to the RStudio server, and then read in the data from the local file.  Pretty foolproof, but a bit of an annoying process.
 
 Here is a simple way to read data directly from Google which usually works well. Be warned - sometimes strange errors crop up when you try to do this - don't hesitate to ask for help if needed.
 
@@ -49,19 +49,19 @@ Before you can read in the data file, make it public online two ways.  In Google
 1. Click the "Share" button on the upper right and make sure the document is shared so that "anyone with the link can [view, comment, or edit]".
 
 ```{r, echo=FALSE, out.width='85%'}
-knitr::include_graphics(path='images/ShareButton.png')
+knitr::include_graphics(path = 'images/ShareButton.png')
 ```
 
 2. Go to the "File" menu on the upper left and select "Publish to the web..."
 
 ```{r, echo=FALSE, out.width='30%'}
-knitr::include_graphics(path='images/FileMenu.png')
+knitr::include_graphics(path = 'images/FileMenu.png')
 ```
 
 In the pop-up window that appears, opt to publish the current sheet as a comma-separated values (.csv) file.  Copy the resulting URL (highlighted in blue in the image).
 
 ```{r, out.width='85%', echo=FALSE}
-knitr::include_graphics(path='images/PublishWeb.png')
+knitr::include_graphics(path = 'images/PublishWeb.png')
 ```
 
 3. Optional: If you want a shorter URL, you can go to <goo.gl> (or another link shortener) to do so. I did that and got the short URL: <https://goo.gl/C7qnbQ>
@@ -71,7 +71,8 @@ Once you have the link to the published CSV file (which is **not** the same as t
 
 In this case, we want to treat blank cells as missing data; we can tell R this by including the input `na.strings=c('')` to `read.csv()`. This tells R to treat an empty cell as an "NA" (missing datapoint).
 ```{r, echo=TRUE}
-DPiD <- read.csv('https://goo.gl/C7qnbQ', na.strings = c(''))
+DPiD <- read.csv('https://goo.gl/C7qnbQ',
+                 na.strings = c(''))
 head(DPiD)
 ```
 
@@ -79,19 +80,31 @@ head(DPiD)
 We now have data! But some of it is a mess. For example, let's take a quick look at the `Year` variable:
 
 ```{r}
-gf_bar(~Year, data=DPiD) + coord_flip()
+gf_bar(~Year, data=DPiD) %>%
+  gf_refine(coord_flip())
 ```
 
-Argh! Your classmates adopted 3 spellings of "senior", 3 of "sophomore", and 4 of "junior".  We can fix this using function `fct_recode` from package `forcats`. Its inputs are a factor (categorical) variable, then a set of inputs of the form `old_value = "new_value"`. 
+Argh! Students adopted 3 spellings of "senior", 3 of "sophomore", and 4 of "junior".  We can fix this using function `fct_recode` from package `forcats`. Its inputs are a factor (categorical) variable, then a set of inputs of the form `old_value = "new_value"`. 
 
 Here, we're also using the \$ syntax, where dataset_name\$variable_name isolates just one variable from a dataset.
 
 ```{r, echo=TRUE, message=FALSE}
-require(forcats)
-DPiD$Year <- fct_recode(DPiD$Year, senior="Sr.", senior='SR', senior='Sr',
-                        sophomore='Sophomore', sophomore='sophomore', sophomore='soph',
-                        junior='Junior', junior='Jr.', junior='JR', junior='Jr')
-gf_bar(~Year, data=DPiD) + coord_flip()
+DPiD <- DPiD %>%
+  mutate(Year= fct_recode(Year, 
+                        senior="Sr.", 
+                        senior='SR', 
+                        senior='Sr',
+                        sophomore='Sophomore', 
+                        sophomore='sophomore', 
+                        sophomore='soph',
+                        junior='Junior', 
+                        junior='Jr.', 
+                        junior='JR', 
+                        junior='Jr')
+  )
+
+gf_bar(~Year, data = DPiD) %>%
+  gf_refine(coord_flip())
 ```
 
 ### Your Turn!
@@ -100,6 +113,7 @@ Use plots to find another variable that needs this kind of fix, and fix it.
 *Note: In the tutorial environment, any new variables you create, or fixes you implement, will be valid only within the single code pane you are working in. If you want to save your work and keep a "clean" version of the `DPiD` dataset, you may want to go to RStudio and work in an Rmd document instead of here in the tutorial.*
 
 ```{r, tidy-DPiD, exercise=TRUE}
+
 ```
 
 ## Shiny App from Template
@@ -123,10 +137,10 @@ You can choose a name for your app (keep it short, without any space or special 
 ### One file or two?
 You can also choose between a one-file (app.R) or two-file (ui.R and server.R) setup.  The "ui" (user interface) part of an app defines the setup and structure of the app, while the "server" part processes data and creates the actual content.  These two parts can either be stored in the same, single file (which is always called **app.R**) or in two files (always called **ui.R** and **server.R**).  Whether you choose one file or two, they will be stored in a folder with the same name as the name you choose for your app. *Note: the rest of the tutorial will assume that you chose a single-file app.R app.*
 
-Finally, you have to choose where to save the files...this is so important we'll give it its own section...
+<!-- Finally, you have to choose where to save the files...this is so important we'll give it its own section... -->
 
-## Where to Save Shiny Apps
-Finally, you have to choose a folder in which to save your new app.  The preferred choice is to save it in a folder called "ShinyApps" in your Home directory on the server (as shown in the picture above).  If you do this, then your app (once complete and working) will automatically be deployed and accessible via the internet without any further action from you.
+<!-- ## Where to Save Shiny Apps -->
+<!-- Finally, you have to choose a folder in which to save your new app.  The preferred choice is to save it in a folder called "ShinyApps" in your Home directory on the server (as shown in the picture above).  If you do this, then your app (once complete and working) will automatically be deployed and accessible via the internet without any further action from you. -->
 
 ## Viewing Your App Locally
 Once you have clicked "Create" to initialize and save your app file(s), you can click the "Run App" button in the upper right corner of the file to preview the app.  
@@ -139,17 +153,31 @@ knitr::include_graphics(path='images/RunAppButton.png')
 Try running the template app without making any edits to preview what it looks like.
 
 
-## Viewing Your App Online
-If you saved your app in the directory "Home/ShinyApps", you can also view it online right away.  The URL to your app will be of the form:
+<!-- ## Viewing Your App Online -->
+<!-- If you saved your app in the directory "Home/ShinyApps", you can also view it online right away.  The URL to your app will be of the form: -->
 
-**shiny.calvin.edu/your_Calvin_user_ID/AppName**
+<!-- **shiny.calvin.edu/your_Calvin_user_ID/AppName** -->
 
-For example, my user name is **sld33** and I have an app called **statref** which is at:
+<!-- For example, my user name is **sld33** and I have an app called **statref** which is at: -->
 
-<http://shiny.calvin.edu/sld33/statref>
+<!-- <http://shiny.calvin.edu/sld33/statref> -->
 
-### Try it...
-Construct the URL to your current app and use a web browser to view it.
+<!-- ### Try it... -->
+<!-- Construct the URL to your current app and use a web browser to view it. -->
+
+## Deploying your App
+
+Deploy your app online to Calvin's rsconnect server.
+
+After "running the app" locally, click on the "Publish" button on the upper right of the live app.
+
+Follow instructions in the popup to deploy it to our server. 
+
+The server URL is https://rsconnect.calvin.edu:3939 and you log in with your Calvin username and password.
+
+(Contact me if you run into any problems).
+
+## Customizing your App
 
 Next, let's think about making some modifications to the app.
 
@@ -523,7 +551,7 @@ If you need more options for formatting and customization, check out the compani
 
 
 ### pander tables
-There is another function `pander()`, from package `pander`, that can print out almost anything "nicely", but you dont' have as much control and customization. For example, you can use `pander()` to print out a summary of a regression model nicely:
+There is another function `pander()`, from package `pander`, that can print out almost anything "nicely", but you don't have as much control and customization. For example, you can use `pander()` to print out a summary of a regression model nicely:
 
 ```{r}
 my_model <- lm(hp ~ cyl + mpg, data=mtcars)
@@ -604,5 +632,5 @@ If you are great at R coding or just into coding in general, this is your chance
 To learn more ways to customize and format your app, you may consult:
 
 
-- Shiny tutorials from RStudio, <https://shiny.rstudio.com/tutorial/>. The RStudio tutorials give a more detailed and comprehensive introduction to shiny than this tutorial does. *Note that because of the on-campus server we are using, deploying an app online is easier for you than the process described in the tutorials...just follow the directions from earlier in this tutorial about where to save your app, and it's deployed.*
+- Shiny tutorials from RStudio, <https://shiny.rstudio.com/tutorial/>. The RStudio tutorials give a more detailed and comprehensive introduction to shiny than this tutorial does. 
 - An online gallery of shiny apps, <https://shiny.rstudio.com/gallery/>. These examples show you some of what is possible with shiny, and you can view the source code for them and copy/modify it to use in your own work. 

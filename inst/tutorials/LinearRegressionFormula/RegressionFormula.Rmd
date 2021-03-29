@@ -371,6 +371,7 @@ If you don't want to use the lead dataset, or want more practice, try:
 
 
 ```{r intercept-practice, exercise = TRUE}
+
 ```
 
 ## Inhibition
