@@ -1,5 +1,5 @@
 ---
-title: "Stat 145 -- Homework ??"
+title: "Stat 145 -- PS ??"
 author: "Put your name here (keep the quotes)"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 
@@ -16,9 +16,10 @@ output:
 
 ```{r, setup, include = FALSE, message=FALSE}
 # load packages that are going to be used
-require(mosaic)      # this loads ggformula (for plotting), etc. too
-require(Lock5withR)  # this loads data sets from our book
-require(pander)      # for tables
+library(mosaic)      # this loads ggformula (for plotting), etc. too
+library(openintro)   # this loads data sets intro to modern stats 
+library(oibiostat)   # this loads data sets open intro biostats 
+library(pander)      # for tables
 
 # Some customization. You can alter or delete as desired (if you know what you are doing).
 

@@ -72,10 +72,10 @@ $$ y_i = \beta_0 + \beta_1x_i + \epsilon, \epsilon \sim \text{Norm}(0, \sigma)$$
 4. Carry out hypothesis tests to check whether the true regression slope is 0 (in which case there is no association between the predictor and response variables). These can be t-tests or ANOVA, which are equivalent for a simple linear regression model.
 5. Make predictions from a fitted model, including point estimates/expected values ("the point on the line") and interval estimates (confidence or prediction intervals)
 
-*Text book reference: Lock5 Chapter 2.6 and Chapter 9*
+<!-- *Text book reference: Lock5 Chapter 2.6 and Chapter 9* -->
 
 ## Recap: Live Class
-*Text book reference: Lock5 Chapter 2.6*
+<!-- *Text book reference: Lock5 Chapter 2.6* -->
 
 In class on Thursday, May 7, we did a quick and gentle introduction to linear regression and least-squares estimation. If you did not attend and have not yet reviewed [the class video](https://web.microsoftstream.com/video/ede1bb42-16d3-4351-8c2f-bb9628deadb9), do that first! [Related handouts and links are on Moodle](https://moodle.calvin.edu/mod/page/view.php?id=993371).
 
@@ -327,7 +327,7 @@ In this case, there are 5 conditions:
 - **E**rror variance is constant: The variance (spread) of the residuals does not change with predictor variable value, or with fitted (on-the-line) value. Another word for this is *homoscedasticity*.
 
 ## Model Assessment: Checking Conditions
-*(Incomplete) Text book reference: Lock5 Chapter 9.1*
+<!-- *(Incomplete) Text book reference: Lock5 Chapter 9.1* -->
 
 Consider these more detailed explanations of each condition, accompanied by details about which plots to use to check each one and how to interpret them:
 
@@ -341,7 +341,7 @@ To review and practice what you just learned, make a brief detour to the separat
 **If conditions are met, then we're ready to draw conclusions from our fitted model. How?**
 
 ## Inference
-*Text book reference: Lock5 Chapter 9.1*
+<!-- *Text book reference: Lock5 Chapter 9.1* -->
 
 Our goal: establish a method to generate confidence intervals and carry out tests for $\beta_0$ and $\beta_1$, the intercept and slope.  In fact, we focus almost entirely on the slope, but the exact same methods work for the intercept too (it's just that the slope is almost always of much more practical interest than the intercept).
 
@@ -434,7 +434,7 @@ quiz(question("What is the intercept estimate for the model you just fitted?",
 
 
 ## SE of Sampling Distributions
-*Text book reference: Lock5 Chapter 9.1*
+<!-- *Text book reference: Lock5 Chapter 9.1* -->
 
 In fact, as you may have noticed, the `summary()` of an `lm()` fit includes not only estimates of the parameters $\beta_0$ and $\beta_1$, but also the *standard errors of the corresponding sampling distributions*! (Hooray.) These are found in the coefficient table, labelled `"Std. Error"`.
 
@@ -457,7 +457,7 @@ quiz(question("What is the SE for the slope, for the regression to predict normD
 ```
 
 ## CI for the slope
-*Text book reference: Lock5 Chapter 9.1*
+<!-- *Text book reference: Lock5 Chapter 9.1* -->
 
 Although we won't derive the reasons why in detail, the sampling distribution for the slope has **a t distribution** with $n - 2$ degrees of freedom (where $n$ is the number of rows in the dataset).
 
@@ -488,7 +488,7 @@ confint(bm, "weight", level = 0.95)
 **Notice the shortcut -- R function `confint()` returns CIs (with a default confidence level of 95%).**
 
 ## Test for the slope
-*Text book reference: Lock5 Chapter 9.1*
+<!-- *Text book reference: Lock5 Chapter 9.1* -->
 
 We can also test the null hypothesis $H_0: \beta_1 = \beta_{1\text{null}}$ (where $\beta_{1\text{null}}$ is some hypothetical slope value of interest) using the standardized test statistic
 
@@ -522,7 +522,7 @@ summary(bm)
 Note that for simple linear regression, the p-value reported at the very end of the model summary **is the same** as the one for the slope in the coefficient table. This is *only* the case when there's only one predictor, since the test at the bottom is testing $H_0: \text{all the slopes in the model are 0 for all predictors}$. But...it's reported along with an F-statistic -- which reminds us of ANOVA from last week -- why is this??
 
 ## ANOVA for Regression
-*Text book reference: Lock5 Chapter 9.2*
+<!-- *Text book reference: Lock5 Chapter 9.2* -->
 
 We can, if we wish, use ANOVA to measure the *model utility* of a simple linear regression with one quantitative predictor. *Model utility* means, basically, whether the model is any good -- is it better to include the predictor than to stick with a simple intercept-only model?  In the simple (one-predictor) linear regression case, the model utility test is basically the same as testing $H_0: \beta_1 = 0$.
 
@@ -576,7 +576,7 @@ gf_point(gratitude_score ~ life_rating, data = grateful) %>%
 But what about uncertainty? 
 
 ### Ways to Conceptualize Uncertainty in Predictions
-*Text book reference: Lock5 Chapter 9.3*
+<!-- *Text book reference: Lock5 Chapter 9.3* -->
 
 We could do this two ways!
 

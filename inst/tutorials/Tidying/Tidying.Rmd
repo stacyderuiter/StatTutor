@@ -12,8 +12,8 @@ library(learnr)
 library(mosaic)
 library(tidyverse)
 knitr::opts_chunk$set(echo = TRUE)
-terrible_demographics <- read.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vR3yEJxW6KNHE1lHPr3K-T4VZHeA_J_KGq_DUb1-Y9sYUd3IUEpliqVLVaJNa69TSRm-fm6WWWu7jS9/pub?gid=0&single=true&output=csv')
-terrible_data <- read.csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vTWbGAYFfuwPFciVedTUkeM8fAa6kLJ3aefGVMAz4V0O1Geb-zzDytG3lhevy8JOWV0LGgx5QUzsxFx/pub?gid=0&single=true&output=csv')
+terrible_demographics <- read_csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vR3yEJxW6KNHE1lHPr3K-T4VZHeA_J_KGq_DUb1-Y9sYUd3IUEpliqVLVaJNa69TSRm-fm6WWWu7jS9/pub?gid=0&single=true&output=csv')
+terrible_data <- read_csv('https://docs.google.com/spreadsheets/d/e/2PACX-1vTWbGAYFfuwPFciVedTUkeM8fAa6kLJ3aefGVMAz4V0O1Geb-zzDytG3lhevy8JOWV0LGgx5QUzsxFx/pub?gid=0&single=true&output=csv')
 ```
 
 ## Motivation and Reference Material
@@ -46,6 +46,7 @@ Here in the tutorial, first, take a look at them (`glimpse()` them, and try maki
 (The datasets are already loaded for you in the tutorial environment.)
 
 ```{r, explore-untidy-data, exercise = TRUE}
+
 ```
 
 ## Combining datasets by adding rows
@@ -67,7 +68,7 @@ glimpse(both_together)
 
 
 ## Combining data files by key
-To join together several tables using a **key** variable, you want to `join` them. I very often use  `left_join()` (which means that I want to keep all the rows in the first dataset you name, and no more). Other options are covered at: <https://dplyr.tidyverse.org/reference/join.html>.
+To join together several tables using a **key** variable, you want to `join` them. I very often use  `left_join()` (which means that I want to keep all the rows in the first dataset I name, and no more). Other options are covered at: <https://dplyr.tidyverse.org/reference/join.html>.
 
 You can find examples of this in HW2, where we worked with the gapminder dataset. 
 
@@ -80,21 +81,21 @@ To keep only certain rows, use `filter()`. For example, to keep only countries w
 
 ```{r}
 countries <- terrible_data %>%
-  filter(Population.in.millions > 20)
+  filter(`Population in millions` > 20)
 ```
 
-Or to keep only the entries where `The.country.they.are.from` is "USA", 
+Or to keep only the entries where `Where from` is "USA", 
 
 ```{r}
 countries <- terrible_demographics %>%
-  filter(The.country.they.are.from == 'USA')
+  filter(`Where from` == 'USA')
 ```
 
 Or to keep only the ones that are either "USA", "usa", or "United States",
 
 ```{r}
 countries <- terrible_demographics %>%
-  filter(The.country.they.are.from %in% c('USA', 'usa', 'United States'))
+  filter( `Where from` %in% c('USA', 'usa', 'United States'))
 ```
 
 
@@ -106,22 +107,22 @@ For example to keep only the population column we'd do:
 
 ```{r}
 country <- terrible_data %>%
-  select(Population.in.millions)
+  select(`Population in millions`)
 glimpse(country)
 ```
 Or to keep *everything but* that we'd add a `-`:
 
 ```{r}
 country <- terrible_data %>%
-  select(-Population.in.millions)
+  select(-`Population in millions`)
 glimpse(country)
 ```
 
-You can also select (or -select) multiple columns at the same time. For example, to keep only `coke_or_pepsi` and `fave_color` from the `terrible_demographics` data,
+You can also select (or -select) multiple columns at the same time. For example, to keep only `coke_or_pepsi` and `color` from the `terrible_demographics` data,
 
 ```{r}
 td <- terrible_demographics %>%
-  select(coke_or_pepsi, fave_color)
+  select(coke_or_pepsi, color)
 head(td)
 ```
 
@@ -129,7 +130,7 @@ Or to *get rid* of just those two:
 
 ```{r}
 td <- terrible_demographics %>%
-  select(-coke_or_pepsi, -fave_color)
+  select(-coke_or_pepsi, -color)
 head(td)
 ```
 
@@ -139,9 +140,11 @@ This is easy! Just use `rename()`:
 ```{r}
 glimpse(terrible_data)
 country <- terrible_data %>%
-  rename(population = Population.in.millions)
+  rename(population = `Population in millions`)
 glimpse(country)
 ```
+
+Ahhh. now we can stop using the `backticks` around naughty variable names with spaces in them.
 
 ## Creating new variables
 If we want to make a new variable by modifying or combining some existing ones (or from scratch), we use `mutate()`.
@@ -151,8 +154,8 @@ We can do arithmetic or apply mathematical functions to one or more existing var
 
 ```{r}
 country_data <- terrible_data %>%
-  mutate(double_pop = 2*Population.in.millions,
-         logpop = log10(Population.in.millions*1e6))
+  mutate(double_pop = 2*`Population in millions`,
+         logpop = log10(`Population in millions`*1e6))
 glimpse(country_data)
 ```
 
@@ -165,7 +168,7 @@ For example, to make a new categorical variable that indicates whether or not a 
 
 ```{r}
 country_data <- terrible_data %>%
-  mutate(pop = ifelse(Population.in.millions >= 30, 
+  mutate(pop = ifelse(`Population in millions` >= 30, 
                                "Above 30 million", 
                                "Below 30 million"))
 glimpse(country_data)
@@ -192,40 +195,40 @@ glimpse(demo)
 ### Recoding from more than two categories to two
 What if we have a variable with multiple possible values, and we want to re-envision it as a binary variable? `ifelse()` can help with that.
 
-For example, consider using the variable `The.country.they.are.from` (*who named that!?!*) to create a new variable `country` with values "USA" and "other".
+For example, consider using the variable ``Where from`` (*who named that!?!*) to create a new variable `country` with values "USA" and "other".
 
 First, remember that this dataset is a mess:
 
 ```{r}
-tally(~The.country.they.are.from, data = terrible_demographics)
+tally(~`Where from`, data = terrible_demographics)
 ```
 
 A first try at making our `country` variable might be:
 
 ```{r}
 usa_data <- terrible_demographics %>%
-  mutate(country = ifelse(The.country.they.are.from == 'USA', 'USA', 'Other'))
+  mutate(country = ifelse(`Where from` == 'USA', 'USA', 'Other'))
 glimpse(usa_data)
-tally(~country | The.country.they.are.from, data = usa_data)
+tally(~country | `Where from`, data = usa_data)
 ```
 
-Notice that this will not include spelling variants "usa" and "United States" in our new "USA" category.  We could go back and clean up the possible values of `The.country.they.are.from` before creating our new `country` variable, of course, but if we want to take care of it here, we could use "or" (`|`) in our condition:
+Notice that this will not include spelling variants "usa" and "United States" in our new "USA" category.  We could go back and clean up the possible values of `Where from` before creating our new `country` variable, of course, but if we want to take care of it here, we could use "or" (`|`) in our condition:
 
 ```{r}
 usa_data <- terrible_demographics %>%
-  mutate(country = ifelse(The.country.they.are.from == 'USA' |
-                            The.country.they.are.from == 'usa' | 
-                            The.country.they.are.from == 'United States',
+  mutate(country = ifelse(`Where from` == 'USA' |
+                            `Where from` == 'usa' | 
+                            `Where from` == 'United States',
                           'USA',
                           'Other'))
 glimpse(usa_data)
-tally(~country | The.country.they.are.from, data = usa_data)
+tally(~country | `Where from`, data = usa_data)
 ```
 
 ## Create categorical variables with more than two categories
 What if you want to do something kind of like `ifelse()` does, but with more than just two possible values for the resulting categorical variable?
 
-For example, the `terrible_demographics` data has variable `fave_color` which takes on integer values 1-7, representing colors red, orange, yellow, green, blue, indigo, and violet. What if we wanted to use the names of the colors (rather than the numbers) as the variable values?  We can use `case_when()`.
+For example, the `terrible_demographics` data has variable `color` which takes on integer values 1-7, representing colors red, orange, yellow, green, blue, indigo, and violet. What if we wanted to use the names of the colors (rather than the numbers) as the variable values?  We can use `case_when()`.
 
 The `case_when()` function uses the input format:
 
@@ -237,24 +240,26 @@ data <- data %>%
                                         TRUE ~ "last new value"))
 ```
 
-A concrete example with the `fave_color` variable:
+A concrete example with the `color` variable:
 
 ```{r}
 countries <- terrible_demographics %>%
-  mutate(fave_color2 = case_when(fave_color == 1 ~ 'red',
-                                 fave_color == 2 ~ 'orange',
-                                 fave_color == 3 ~ 'yellow',
-                                 fave_color == 4 ~ 'green',
-                                 fave_color == 5 ~ 'blue',
-                                 fave_color == 6 ~ 'indigo',
-                                 fave_color == 7 ~ 'violet',
+  mutate(color2 = case_when(color == 1 ~ 'red',
+                                 color == 2 ~ 'orange',
+                                 color == 3 ~ 'yellow',
+                                 color == 4 ~ 'green',
+                                 color == 5 ~ 'blue',
+                                 color == 6 ~ 'indigo',
+                                 color == 7 ~ 'violet',
                                  TRUE            ~ 'other'))
 head(countries)
 ```
 
 *The TRUE line at the end is a catchall for all possible cases that don't meet any of the conditions yet specified.*
 
-## Convert between "wide" and "long" formats: Spread and Gather
+## Convert between "wide" and "long" formats
+We use function `pivot_longer()` and `pivot_wider()` to convert columns into rows and rows into columns.
+
 If you have multiple columns that you want to combine into one, or one column that you want to split into many, check out:
 <https://r4ds.had.co.nz/tidy-data.html#spreading-and-gathering>
 
@@ -310,6 +315,7 @@ Check out:
 And then see if you can fix some of the problems with the terrible datasets...
 
 ```{r, forcats-play, exercise = TRUE}
+
 ```
 
 
@@ -320,7 +326,7 @@ For some reason they all have a strange $\hat{A}$ at the end. Let's remove those
 
 ```{r}
 demo <- terrible_demographics %>%
-  rename(name = Name.of.the.person) %>%
+  rename(name = `Name of the person`) %>%
   # note: for this I did copy/paste the offending character
   mutate(name = stringr::str_remove(name, 'Â'))
 glimpse(demo)  
@@ -330,7 +336,7 @@ Better, but now there is random white space at the end of each name. We can also
 
 ```{r}
 demo <- terrible_demographics %>%
-  rename(name = Name.of.the.person) %>%
+  rename(name = `Name of the person`) %>%
   # note: for this I did copy/paste the offending character
   mutate(name = stringr::str_remove(name, 'Â'),
          name = stringr::str_trim(name, side = "right"))
@@ -346,23 +352,23 @@ There are many other things you might need to do with character data. For more i
 ## Missing value "codes"
 Sometimes people use values (like -999, etc.) to indicate when data is missing.  You don't want to accidentally treat these values as "real" numbers (or categories) in your analysis!
 
-The simplest way to get rid of them is right when you are reading in your data. If you use `read.csv()`, just add the input `na.strings = c('your value')`
+The simplest way to get rid of them is right when you are reading in your data. If you use `read_csv()`, just add the input `na = c('your value')`
 
 For example, if you wanted every entry that is "space" (" ") or "two spaces" ("  ") or "unknown" to be interpreted as missing data, you would do:
 
 ```{r, eval = FALSE}
-my_data <- read.csv('my_file.csv', na.strings = c(' ', '  ', 'unknown'))
+my_data <- read_csv('my_file.csv', na = c(' ', '  ', 'unknown'))
 ```
 
-If *numeric* variables contain *valid numeric values* like -999 that you would like to interpret as NA, you will have to replace them specifically.  There are some of these in our `terrible_demographics` data: it looks like -9 has been used as code for missing data in the variable `Number.in.family`.  We can replace all -9s in that variable using `ifelse()`:
+If *numeric* variables contain *valid numeric values* like -999 that you would like to interpret as NA, you will have to replace them specifically.  There are some of these in our `terrible_demographics` data: it looks like -9 has been used as code for missing data in the variable ``Number in family``.  We can replace all -9s in that variable using `ifelse()`:
 
 ```{r}
 demo <- terrible_demographics %>%
-  mutate(num_in_fam = ifelse(Number.in.family == -9, NA, Number.in.family))
+  mutate(num_in_fam = ifelse(`Number in family` == -9, NA, `Number in family`))
 glimpse(demo)
 ```
 
-The code above tells R, "Make a new variable `num_in_fam` from the variable `Number.in.family`. If `Number.in.family` is -9, change it to NA (missing), and if it is not, then leave it alone."
+The code above tells R, "Make a new variable `num_in_fam` from the variable ``Number in family``. If ``Number in family`` is -9, change it to NA (missing), and if it is not, then leave it alone."
 
 ## Dates and Times
 If you are going to work with date/time data, I recommend the package `lubridate`. It can be used to parse date-time variables (even if they are in multiple formats!) and work with them. Help and examples are online at: <https://r4ds.had.co.nz/dates-and-times.html>

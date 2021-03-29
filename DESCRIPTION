@@ -1,7 +1,7 @@
 Package: StatTutor
 Type: Package
 Title: Tutorials and Templates for Statistics Courses
-Version: 0.1.5
+Version: 0.1.6
 Author: Stacy DeRuiter
 Maintainer: Stacy DeRuiter <sld33@calvin.edu>
 Description: This package contains tutorials created for statistics courses at Calvin College.

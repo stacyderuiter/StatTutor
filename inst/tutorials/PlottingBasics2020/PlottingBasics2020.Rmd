@@ -16,6 +16,7 @@ library(ggformula)
 library(ggthemes)
 library(mosaic)
 library(NHANES)
+library(palmerpenguins)
 library(readr)
 theme_set(theme_bw())
 # data(Births78, package = "mosaicData")
@@ -62,17 +63,20 @@ table, td, th { border:0px; }
 </style>
   
 ## Acknowledgements
-This tutorial was created based closely on the "Introduction" tutorial provided with the `ggformula` package. If desired you can access the original tutorial by running the code below in RStudio.
 
-### Note: Do NOT actually switch to R and run the code below...
-unless you want to view the original tutorial!  Instead, click "Next Topic" below to continue with *this* tutorial...
+This tutorial was created based closely on the "Introduction" tutorial provided with the `ggformula` package. 
 
-```{r, echo=TRUE, eval=FALSE}
-library(ggformula)
-library(learnr)
-learnr::run_tutorial("introduction", package = "ggformula")
-```
-  
+<!-- If desired you can access the original tutorial by running the code below in RStudio.[^original] -->
+
+<!-- [^original]:  Don't do this now, but if you want to see the original -->
+<!-- tutorial, you can run this code in R -->
+
+<!--     ```{r eval = FALSE, echo = TRUE} -->
+<!--     library(ggformula) -->
+<!--     library(learnr) -->
+<!--     learnr::run_tutorial("introduction",  package = "ggformula") -->
+<!--     ``` -->
+
   
 ## US Births in 1978
 
@@ -86,11 +90,11 @@ gf_point(births ~ date, data = Births1978)
 
 But before we do that, take a look at the plot.
 
-  1. What patterns do you see in the plot?
+  1. What **patterns** do you see in the plot?
   
-  2. Can you conjecture reasons for those patterns?
+  2. Can you conjecture **reasons** for those patterns?
   
-  3. How might we improve the plot to test your conjectures?
+  3. What **improvements** might we make to the plot to test your conjectures?
   
 ## Scatter plots with ggformula
 
@@ -102,7 +106,13 @@ continuing, see if you can figure out what they are.
 
 ### The Questions
 
-To get R (or any software) to create this plot, there are two
+To get R (or any software) to create this plot, 
+
+```{r, echo = FALSE, out.width = "40%"}
+gf_point(births ~ date, data = Births1978)
+```
+
+there are two
 important questions you must be able to answer:
   
 #### 1. What do you want the computer to do?
@@ -121,8 +131,8 @@ To make this plot, the answers to our questions are
 
 **A.** The data used for the plot:
   
- * The variable to be plotted along the $y$ axis.
- * The variable to be plotted along the $x$ axis.
+ * The variable to be plotted along the y-axis.
+ * The variable to be plotted along the x-axis.
  * The data set that contains the variables.
 
 We just need to learn how to tell R these answers.     
@@ -164,11 +174,11 @@ Here are some other forms we will eventually see.
 
 ```{r eval=FALSE, echo = TRUE}
 # simpler version
-goal( ~ x, data = mydata )          
+goal( ~ x, data = mydata, ... )          
 # fancier version
-goal( y ~ x | z , data = mydata )   
+goal( y ~ x | z , data = mydata, ... )   
 # unified version
-goal( formula , data = mydata )     
+goal( formula , data = mydata, ... )     
 ```
 
 ### 2 Questions and the Formula Template
@@ -259,25 +269,25 @@ Births1978 %>% head(3) %>% select(births, date, day_of_year)
 
 ## Using formulas to describe plots
 
-### The tilde (wiggle)
+<!-- ### The tilde (wiggle) -->
 
-The most distinctive feature of `ggformula` plots is the use of formulas to 
-describe the positional information of a plot.
-Formulas in R always involve the tilde character, which is easy to overlook.
-It looks like this:  
-  
-&nbsp;
-<center>
-  <h2><strong> <span class="boxed">&nbsp;~&nbsp;</span> </strong> 
-  </h2></center>
-  
-  &nbsp;
+<!-- The most distinctive feature of `ggformula` plots is the use of formulas to  -->
+<!-- describe the positional information of a plot. -->
+<!-- Formulas in R always involve the tilde character, which is easy to overlook. -->
+<!-- It looks like this:   -->
 
-Make sure you know where the tilde is located on your computer's keyboard! It is often near the upper left-hand corner on American keyboards.
+<!-- &nbsp; -->
+<!-- <center> -->
+<!--   <h2><strong> <span class="boxed">&nbsp;~&nbsp;</span> </strong>  -->
+<!--   </h2></center> -->
 
-```{r echo = FALSE, fig.align = "center", out.width = "40%"}
-knitr::include_graphics("images/keyboard-tilde.png")
-```
+<!--   &nbsp; -->
+
+<!-- Make sure you know where the tilde is located on your computer's keyboard! It is often near the upper left-hand corner on American keyboards. -->
+
+<!-- ```{r echo = FALSE, fig.align = "center", out.width = "40%"} -->
+<!-- knitr::include_graphics("images/keyboard-tilde.png") -->
+<!-- ``` -->
 
 <!-- #### Exercise -->
 
@@ -385,22 +395,25 @@ apropos("gf_")
 
 ## Variety is the Spice of Life
 
-In addition to a traditional scatterplot, there are other ways to represent
-the relationship between two quantitative variables.  To make a different
-kind of plot, we simply replace `gf_point()` with a different goal.
+Scatter plots are a common way to investigate the
+relationship between two quantitative variables like `births` and `date`,
+but they not the only type of plot we could use.
+To make a different kind of plot, 
+we simply replace `gf_point()` with a different goal.
 
 ### Give it a try
 
 Replace the second `gf_point()` with one of the following and see what happens:
 
   * `gf_line()` -- connect the points with line segments (but don't draw the points)
+  * `gf_area()` -- shade the area under `gf_line()`
   * `gf_smooth()` -- a "smoother"
   * `gf_spline()` -- a different kind of smoother
   * `gf_lm()` -- lm stands for "linear model"
   
 Which do you like best? Why?
 
-*For the moment, many of these are probably dangerous plot types. Why? Because the picture may look pretty, but you may not understand exactly what the function is doing with your dataset to get the picture. And you have to know what is being done to be sure it's appropriate!* 
+*For the moment, some of these are probably "dangerous" plot types. Why? Because the picture may look pretty, but you may not understand exactly what the function is doing with your dataset to get the picture. And you have to know what is being done to be sure it's appropriate!* 
 
 ```{r spice, exercise = TRUE}
 gf_point(births ~ date, data = Births1978)
@@ -427,17 +440,19 @@ gf_line(births ~ date, data = Births1978)
   1. Change `gf_line()` to `gf_smooth()`.
   
   2. Try adding a third layer.
+  
+  3. Which patterns are easier to see with which types of plots?
 
 
 ## Custom colors and transparency 
 
-Color can be a very important elemnt of a plot.  
+Color can be a very important element of a plot.  
  
   * We can use color just to make our plots more beautiful (or to match our favorite color)
   
   * We can use color to communicate more about the data.  
   
-We can adjust the colors (and several othre plot attributes) using the `...` part of our template.
+We can adjust the colors (and several other plot attributes) using the `...` part of our template.
 
 &nbsp;
 <center>
@@ -519,7 +534,7 @@ automatically included to show us which days are which.
 
 Change the color argument so that it maps color to `wday`. 
 
-  * Don't forget the tilde (`~`).
+  * Don't forget the tilde (`~`) and to remove the quotes.
 
 ```{r, color-mapping, exercise = TRUE}
 gf_point(births ~ date, data = Births1978, color = "navy")
@@ -549,9 +564,191 @@ answer("There is an error message: 'wday' not found.", correct = TRUE)
 gf_line(births ~ date, data = Births1978, color = ~ wday)
 ```
 
+## Quantitative vs Categorical
+
+We could investigate the number of births by day of week another way.
+Let's make a scatter plot with `wday` on the x-axis and `births` on the 
+y-axis.
+
+```{r, q-v-c, exercise = TRUE}
+gf_point( births ~ wday, data = Births1978)
+```
+
+All those dots kind of run together.  Let's try some improvements:
+
+1. Set `alpha` to a smallish number (start at 0.5 and adjust up or down from there).  This will help show where the dots are piling up.
+
+2. We could move the dots left and right a bit without losing any information.
+Do this with `gf_jitter( height = 0)`.  `height = 0` says don't move things up and
+down, only left and right.
+
+3. Now try `gf_sina()`.  This slides the points left and right, but moves them
+farther when there are more dots and lest far when there are fewer.  That
+helps us see the shape of the data.
+
+4. Now try `gf_violin()`.  This is like the outline of the dots in `gf_sina()`.
+(You might like to overlay these plots to compare.)
+
+5. Some of you may have seen boxplots before. `gf_boxplot()` will create those.
+
+Which of these plots do you like best for this data set?  Why?
+
+## Exagerating the differences?
+
+You may have noticed that these plots don't stretch down to 0 on the y-axis.
+By default, R tries to fit everything onto the plot with relatively little 
+extra space.  This makes our data easier to see (because it takes up more
+space).  But sometimes this distorts our view of the data.  We can tell
+R exactly what range to use using `gf_lims()`. Here is an example:
+
+```{r gf-lims, exercise = TRUE}
+gf_violin(births ~ wday, data = Births1978) %>%
+  gf_sina(births ~ wday, data = Births1978) %>%
+  gf_lims(y = c(0, NA))
+```
+
+Notes:
+
+* The `c()` function may seem a bit strange.  Think of c = combine.  We are 
+combining two values into one range of values.
+
+* `NA` is R's way of saying "missing".  By not specifying the top of the range,
+we let R pick the top for us, we just want to pick the lower limit.  (Change `NA` to some number to see how the plot changes.)
+
+* Does your impression of how different the weekdays and weekends are 
+change when you change the limits?
+
+## Plots with just one variable
+
+The most interesting plots have multiple variables, but sometimes it 
+is useful to look at just one variable.  In this case, we only need one 
+slot in our formula.  For example, to make a histogram we use
+
+```{r histogram, exercise = TRUE}
+gf_histogram( ~ births, data = Births1978) 
+```
+
+We are telling R that we want `births` on the x-axis and we expect R to 
+compute what goes on the y-axis for us.
+
+### Change it up!
+
+1. Change the widths of the bins by setting `binwidth` to the width of a bin
+or `bins` to the number of bins.
+
+2. Change `gf_histogram()` to `gf_density()` or `gf_dens()` to get a 
+"smooth" version of the histogram called a density plot.  (Density plots
+are like half of a violin plot.)
+
+3. Just like you can adjust the binwidth in a histogram, you can
+adjust the smoothness of a density plot.  The default value is 
+`adjust = 1`.  Set `adjust` to 0.5 or 2.0 to see how the density plot 
+changes.
+
+3. `gf_dhistogram()` makes a **density histogram**.  A density
+histogram is rescaled so that it's **total area is 1**.  Density plots
+also have a total area of 1.  Overlay a density histogram and a 
+density plot.  Which works better, `gf_dens()` or `gf_density()`?
+
+4. What happens if you map color or fill to `wday` in a density plot?  Give
+it a try!
+
+5. Overlay a histogram with `gf_freqpoly()`.  Be sure to set the binwidth
+to the same value for each.  How do the plots compare?  When might you
+prefer a frequeny polygon to a histogram?
+
+## One Template to Rule A Lot
+
+We have made a lot of plots, all with one basic template.  
+Not quite as good as Frodo's ring, but pretty powerful.
+
+Let's catch our breath and make sure  we still see the big picture.
+The basic structure of all of these commands is the same:
+
+<center>
+  <h2><strong><span class="boxed">goal</span> ( <span class="boxed">&nbsp;y&nbsp;</span> ~ <span class="boxed">&nbsp;x&nbsp;</span> , data = <span class="boxed">mydata</span> , ...)</strong> 
+  </h2></center>
+&nbsp;
+
+* goal: says what kind of plot to make (and starts `gf_` every time).
+* `y ~ x` (or sometimes just `~ x`) says which variable to put
+  on the x-axis and which variable to put on the y-axis.
+* `data = ` tells R which dataset to use (where to find the variables).
+* `...` is a comma-separated list of additional instructions in 
+  the form `attribute = value`.  We can use these extras to set or map
+  other properties, like color or fill or shape, or to set values for 
+  things like the binwidth of a histogram or the smoothness of a density
+  plot.
+* We can layer plots on top of each other using `%>%`.
+  
+* Once you get the basic structure, the commands are all basically the 
+same!
+
+* And it works for numbers as well as plots!!!  Let's give that a try.
+
+### Computing Numerical Summaries
+
+All we need to do is change the name of our goal from the name of a 
+plot to the name of a numerical summary.
+
+```{r number-summary, exercise = TRUE}
+gf_violin(births ~ wday, data = Births1978)
+     mean(births ~ wday, data = Births1978)
+gf_histogram(~ births, data = Births1978)
+        mean(~ births, data = Births1978)
+```
+
+### Your Turn!
+
+```{r number-summary-your-turn, exercise = TRUE}
+mean(births ~ wday, data = Births1978)
+```
+
+Add additional lines to the code chunk above to do the following.
+
+1. Compute the maximum number of births for each day of the week (`max()`).
+
+2. Compute the minimum number of births for each day of the week (`min()`).
+
+3. Compute the median number of births for each day of the week (`median()`)
+
+
+### Multi-taksing
+
+Hmm. What if we want several numbers all at once?  Give this a try:
+
+```{r df-stats, exercise = TRUE}
+df_stats(births ~ wday, data = Births1978, mean, median)
+```
+
+1. What happens if you delete `mean` and `median` (and the unneeded commas) 
+in the example above?
+
+2. What happens if you add `min` and `max` in the example above?
+
+3. What happens if you use `range` instead of `min` and `max`?
+
+Note: The result of `df_stats()` is a **data frame**.  That's R's name 
+for rectangular data.  That explains the "df".  "stats", of course,
+stands for "statistics", numbers we compute from our data.
+
+So now we can make both graphical and numerical summaries of our data
+with one easy template:
+
+
+<center>
+  <h2><strong><span class="boxed">goal</span> ( <span class="boxed">&nbsp;y&nbsp;</span> ~ <span class="boxed">&nbsp;x&nbsp;</span> , data = <span class="boxed">mydata</span> , ...)</strong> 
+  </h2></center>
+&nbsp;
+
+
+It would probably be a good idea to master that template. We are going to use it
+**a lot**.
+
+
 ## NHANES data
 
-Time for some new data.
+Time for some new data, some review, a few new wrinkles (like bar charts).
 
 The `NHANES` dataset contains measurements from 10,000 human subjects in
 the National Health and Nutrition Evaluation Survey.  To learn more about the data,
@@ -612,10 +809,12 @@ gf_histogram( ~ BPSysAve, data = NHANES, bins = 30)
 A density plot is a smoothed contour tracing the shape of a dataset's
 distribution.  The `gf_density()` and `gf_dens()` functions produce these plots
 (in slightly different ways).  To compare with a histogram apples-to-apples, we
-will use a **density histogram** (`gf_dhistogram()`).[^dhistogram]
+will use a **density histogram** (`gf_dhistogram()`).
 
-[^dhistogram]: A density histogram is rescaled so that the **total area**
-of the histogram is **always 1**.
+<!-- [^dhistogram] -->
+
+<!-- [^dhistogram]: A density histogram is rescaled so that the **total area** -->
+<!-- of the histogram is **always 1**. -->
 
 ```{r, hist-dens, exercise = TRUE}
 gf_dhistogram( ~ BPSysAve, data = NHANES) 
@@ -906,10 +1105,9 @@ Here are three data sets you can use.
 
 * `HELPrct` has data from a study of people addicted to alcohol, cocaine, or heroine
 * `KidsFeet` has information about some kids' feet.
-* `NHANES` has lots of physiologic and other measurements from 10,000
-subjects in the National Health and Nutrition Evaluation Survey.
+* `penguins` has some information about some penguins.
 
-To find out more about the data sets use `?HELPrct`, `?KidsFeet`, or  `?NHANES`.
+To find out more about the data sets use `?HELPrct`, `?KidsFeet`, or  `?penguins`.
 To see the first few rows of the data, you can use `head()`.
 
 To get a list of functions available in `ggformula`, run this code chunk.
@@ -939,9 +1137,12 @@ head(KidsFeet)
 
 ```
 
-Post your favorite plot here by making a new slide in this google presentation:
+Post your favorite plot(s) here by making a new slide in this google presentation:
 
- * [Favorite Plots Google Slides](https://docs.google.com/presentation/d/1O7BMi28lDktfhefdPS9TLbmmAeg4FKvuPwVoOA2gM2w/edit?usp=sharing)
+ * [Favorite Plots Google Slides](https://docs.google.com/presentation/d/16wu5IVPkXtuCAybGbF5vxF3GQ_h4xqU3syFL3S6Gkq4/edit?usp=sharing)
+ 
+You may work in a group of 2--3, but then you must submit as many plots
+as there are people in your group.
 
 ## More Customization
 
@@ -1040,121 +1241,4 @@ Metabolic <-
   read_csv('http://sldr.netlify.com/data/MammalMetabolicRates.csv')
 Metabolic
 ```
-
-
-
-## Figure size in RMarkdown
-You will almost certainly want to adjust figure sizes in your own RMarkdown documents. There are several ways - you can set a file-wide default in the header of the Rmd file as is done in the STAT homework template - or you can set the figure size for one R code chunk in the chunk header, as shown below.
-
-The values of `fig.width` and `fig.height` are expected to be given in inches, by default. Just add these values to the chunk header like this:
-
-```{r echo = FALSE, results = 'asis', comment = NA}
-cat("```{r fig.width = 6, fig.height = 4}")
-```
-
- 
- 
-## But I like numbers!
-
-Numerical summaries can be obtained using the **same template we used for plots**, so there is almost nothing to learn.
-
-Look how similar these are.  (I've inserted some spaces to make it even more obvious.)
-The first of these creates side by side boxplots.  The second does side-by-side means.
-
-```{r numbers1, exercise = TRUE}
-gf_boxplot(BPSysAve ~ TVHrsDay, data = NHANES)
-      mean(BPSysAve ~ TVHrsDay, data = NHANES, na.rm = TRUE)
-```
-
-Why `na.rm = TRUE`?  Edit the code above to remove that part and 
-see what happens.  To R's way of thinking, if some of the values are 
-missing, you can't know what the sample mean is, so it reports NA.
-`na.rm = TRUE` says "Please remove all missing values first, then
-compute the mean for me.  Thanks!"
-
-<!-- ### Your turn -->
-
-<!-- Try replaceing `mean()` with some other functions: -->
-
-<!-- * `median()` -->
-<!-- * `max()` -->
-<!-- * `min()` -->
-<!-- * `sd()` (standard deviation) -->
-<!-- * `iqr()` (interquartile range) -->
-
-<!-- ### Summaries of one variable   -->
-
-<!-- If we only have one variable, we can mimic histograms or barplots. -->
-
-<!-- #### 1 Quantitative variable -->
-
-<!-- ```{r numbers2, exercise = TRUE} -->
-<!-- gf_histogram( ~ BPSysAve, data = NHANES) -->
-<!--         mean( ~ BPSysAve, data = NHANES) -->
-<!-- ``` -->
-
-<!-- #### 1 Categorical variable -->
-
-<!-- `tally()` is a useful function for tallying a categorical variable.  (It can -->
-<!-- handle two categorical variables, too.) -->
-
-<!-- ```{r, numbers3, exercise = TRUE} -->
-<!-- gf_bar( ~ Race1, data = NHANES) -->
-<!--  tally( ~ Race1, data = NHANES) -->
-<!-- ``` -->
-
-
-<!-- ### Multi-tasking -->
-
-<!-- The `df_stats()` function allows us to compute multiple summaries simultaneously -->
-<!-- -- great for all you multi-taskers out there. (It also saves paper if you are -->
-<!-- printing your work.) -->
-
-<!-- ```{r, numbers4, exercise = TRUE} -->
-<!-- df_stats( ~ BPSysAve, data = NHANES, mean, median) -->
-<!-- ``` -->
-
-<!-- #### Your turn -->
-
-<!--  1. Add on `max`, and `min` to the list of summaries in the example above. -->
-
-<!--  2. Now delete all the summaries (get rid of `mean`, `median`, etc.) to see what -->
-<!--  the default summaries are.  (It's a pretty useful set of summaries.) -->
-
-<!--  3. Now create a boxplot on a separate line using the same formula and data.  Do -->
-<!--  you see how where the values corresponding to the edges of the boxes show up in -->
-<!--  the default summary of `df_stats()`? -->
-
-<!-- ### df-stats() for tallying -->
-
-<!-- The `counts()` and `props()` summaries compute counts and proportions for  -->
-<!-- categorical variables. -->
-
-<!-- ```{r, numbers5, exercise = TRUE} -->
-<!-- df_stats( ~ Race1, data = NHANES, counts) -->
-<!-- df_stats( SmokeNow ~ Race1, data = NHANES, counts) -->
-<!-- ``` -->
-
-<!-- #### Your turn -->
-
-<!--  1. Change `counts` to `props` to see what happens. -->
-
-<!--  2. What happens if you switch the order of `SmokeNow` and `Race1` with `counts`? -->
-
-<!--  3. What happens if you switch the order of `SmokeNow` and `Race1` with `props`? -->
-
-<!--  4. Can we get counts and proportions at the same time? Try it. -->
-
-
-## One template to rule a lot
-
-Not quite as good as Frodo's ring, but our template is pretty powerful.
-
-<center>
-<h2><strong><span class="boxed">goal</span> ( <span class="boxed">&nbsp;y&nbsp;</span> ~ <span class="boxed">&nbsp;x&nbsp;</span> , data = <span class="boxed">mydata</span> , ...)</strong> 
-  </h2></center>
-&nbsp;
-
-We can use it for all sorts of numerical and graphical summaries of data.  (And later
-in the course we will use it for statistical modeling as well.)
 
