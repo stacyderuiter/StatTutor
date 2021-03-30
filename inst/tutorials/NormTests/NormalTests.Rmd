@@ -30,7 +30,7 @@ In the last tutorial, you learned to use normal distributions as an approximatio
 
 You will probably not be surprised to learn that randomization distributions, too, can be approximated well by normal distributions. **We can take advantage of this fact to give us another way to compute p-values for randomization tests.**
 
-*The material in this tutorial is also covered in the textbook: Lock5 Chapter 5.2.*
+*The material in this tutorial is also covered in the textbook: [IMS Chapter 5.3](https://openintro-ims.netlify.app/intro-stat-inference.html#inf-math)*
 
 ## The Dataset
 

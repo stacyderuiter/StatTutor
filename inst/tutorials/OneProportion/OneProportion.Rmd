@@ -38,12 +38,12 @@ At the end of this module, you will:
 
 ## Text Book Reference
 
-This module covers **Lock5 Chapter 6.1 - 6.3**. Relevant sections will be noted throughout this tutorial when they are covered.
+This module covers **[IMS Chapter 6.1](https://openintro-ims.netlify.app/inference-cat.html#single-prop)**, if you wish for additional reference material. 
 
-*It is recommended that you read the text book sections either before or after completing the corresponding parts of the tutorial, especially for any sections you feel less confident about.*
+*It is recommended (but not required) that you read the text book sections either before or after completing the corresponding parts of the tutorial, especially for any sections you feel less confident about.*
 
 ## Exploring SE for a Proportion
-*Text book reference: Lock5 Chapter 6.1, pp. 652 - 653*
+*Text book reference: [IMS Ch. 6.1.2](https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm)*
 
 ### Central Limit Theorem
 We previously encountered the Central Limit Theorem (CLT), which told us that the sampling distribution for a proportion **will be normal** *as long as the sample size is big enough.*
@@ -256,7 +256,7 @@ quiz(question("The sampling distribution for a proportion will be skewed (not no
 ```
 
 ## Rule of Thumb: Sample Size and Normality
-*Text book reference: Lock5 Chapter 6.1*
+*Text book reference: [IMS Chapter 6.1.2, Conditions](https://openintro-ims.netlify.app/inference-cat.html#conditions)*
 
 So, we know that the required sample size to ensure that the sampling distribution for a proportion is normal *depends on the proportion* -- small samples sizes will do for proportions near 0.5, but not for proportions near 0 or 1.
 
@@ -272,7 +272,7 @@ So, we know that the required sample size to ensure that the sampling distributi
 If you are working with data on one proportion to find a CI or do a hypothesis test, your sample size *must* meet the rule of thumb above ($np \geq 10$ and $n(1-p) \geq 10$) or you can't use the short cut we're about to learn!
 
 ## SE for one proportion: Exploration
-*Text book reference: Lock5 Chapter 6.1*
+*Text book reference: [IMS Ch. 6.1.2](https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm)*
 
 The Central Limit Theorem tells us that (when $n$ is big enough), the sampling distribution will be normal.
 
@@ -299,7 +299,7 @@ We can use bootstrap sampling distributions again to explore how the $SE$ change
 
 We will compute lots of bootstrap sampling distributions for a range of values of the proportion $n$ from small to large. For each one, we'll compute a standard error (SE). Then, we'll plot the SEs as a function of the $n$s.
 
-You can click to expand the code below to see how it's done, but **your main goal is to see exactly how the SE changes as a function of n**.
+You can click to expand the code below to see how it's done, but **your main goal is to** *see* **exactly how the SE changes as a function of n** (based on the graph).
 
 <details>
   <summary>Show code</summary>
@@ -374,7 +374,7 @@ gf_point(SE ~ ps, xlab = 'Proportion')
 **Interesting!** The SE is largest when $p$ is around 0.5, and smaller for $p$ closer to 0 or 1.  How could we include $p$ in an expression for the SE in a way that would yield a pattern like this? (*Click on to the next section to find out...*)
 
 ## SE for one proportion: Formula
-*Text book reference: Lock5 Chapter 6.1*
+*Text book reference: [IMS Ch. 6.1.2](https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm)*
 
 The exploration we just finished has given us some idea of what we'd expect the formula for the SE for a proportion to look like. (Of course, the formula was derived analytically, not guess-and-checked via simulations, but the simulations are an easy way for us to get a sense of what to expect.)
 
@@ -403,7 +403,7 @@ to get the SE, then
 
 $$\hat{p} \pm z^*SE$$
 
-to get the CI. (Remember -- from Module 2 and Lock5 Chapter 5 -- $z^*$ is the multiplier for your chosen confidence level C, obtained from the boundaries of the central C% of the standard normal distribution.) 
+to get the CI. (Remember from before -- $z^*$ is the multiplier for your chosen confidence level C, obtained from the boundaries of the central C% of the standard normal distribution.) 
 
 For reference,
 
@@ -416,7 +416,7 @@ pander::pander(ztab)
 
 ### Practice: Sunday Stalwarts
 
-Let's practice: At the start of the term, we all took the Pew Religious Typology quiz, and 16 of 37 respondents were classed as "Sunday Stalwarts." Find a 99% confidence interval for the proportion Sunday Stalwarts at Calvin. (*Note: this calculation assumes, perhaps incorrectly, that our class is a random sample of all Calvin Students with respect to their religious practice.*)
+Let's practice: At the start of the term, some Calvin students took the [Pew Religious Typology quiz](https://www.pewforum.org/quiz/religious-typology/), and 16 of 37 respondents were classed as "Sunday Stalwarts." Find a 99% confidence interval for the proportion Sunday Stalwarts at Calvin. (*Note: this calculation assumes, perhaps incorrectly, that the class is a random sample of all Calvin Students with respect to their religious practice.*)
 
 You can use the R exercise chunk below as a calculator (and to check your work using the solution):
 
@@ -467,7 +467,7 @@ cdata(~prop_TRUE, data = bd, p = 0.99)
 ```
 
 ### Practice: Better than Chimps
-One more practice. On the *Factfulness* quiz at the start of term, 21 (of the 37 of us) scored 3 or lower (alas, worse than chimpanzees).  Assuming (generously) that we are a random sample of US college students, find a 90% CI for the proportion US college students who do worse than chimps on this test.
+One more practice. Some other students took a [*Factfulness* quiz](https://factfulnessquiz.com/), measuring their knowledge about the state of the world. (*Take the quiz yourself if you want - it takes 5 minutes or less and is interesting.*) 21 (of the 37 of us) scored 3 or lower (alas, [worse than chimpanzees](https://youtu.be/N1dvfH3s1Ak), that is, worse than expected by random guessing).  Assuming (generously) that the class who took the quiz is random sample of all US college students, find a 90% CI for the proportion US college students who do worse than chimps on this test.
 
 ```{r, chimps, exercise = TRUE}
 
@@ -480,10 +480,10 @@ CI <- phat + c(-1,1) * 1.64 * SE
 CI
 ```
 
-We are 90% confident the true proportion chimp-dominated test-takers is between 0.43 and 0.70! (Kind of a lot, but the same is true all over the world.)
+We are 90% confident the true proportion chimp-dominated test-takers is between 0.43 and 0.70! (Kind of a lot, but [the same is true all over the world](https://youtu.be/N1dvfH3s1Ak).)
 
 ## Using your Power Wisely: Tests
-*Text book reference: Lock5 Chapter 6.3*
+*Text book reference: [IMS Ch. 6.1](https://openintro-ims.netlify.app/inference-cat.html#single-prop)*
 
 Think back to when we first learned randomization tests. To create a randomization sampling distribution, do you remember what we had to *assume* before we began?
 
@@ -527,7 +527,7 @@ So we find a p-value by finding the area-under-the-curve *that is more extreme t
 
 ### Practice: Stalwarts again
 
-[Data from Calvin University](https://calvin.edu/offices-services/enrollment-research/reports/archives/2019/2019-fall-census-day-10-report.pdf#page=1) states that the population proportion of Calvin students who are Christian Reformed Church members is 28.3%. Recall, in our survey, 16 of 37 students were "sunday stalwarts". Let's test whether the proportion stalwarts could be the same as the proportion CRC members.
+[Data from Calvin University in 2020](https://calvin.edu/offices-services/enrollment-research/reports/archives/2019/2019-fall-census-day-10-report.pdf#page=1) states that the population proportion of all Calvin students who are Christian Reformed Church members was 28.3%. Recall, in our survey, 16 of 37 students were "sunday stalwarts". Let's test whether the proportion stalwarts could be the same as the proportion CRC members.
 
 ```{r stalwart-test}
 quiz(question("What null hypothesis will we test?",
@@ -555,7 +555,7 @@ SE <- sqrt(p0 * (1- p0) / n)
 2 * xpnorm(phat, mean = p0, sd = SE, lower.tail = FALSE)
 ```
 
-**Conclusion:** The p-value is pretty small - about 0.04. So we reject $H_0$. Our data provide pretty strong evidence *against* the idea that the proportion Stalwarts is the same as the proportion CRC students. (Not surprising - it was a kind of silly idea to begin with!)
+**Conclusion:** The p-value is pretty small - about 0.04. So we reject $H_0$. Our data provide pretty strong evidence *against* the idea that the proportion Stalwarts is the same as the proportion CRC students. (Not surprising - it was a kind of silly idea to begin with! CRC members are not the only people in the world with regular dedication to religious practice!)
 
 ### Review: Stalwart Randomization
 
@@ -619,7 +619,6 @@ To sum up, **You can use the normal model for one-proportion data if:**
 3. The observations are independent.
 
 ## Necessary Sample Size
-*Textbook reference: Lock5 Chapter 6.2, page 361*
 
 One last cool trick you can do now.
 
@@ -657,6 +656,4 @@ So, if we want to estimate the proportion who will vote Trump to within 1%, we s
 
 ## More Practice
 
-You will practice the skills you just learned in Quiz 9 and Homework 12.
-
-For *additional* practice on one-proportion problems, there's also [a worksheet available for you (with solutions so you can check your work)](https://moodle.calvin.edu/mod/page/view.php?id=1007066).
+Now, all you need is practice at putting your new skills to work! You can expect to work collaboratively on homework, practice problems and projects in class this week.

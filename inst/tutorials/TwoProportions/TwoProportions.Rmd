@@ -58,7 +58,7 @@ We can use it to answer: Is the proportion Islanders with brown eyes *the same* 
 This is a *two-proportion* problem because our parameter of interest is a **difference in proportions between two groups** -- the proportion is the proportion people with brown eyes, and the two groups are North Island residents and South Island residents.
 
 ## SE for a Two Proportions
-*Text book reference: Lock5 Chapter 6.7*
+*Text book reference: [IMS Ch. 6.2](https://openintro-ims.netlify.app/inference-cat.html#diff-two-prop)*
 
 Just as the Central Limit Theorem for one proportion told us that the sampling distribution for a proportion is normal, with SE = $\sqrt{\frac{p(1-p)}{n}}$, there's a CLT for *two* proportions that gives us equally valuable information.
 
@@ -80,7 +80,7 @@ By logic similar to what we used for one proportion, we obtain a rule of thumb f
 If you are working with data on one proportion to find a CI or do a hypothesis test, your sample size *must* meet the rule of thumb above ($np \geq 10$ and $n(1-p) \geq 10$) or you can't use the short cut we're about to learn!
 
 ## SE for two proportions: Formula
-*Text book reference: Lock5 Chapter 6.7*
+*Text book reference: [IMS Ch. 6.2](https://openintro-ims.netlify.app/inference-cat.html#diff-two-prop)*
 
 Our exploration of the normal model for one proportion gives us a good idea of what we'd expect the formula for the SE for two proportions to look like. It'll look similar to the one for one proportion, but with a term for each of the two groups.
 
@@ -99,7 +99,6 @@ For a confidence interval, as you might guess, $\hat{p}_1$ and $\hat{p}_2$ (the 
 Now we have *even more* power -- we have a nifty shortcut for estimating the SE for problems about *two proportions* as well as problems about *one proportion*!
 
 ## Using your Power Wisely: CIs
-*Text book reference: Lock5 Chapter 6.8*
 
 As long as you know the sample sizes $n_1$ and $n_2$ and the sample proportions $\hat{p}_1$ and $\hat{p}_2$, you can now **estimate the SE for a CI without bootstrapping**.
 
@@ -109,7 +108,7 @@ to get the SE, then
 
 $$(\hat{p}_1 - \hat{p}_2) \pm z^*SE$$
 
-to get the CI. (Remember -- from Module 2 and Lock5 Chapter 5 -- $z^*$ is the multiplier for your chosen confidence level C, obtained from the boundaries of the central C% of the standard normal distribution.) 
+to get the CI. (Remember -- from before -- $z^*$ is the multiplier for your chosen confidence level C, obtained from the boundaries of the central C% of the standard normal distribution.) 
 
 For reference,
 
@@ -195,7 +194,6 @@ CI
 
 
 ## Using your Power Wisely: Tests
-*Text book reference: Lock5 Chapter 6.9*
 
 What if you wanted to answer, *"Is the proportion brown-eyed Islanders the same on North and South Islands"*, using a hypothesis test instead of a CI?
 

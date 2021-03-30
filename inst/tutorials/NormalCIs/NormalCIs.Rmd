@@ -60,6 +60,7 @@ Return to an app if needed -- or just search your memory -- to figure out:
 - *When* (under what conditions) is it a good match?
 
 ## Central Limit Theorem
+*Textbook reference: [Intro to Modern Statistics Ch. 5.3](https://openintro-ims.netlify.app/intro-stat-inference.html#inf-math)*
 
 The answers to those two questions are provided by the **Central Limit Theorem**:  Sampling distribution will be **normal**, as long as the sample size is **big enough**.
 
@@ -81,7 +82,7 @@ Not at first, but eventually, this will lead us to some **shortcuts that let us 
 
 ## But first, z-scores
 
-*Textbook: Lock5 Chapter 2.3, pages 78-79*
+*Textbook reference: [Intro to Modern Statistics Ch. 5.3.2](https://openintro-ims.netlify.app/intro-stat-inference.html#standardizing-with-z-scores)*
 
 A quantity known as a **z-score** will prove useful in our next explorations. What is it? (Watch the 3.5-minute video...)
 
@@ -90,8 +91,6 @@ A quantity known as a **z-score** will prove useful in our next explorations. Wh
 (You can also [watch directly on YouTube](https://youtu.be/03aanM4ruqw) if you prefer.)
 
 ## CIs with Varying Confidence Levels
-
-*Textbook reference: Lock5 Chapter 5.2*
 
 So...how does the Central Limit Theorem actually help us? And why that detour about z-scores?
 
