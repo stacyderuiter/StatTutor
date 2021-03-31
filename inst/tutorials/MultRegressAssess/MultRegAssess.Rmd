@@ -33,7 +33,7 @@ head(lead)
 
 The first input to `lm` is a formula of the form $y \sim x_1 + x_2 + ...$, where y is the name of the response variable, and $x_1$, $x_2$, ... $x_n$ are the predictor or explanatory variables.  The second input to `lm` is `data`, the name of your dataset.
 
-Let's try a model with response varialbe `Lead` and predictors `Fluoride`, `Water_Filter`, and `Month`.
+Let's try a model with response variable `Lead` and predictors `Fluoride`, `Water_Filter`, and `Month`.
 
 ```{r, fit-lm, exercise=TRUE}
 mr1 <- lm(y ~ x1 + x2, data=lead)
