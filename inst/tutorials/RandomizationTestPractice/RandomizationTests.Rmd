@@ -510,7 +510,7 @@ quiz(
 
 What does this mean, biologically? One interpretation is that the penguins are less successful at finding or capturing food, so they have to stay out longer on foraging trips before returning to their colony to rest or breed.
 
-The difference in average foraging trip duration is about a day.  Do you think this difference is big enough to be, not just *statistically* significant, but *biologically* meaningful? (A statisticaly significant difference that is biologically meaningless is not worth making a big deal of -- for example, if the difference in foraging trip durations was 1 second (but was "statistically significant") it would probably be a mistake to think such a small difference *really* mattered to the penguins. But what about this one-day difference? Could it affect their fitness?  (For example, what might be an advantage of getting back to the colony a day earlier at breeding time?)
+The difference in average foraging trip duration is about a day.  Do you think this difference is big enough to be, not just *statistically* significant, but *practically* meaningful? (A statisticaly significant difference that is practically meaningless is not worth making a big deal of -- for example, if the difference in foraging trip durations was 1 second (but was "statistically significant") it would probably be a mistake to think such a small difference *really* mattered to the penguins. But what about this one-day difference? Could it affect their fitness?  (For example, what might be an advantage of getting back to the colony a day earlier at breeding time?)
 
 
 ## Robins and Noise: Setup
@@ -681,6 +681,7 @@ Sorry, I know that was probably painful to think through! Remember we can only *
 Now that we have shown that there *is* a difference between day and night, we might try further tests to determine whether the proportion sites with robin song also has day/night differences, and whether the day (or night) noise level is different on average at sites where song is present vs sites where it is absent.
 
 ```{r, more-robins, exercise=TRUE}
+
 ```
 
 ## Extra Practice: Bad(?) Words
@@ -694,6 +695,7 @@ Use the data at [http://sldr.netlify.com/data/obscenity.csv](http://sldr.netlify
 If you want to work here in the tutorial, the data are already loaded for you in the dataset `obscene`.
 
 ```{r, obscenity, exercise = TRUE}
+
 ```
 
 ## Extra Practice: Reindeer
@@ -706,4 +708,5 @@ Mathieu Douhard and colleagues studied the effects of weather on reproductive su
 - *challenge* Is the prevalence of poor weather (lots of ROS) increasing over time? (You will have to figure out and/or create a variable and sample stat to measure this -- once you have the sample stat, the rest won't be too hard...)
 
 ```{r, reindeer, exercise = TRUE}
+
 ```

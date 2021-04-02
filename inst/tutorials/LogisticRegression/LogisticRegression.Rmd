@@ -27,6 +27,7 @@ tutorial_options(exercise.eval = FALSE)
 
 set.seed(14)
 bonobos <- read.csv('http://sldr.netlify.com/data/bonobo_faces.csv') %>%
+  mutate(Sex = factor(Sex)) %>%
   na.omit() 
 ```
 
@@ -241,6 +242,9 @@ OK, sorry for the sarcasm. The fact is, many people find odds ratios un-intuitiv
 For example, for our bonobos:
 
 ```{r}
+# you can install the s245 package on standalone R via:
+# install.packages('remotes')
+# remotes::install_github('stacyderuiter/s245')
 require(s245)
 pred_plot(bonobo_logit, 'fWHR') %>%
   gf_labs(y = 'Predicted P(Male)')

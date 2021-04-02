@@ -64,7 +64,7 @@ We will dive further into this topic -- learning about ANOVA and some other test
 
 The data are simulated based on the results of a paper published in 2003:
 
-[![](images/count-blessings.png){width=450px}](https://moodle.calvin.edu/pluginfile.php/1481445/mod_page/content/1/Counting_blessings_versus_burd.pdf)
+[![](images/count-blessings.png){width=450px}](https://moodle.calvin.edu/pluginfile.php/1489971/mod_resource/content/1/Counting_blessings_versus_burd.pdf)
 
 *Click on the image above to get the full PDF. Reading it is* **not** *required, but it is interesting and accesible - check it out if you have time!*
 
@@ -670,6 +670,17 @@ $$ \omega: E(Y) = \beta_0 $$
 
 $$H_0: \beta_1 = \beta_2 = 0$$
 
+Practical Example: We want to test whether a model with `life_rating` and `week_rating` is useful
+
+```{r, echo = TRUE}
+Omega <- lm(gratitude_score ~ life_rating + week_rating, data = grateful)
+omega <- lm(gratitude_score ~ 1, data = grateful)
+anova(omega, Omega)
+```
+
+So we reject the null hypothesis and conclude that the model with predictors is better than the intercept-only one.
+
+
 #### Removing a parameter
 
 $$ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2$$
@@ -678,6 +689,16 @@ $$ \omega: E(Y) = \beta_0 + \beta_1x_1 $$
 
 $$H_0: \beta_2 = 0$$
 
+Example with the gratitude data:
+
+```{r, echo = TRUE}
+Omega <- lm(gratitude_score ~ life_rating + week_rating, data = grateful)
+omega <- lm(gratitude_score ~ life_rating, data = grateful)
+anova(omega, Omega)
+```
+
+So we fail to reject the null that $\beta_2$ is 0: we conclude that the model with only `life_rating` is just fine.
+
 #### Constraints on Parameter Values
 
 $$ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2$$
@@ -685,6 +706,15 @@ $$ \Omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_2x_2$$
 $$ \omega: E(Y) = \beta_0 + \beta_1x_1 + \beta_1x_2 = \beta_0 + \beta_1(x_1 + x_2)$$
 
 $$ H_0: \beta_1 = \beta_2$$
+
+```{r, echo = TRUE}
+Omega <- lm(gratitude_score ~ life_rating + week_rating, data = grateful)
+omega <- lm(gratitude_score ~ I(life_rating + week_rating), data = grateful)
+anova(omega, Omega)
+```
+
+So here, we reject the null hypothesis that $\beta_1 = \beta_2$ and conclude the model with the two individual predictors is preferable.
+
 
 #### Complex Hypotheses (Combinations of Above)
 

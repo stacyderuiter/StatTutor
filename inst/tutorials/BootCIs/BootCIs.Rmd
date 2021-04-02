@@ -157,6 +157,7 @@ median(~Heartrate, data=students)
 Next, compute the difference in mean top speeds driven (variable `Topspeed`) between students who have/haven't gotten a speeding ticket while driving (variable `Ticket`).
 
 ```{r speed-diff, exercise=TRUE}
+
 ```
 
 ```{r speed-diff-hint-1, echo=FALSE, eval=FALSE, results='hide'}
@@ -174,6 +175,7 @@ diff(mean(~Topspeed | Ticket, data=students))
 Finally, compute the difference in proportion of intro stat students who exercise regularly (variable `Exercise`), between those who plan to get a job after Calvin and those who will attend more school (variable `Plans`).
 
 ```{r exercise-gender, exercise=TRUE}
+
 ```
 
 ```{r exercise-gender-hint-1, eval=FALSE, echo=FALSE}
@@ -453,6 +455,7 @@ SE
 Your turn:  try computing the SE for one of the previous examples.
 
 ```{r se-calc, exercise=TRUE}
+
 ```
 
 ## Computing a 95% CI: 2SE method
@@ -478,6 +481,7 @@ CI
 Your turn: try computing a 95% CI in this way for one of the previous examples.
 
 ```{r CI95, exercise=TRUE}
+
 ```
 
 ## Different Conf. Levels
