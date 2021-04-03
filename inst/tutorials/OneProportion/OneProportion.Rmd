@@ -38,12 +38,13 @@ At the end of this module, you will:
 
 ## Text Book Reference
 
-This module covers **[IMS Chapter 6.1 - 6.2](https://openintro-ims.netlify.app/inference-cat.html#inference-cat)**. 
+This module covers **[IMS Chapter 6.1](https://openintro-ims.netlify.app/inference-cat.html#single-prop)**, if you wish for additional reference material. 
 
-*It is recommended that you read the text book sections either before or after completing the corresponding parts of the tutorial, especially for any sections you feel less confident about.*
+*It is recommended (but not required) that you read the text book sections either before or after completing the corresponding parts of the tutorial, especially for any sections you feel less confident about.*
 
 ## Exploring SE for a Proportion
 
+*Text book reference: [IMS Ch. 6.1.2](https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm)*
 
 ### Central Limit Theorem
 We previously encountered the Central Limit Theorem (CLT), which told us that the sampling distribution for a proportion **will be normal** *as long as the sample size is big enough.*
@@ -52,11 +53,11 @@ We previously encountered the Central Limit Theorem (CLT), which told us that th
 
 Let's consider a few examples, using our old bootstrapping skills.
 
-### Normality of Sampling Dist when $\hat{p} = 0.5$
+### Normality of Sampling Dist when $p = 0.5$
 
-The code below computes and displays four bootstrap sampling distributions, and overlays a fitted normal distribution on each one.
+The code below computes and displays four sampling distributions, and overlays a fitted normal distribution on each one.
 
-For each one, **the sample proportion is $\hat{p} = 0.5$.** 
+For each one, **the true parameter value is $p = 0.5$.** 
 
 But **the sample sizes vary:** 10, 25, 50, and 100.
 
@@ -64,7 +65,8 @@ You can click to expand the code if you want to review how it's done, but **you 
 
 <details>
   <summary>Show code</summary>
-```{r, echo = TRUE, eval = FALSE, fig.show = 'hide'}
+  
+```{r, prop-sim-1, echo = TRUE, eval = FALSE, fig.show = 'hide'}
 # note: code written for clarity, not efficiency :)
 b1 <- do(1000)*rflip(n = 10,  prob = 0.5)
 b2 <- do(1000)*rflip(n = 25,  prob = 0.5)
@@ -81,23 +83,12 @@ gf_dhistogram(~prop, data = b4, title = 'n = 100', binwidth = 1/50) %>% gf_fitdi
 
 </details>
 
-```{r, echo = TRUE, fig.show = 'hold', fig.width = 3, fig.height = 2.5}
-# note: code written for clarity, not efficiency :)
-b1 <- do(1000)*rflip(n = 10,  prob = 0.5)
-b2 <- do(1000)*rflip(n = 25,  prob = 0.5)
-b3 <- do(1000)*rflip(n = 50,  prob = 0.5)
-b4 <- do(1000)*rflip(n = 100, prob = 0.5)
+```{r, ref.label = 'prop-sim-1', eval = TRUE, echo = FALSE, fig.show = 'hold', fig.width = 3, fig.height = 2.5}
 
-gf_dhistogram(~prop, data = b1, title = 'n =  10', binwidth = 1/10) %>%
-  gf_fitdistr()
-gf_dhistogram(~prop, data = b2, title = 'n =  25', binwidth = 1/25) %>%
-  gf_fitdistr()
-gf_dhistogram(~prop, data = b3, title = 'n =  50', binwidth = 1/50) %>% gf_fitdistr()
-gf_dhistogram(~prop, data = b4, title = 'n = 100', binwidth = 1/50) %>% gf_fitdistr()
 ```
 
 ```{r, quiz-med-p}
-quiz(question(text = "Which sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.5)?",
+quiz(question(text = "Which sample sizes result in normal-looking sampling distributions for a proportion (when the proportion is 0.5)?",
               answer("Sample sizes of 10 and more look normal", correct = TRUE),
               answer("Sample sizes of 25 or more look normal"),
               answer("Sample sizes of 50 or more look normal"),
@@ -108,11 +99,11 @@ quiz(question(text = "Which sample sizes result in normal-looking sampling distr
 )
 ```
 
-### Normality of Sampling Dist when $\hat{p} = 0.07$
+### Normality of Sampling Dist when $p = 0.07$
 
-**All** of the sampling distributions we just checked had $\hat{p} = 0.5$. Does varying the sample proportion matter?  
+**All** of the sampling distributions we just checked had $p = 0.5$. Does varying the proportion matter?  
 
-#### Let's repeat the same exploration, but this time with a **very small $\hat{p}$ value of 0.07.**
+#### Let's repeat the same exploration, but this time with a **very small $p$ value of 0.07.**
 
 Again, **the sample sizes vary:** 10, 25, 50, and 100.
 
@@ -120,7 +111,7 @@ You can click to expand the code if you want to review how it's done, but **you 
 
 <details>
   <summary>Show code</summary>
-```{r, echo = TRUE, eval = FALSE, fig.show ='hide'}
+```{r, prop-sim-2, echo = TRUE, eval = FALSE, fig.show ='hide'}
 # note: code written for clarity, not efficiency :)
 b1 <- do(1000)*rflip(n = 10,  prob = 0.07)
 b2 <- do(1000)*rflip(n = 25,  prob = 0.07)
@@ -137,19 +128,8 @@ gf_dhistogram(~prop, data = b4, title = 'n = 100', binwidth = 0.01) %>% gf_fitdi
 
 </details>
 
-```{r, echo = FALSE, fig.show = 'hold', fig.width = 3, fig.height = 2.5}
-# note: code written for clarity, not efficiency :)
-b1 <- do(1000)*rflip(n = 10,  prob = 0.07)
-b2 <- do(1000)*rflip(n = 25,  prob = 0.07)
-b3 <- do(1000)*rflip(n = 50,  prob = 0.07)
-b4 <- do(1000)*rflip(n = 100, prob = 0.07)
+```{r, ref.label = 'prop-sim-2', eval = TRUE, echo = FALSE, fig.show = 'hold', fig.width = 3, fig.height = 2.5}
 
-gf_dhistogram(~prop, data = b1, title = 'n =  10', binwidth = 1/10) %>%
-  gf_fitdistr() 
-gf_dhistogram(~prop, data = b2, title = 'n =  25', binwidth = 1/25) %>%
-  gf_fitdistr() 
-gf_dhistogram(~prop, data = b3, title = 'n =  50', binwidth = 0.02) %>% gf_fitdistr() 
-gf_dhistogram(~prop, data = b4, title = 'n = 100', binwidth = 0.01) %>% gf_fitdistr() 
 ```
 
 ```{r, quiz-sm-p}
@@ -172,13 +152,13 @@ quiz(question("What does it mean when part of the left tail of the normal curve 
 ```
 
 
-### Normality of Sampling Dist when $\hat{p} = 0.88$
+### Normality of Sampling Dist when $p = 0.88$
 
-**All** of the sampling distributions we just checked had $\hat{p} = 0.07$. Is it only **small** values of $\hat{p}$ that require larger samples sizes to look normal? Or will **big** $\hat{p}$ values have the same problem?  
+**All** of the sampling distributions we just checked had $p = 0.07$. Is it only **small** values of $p$ that require larger samples sizes to look normal? Or will **big** $p$ values have the same problem?  
 
-#### Let's repeat the same exploration, but this time with a **large $\hat{p}$ value of 0.88.** 
+#### Let's repeat the same exploration, but this time with a **large $p$ value of 0.88.** 
 
-*Notice, this $\hat{p}$ is big, but not as extreme as 0.07 -- 0.07 is closer to 0 than 0.88 is to 1.*
+*Notice, this $p$ is big, but not as extreme as 0.07 -- 0.07 is closer to 0 than 0.88 is to 1.*
 
 Again, **the sample sizes vary:** 10, 25, 50, and 100.
 
@@ -186,7 +166,7 @@ You can click to expand the code if you want to review how it's done, but **you 
 
 <details>
   <summary>Show code</summary>
-```{r, echo = TRUE, eval = FALSE, fig.show = 'hide', fig.width = 3, fig.height = 2.5}
+```{r, prop-sim-3, echo = TRUE, eval = FALSE, fig.show = 'hide', fig.width = 3, fig.height = 2.5}
 # note: code written for clarity, not efficiency :)
 b1 <- do(1000)*rflip(n = 10,  prob = 0.88)
 b2 <- do(1000)*rflip(n = 25,  prob = 0.88)
@@ -203,19 +183,8 @@ gf_dhistogram(~prop, data = b4, title = 'n = 100', binwidth = 0.01) %>% gf_fitdi
 
 </details>
 
-```{r, echo = FALSE, fig.show = 'hold', fig.width = 3, fig.height = 2.5}
-# note: code written for clarity, not efficiency :)
-b1 <- do(1000)*rflip(n = 10,  prob = 0.88)
-b2 <- do(1000)*rflip(n = 25,  prob = 0.88)
-b3 <- do(1000)*rflip(n = 50,  prob = 0.88)
-b4 <- do(1000)*rflip(n = 100, prob = 0.88)
+```{r, ref.label = 'prop-sim-3', eval = TRUE, echo = FALSE, fig.show = 'hold', fig.width = 3, fig.height = 2.5}
 
-gf_dhistogram(~prop, data = b1, title = 'n =  10', binwidth = 1/10) %>%
-  gf_fitdistr() 
-gf_dhistogram(~prop, data = b2, title = 'n =  25', binwidth = 1/25) %>%
-  gf_fitdistr() 
-gf_dhistogram(~prop, data = b3, title = 'n =  50', binwidth = 0.02) %>% gf_fitdistr() 
-gf_dhistogram(~prop, data = b4, title = 'n = 100', binwidth = 0.01) %>% gf_fitdistr() 
 ```
 
 ```{r, quiz-lg-p}
@@ -241,14 +210,14 @@ quiz(question("When part of the right tail of the normal curve is 'cut off' on t
 
 So...what have we learned?
 
-When the sample proportion $\hat{p}$ is in the middle of the range -- around 0.5 -- even a pretty small sample size like $n = 10$ will result in a normal-looking sampling distribution.
+When the proportion $p$ is in the middle of the range -- around 0.5 -- even a pretty small sample size like $n = 10$ will result in a normal-looking sampling distribution.
 
-But as the sample proportion $\hat{p}$ gets closer to the boundaries of 0 and 1, you need bigger and bigger sample sizes before the sampling distribution looks normal.  This is because proportions can never be less than 0 or more than 1; if $n$ is small and there's a lot of variation from sample to sample, it's limited at the edge of the possible range (so with $p \approx 0$, the sampling distribution can "spread out" toward the right but not to the left).
+But as the proportion $p$ (and its estimate(s) $\hat{p}$) get closer to the boundaries of 0 and 1, you need bigger and bigger sample sizes before the sampling distribution looks normal.  This is because proportions can never be less than 0 or more than 1; if $n$ is small and there's a lot of variation from sample to sample, it's limited at the edge of the possible range (so with $p \approx 0$, the sampling distribution can "spread out" toward the right but not to the left).
 
 ```{r skew-direction}
 quiz(question("The sampling distribution for a proportion will be skewed (not normal) if the population proportion is close to 0 or 1 and the sample size is small. Which direction is the skew?",
               answer("Left for small proportions and right for large proportions"),
-              answer("Right for small proportions and lefts for large proportions", correct = TRUE),
+              answer("Right for small proportions and left for large proportions", correct = TRUE),
               answer("Always right skew"),
               answer("Always left skew"),
               allow_retry = TRUE,
@@ -257,6 +226,7 @@ quiz(question("The sampling distribution for a proportion will be skewed (not no
 
 ## Rule of Thumb: Sample Size and Normality
 
+*Text book reference: [IMS Chapter 6.1.2, Conditions](https://openintro-ims.netlify.app/inference-cat.html#conditions)*
 
 So, we know that the required sample size to ensure that the sampling distribution for a proportion is normal *depends on the proportion* -- small samples sizes will do for proportions near 0.5, but not for proportions near 0 or 1.
 
@@ -273,9 +243,14 @@ If you are working with data on one proportion to find a CI or do a hypothesis t
 
 ## SE for one proportion: Exploration
 
+*Text book reference: [IMS Ch. 6.1.2](https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm)*
+
+
 The Central Limit Theorem tells us that (when $n$ is big enough), the sampling distribution will be normal.
 
-But it tells us more!  It also tells us *what the standard error of the sampling distribution will be*, as a function of the proportion $p$ and the sample size $n$!
+#### But it tells us more!  
+
+It also tells us *what the standard error of the sampling distribution will be*, as a function of the proportion $p$ and the sample size $n$!
 
 Before we explore the exact relationship, think for a moment about how you *expect* the SE to depend on $n$ and $p$.
 
@@ -285,9 +260,9 @@ quiz(question("How do you expect the SE to depend on sample size n?",
               answer("As n increases, the SE will decrease.", correct = TRUE, message = "Yes! This is true for any parameter, not just proportions. As the sample size gets bigger, the individual estimates from each dataset are more precise, so the sampling distribution gets narrower and the SE smaller."),
               allow_retry = TRUE),
      question("How do you expect the SE to depend on the proportion p?",
-              answer("As p increases, SE will increase"),
-              answer("As p increases, SE will decrease"),
-              answer("There won't be a simple linear relationship between p and SE", correct = TRUE, message = "You're right! In the next section, we'll explore the actual shape of this relationship."),
+              answer("As p increases, SE will increase linearly"),
+              answer("As p increases, SE will decrease linearly"),
+              answer("There won't be a simple linear relationship between p and SE", correct = TRUE, message = "You're right! In the next section, we'll explore the exact shape of this relationship."),
               allow_retry = TRUE)
 )
 ```
@@ -298,36 +273,28 @@ We can use bootstrap sampling distributions again to explore how the $SE$ change
 
 We will compute lots of bootstrap sampling distributions for a range of values of the proportion $n$ from small to large. For each one, we'll compute a standard error (SE). Then, we'll plot the SEs as a function of the $n$s.
 
-You can click to expand the code below to see how it's done, but **your main goal is to see exactly how the SE changes as a function of n**.
+You can click to expand the code below to see how it's done, but **your main goal is to** *see* **exactly how the SE changes as a function of n** (based on the graph).
 
 <details>
   <summary>Show code</summary>
 
-```{r, echo = TRUE, fig.width = 6.5, fig.height = 2.5, fig.show = 'hold'}
-ns <- seq(from=10, by = 50, to = 1000)
+```{r, se-sim-1, eval = FALSE, echo = TRUE, fig.width = 6.5, fig.height = 2.5, fig.show = 'hold'}
+ns <- seq(from=10, by = 50, to = 5000)
 SE <- NA*ns
 for (i in c(1:length(ns))){
   samp.dist <- do(1000)*rflip(n = ns[i], prob = 0.5)
   SE[i] <- sd(~prop, data = samp.dist)
 }
 
-gf_point(SE ~ 1/ns, xlab = '1 / Sample Size (n)')
-gf_point(SE ~ sqrt(1/ns), xlab = '1 / Square root of\nSample Size')
+gf_point(SE ~ 1/ns, xlab = expression(frac(1, n)))
+gf_point(SE ~ sqrt(1/ns), xlab = expression(frac(1, sqrt(n))))
 ```
 
 </details>
 
 
-```{r, echo = FALSE, fig.width = 6.5, fig.height = 2.5, fig.show = 'hold'}
-ns <- seq(from=10, by = 50, to = 1000)
-SE <- NA*ns
-for (i in c(1:length(ns))){
-  samp.dist <- do(1000)*rflip(n = ns[i], prob = 0.5)
-  SE[i] <- sd(~prop, data = samp.dist)
-}
+```{r, ref.label = 'se-sim-1', eval = TRUE, echo = FALSE, fig.width = 6.5, fig.height = 2.5, fig.show = 'hold'}
 
-gf_point(SE ~ 1/ns, xlab = '1 / Sample Size (n)')
-gf_point(SE ~ sqrt(1/ns), xlab = '1 / Square root of\nSample Size')
 ```
 
 
@@ -343,12 +310,12 @@ We'll use bootstrap sampling distributions again to explore how the $SE$ changes
 
 We will compute lots of bootstrap sampling distributions for a range of values of the proportion $p$ between 0 and 1. For each one, we'll compute a standard error (SE). Then, we'll plot the SEs as a function of the $p$s.
 
-You can click to expand the code below to see how it's done., but **your main goal is to see how the SE changes as a function of p**.
+You can click to expand the code below to see how it's done, but **your main goal is to see how the SE changes as a function of p**.
 
 <details>
   <summary>Show code</summary>
 
-```{r, echo = TRUE, eval = FALSE, fig.show = 'hide'}
+```{r, se-sim-2, echo = TRUE, eval = FALSE, fig.show = 'hide'}
 ps <- seq(from=0, by = 0.01, to = 1)
 for (i in c(1:length(ps))){
   samp.dist <- do(1000)*rflip(n = 1000, prob = ps[i])
@@ -360,19 +327,15 @@ gf_point(SE ~ ps, xlab = 'Proportion')
 
 </details>
 
-```{r, echo = FALSE, fig.width = 6.5, fig.height = 2.5,}
-ps <- seq(from=0, by = 0.01, to = 1)
-for (i in c(1:length(ps))){
-  samp.dist <- do(1000)*rflip(n = 1000, prob = ps[i])
-  SE[i] <- sd(~prop, data = samp.dist)
-}
+```{r, ref.label = 'se-sim-2', eval = TRUE, echo = FALSE, fig.width = 6.5, fig.height = 2.5, fig.show = 'hold'}
 
-gf_point(SE ~ ps, xlab = 'Proportion')
 ```
 
 **Interesting!** The SE is largest when $p$ is around 0.5, and smaller for $p$ closer to 0 or 1.  How could we include $p$ in an expression for the SE in a way that would yield a pattern like this? (*Click on to the next section to find out...*)
 
 ## SE for one proportion: Formula
+
+*Text book reference: [IMS Ch. 6.1.2](https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm)*
 
 The exploration we just finished has given us some idea of what we'd expect the formula for the SE for a proportion to look like. (Of course, the formula was derived analytically, not guess-and-checked via simulations, but the simulations are an easy way for us to get a sense of what to expect.)
 
@@ -391,7 +354,7 @@ Did you see what we just did there? This is pretty huge.  How so?
 
 ## Using your Power Wisely: CIs
 
-As long as you know the sample size $n$ and the sample proportion $\hat{p}$, you can now **estimate the SE for a CI without bootstrapping**.
+As long as you know the sample size $n$ and have an estimate of the proportion $p$ (that "estimate" will be your sample stat $\hat{p}$, if you're doing a CI...), you can now **estimate the SE for a CI without bootstrapping**.
 
 Just use 
 
@@ -401,6 +364,7 @@ to get the SE, then
 $$\hat{p} \pm z^*SE$$
 
 to get the CI. (Remember -- from [before](https://rsconnect.calvin.edu:3939/content/61/) -- $z^*$ is the multiplier for your chosen confidence level C, obtained from the boundaries of the central C% of the standard normal distribution.) 
+
 
 For reference,
 
@@ -413,7 +377,7 @@ pander::pander(ztab)
 
 ### Practice: Sunday Stalwarts
 
-Let's practice: At the start of the term, we all took the Pew Religious Typology quiz, and 16 of 37 respondents were classed as "Sunday Stalwarts." Find a 99% confidence interval for the proportion Sunday Stalwarts at Calvin. (*Note: this calculation assumes, perhaps incorrectly, that our class is a random sample of all Calvin Students with respect to their religious practice.*)
+Let's practice: At the start of the term, some Calvin students took the [Pew Religious Typology quiz](https://www.pewforum.org/quiz/religious-typology/), and 16 of 37 respondents were classed as "Sunday Stalwarts." Find a 99% confidence interval for the proportion Sunday Stalwarts at Calvin. (*Note: this calculation assumes, perhaps incorrectly, that the class is a random sample of all Calvin Students with respect to their religious practice.*)
 
 You can use the R exercise chunk below as a calculator (and to check your work using the solution):
 
@@ -464,7 +428,7 @@ cdata(~prop_TRUE, data = bd, p = 0.99)
 ```
 
 ### Practice: Better than Chimps
-One more practice. On the *Factfulness* quiz at the start of term, 21 (of the 37 of us) scored 3 or lower (alas, worse than chimpanzees).  Assuming (generously) that we are a random sample of US college students, find a 90% CI for the proportion US college students who do worse than chimps on this test.
+One more practice. Some other students took a [*Factfulness* quiz](https://factfulnessquiz.com/), measuring their knowledge about the state of the world. (*Take the quiz yourself if you want - it takes 5 minutes or less and is interesting.*) 21 (of the 37 of us) scored 3 or lower (alas, [worse than chimpanzees](https://youtu.be/N1dvfH3s1Ak), that is, worse than expected by random guessing).  Assuming (generously) that the class who took the quiz is random sample of all US college students, find a 90% CI for the proportion US college students who do worse than chimps on this test.
 
 ```{r, chimps, exercise = TRUE}
 
@@ -477,10 +441,11 @@ CI <- phat + c(-1,1) * 1.64 * SE
 CI
 ```
 
-We are 90% confident the true proportion chimp-dominated test-takers is between 0.43 and 0.70! (Kind of a lot, but the same is true all over the world.)
+We are 90% confident the true proportion chimp-dominated test-takers is between 0.43 and 0.70! (Kind of a lot, but [the same is true all over the world](https://youtu.be/N1dvfH3s1Ak).)
 
 ## Using your Power Wisely: Tests
 
+*Text book reference: [IMS Ch. 6.1](https://openintro-ims.netlify.app/inference-cat.html#single-prop)*
 
 Think back to when we first learned randomization tests. To create a randomization sampling distribution, do you remember what we had to *assume* before we began?
 
@@ -524,7 +489,7 @@ So we find a p-value by finding the area-under-the-curve *that is more extreme t
 
 ### Practice: Stalwarts again
 
-[Data from Calvin University](https://calvin.edu/offices-services/enrollment-research/reports/archives/2019/2019-fall-census-day-10-report.pdf#page=1) states that the population proportion of Calvin students who are Christian Reformed Church members is 28.3%. Recall, in our survey, 16 of 37 students were "sunday stalwarts". Let's test whether the proportion stalwarts could be the same as the proportion CRC members.
+[Data from Calvin University in 2020](https://calvin.edu/offices-services/enrollment-research/reports/archives/2019/2019-fall-census-day-10-report.pdf#page=1) states that the population proportion of all Calvin students who are Christian Reformed Church members was 28.3%. Recall, in our survey, 16 of 37 students were "sunday stalwarts". Let's test whether the proportion stalwarts could be the same as the proportion CRC members.
 
 ```{r stalwart-test}
 quiz(question("What null hypothesis will we test?",
@@ -552,7 +517,7 @@ SE <- sqrt(p0 * (1- p0) / n)
 2 * xpnorm(phat, mean = p0, sd = SE, lower.tail = FALSE)
 ```
 
-**Conclusion:** The p-value is pretty small - about 0.04. So we reject $H_0$. Our data provide pretty strong evidence *against* the idea that the proportion Stalwarts is the same as the proportion CRC students. (Not surprising - it was a kind of silly idea to begin with!)
+**Conclusion:** The p-value is pretty small - about 0.04. So we reject $H_0$. Our data provide pretty strong evidence *against* the idea that the proportion Stalwarts is the same as the proportion CRC students. (Not surprising - it was a kind of silly idea to begin with! CRC members are not the only people in the world with regular dedication to religious practice!)
 
 ### Review: Stalwart Randomization
 
@@ -620,7 +585,6 @@ To sum up, **You can use the normal model for one-proportion data if:**
 
 ## Necessary Sample Size
 
-
 One last cool trick you can do now.
 
 For a CI for a proportion, we can now use
@@ -657,6 +621,4 @@ So, if we want to estimate the proportion who will vote Trump to within 1%, we s
 
 ## More Practice
 
-You will practice the skills you just learned in Quiz 9 and Homework 12.
-
-For *additional* practice on one-proportion problems, there's also [a worksheet available for you (with solutions so you can check your work)](https://moodle.calvin.edu/mod/page/view.php?id=1007066).
+Now, all you need is practice at putting your new skills to work! You can expect to work collaboratively on homework, practice problems and projects in class this week.

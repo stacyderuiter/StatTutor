@@ -132,11 +132,12 @@ $(document).ready(function () {
 </div>
 <div id="section-text-book-reference" class="section level2">
 <h2>Text Book Reference</h2>
-<p>This module covers <strong><a href="https://openintro-ims.netlify.app/inference-cat.html#inference-cat">IMS Chapter 6.1 - 6.2</a></strong>.</p>
-<p><em>It is recommended that you read the text book sections either before or after completing the corresponding parts of the tutorial, especially for any sections you feel less confident about.</em></p>
+<p>This module covers <strong><a href="https://openintro-ims.netlify.app/inference-cat.html#single-prop">IMS Chapter 6.1</a></strong>, if you wish for additional reference material.</p>
+<p><em>It is recommended (but not required) that you read the text book sections either before or after completing the corresponding parts of the tutorial, especially for any sections you feel less confident about.</em></p>
 </div>
 <div id="section-exploring-se-for-a-proportion" class="section level2">
 <h2>Exploring SE for a Proportion</h2>
+<p><em>Text book reference: <a href="https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm">IMS Ch. 6.1.2</a></em></p>
 <div id="section-central-limit-theorem" class="section level3">
 <h3>Central Limit Theorem</h3>
 <p>We previously encountered the Central Limit Theorem (CLT), which told us that the sampling distribution for a proportion <strong>will be normal</strong> <em>as long as the sample size is big enough.</em></p>
@@ -145,10 +146,10 @@ $(document).ready(function () {
 <p>Let’s consider a few examples, using our old bootstrapping skills.</p>
 </div>
 </div>
-<div id="section-normality-of-sampling-dist-when-hatp-0.5" class="section level3">
-<h3>Normality of Sampling Dist when <span class="math inline">\(\hat{p} = 0.5\)</span></h3>
-<p>The code below computes and displays four bootstrap sampling distributions, and overlays a fitted normal distribution on each one.</p>
-<p>For each one, <strong>the sample proportion is <span class="math inline">\(\hat{p} = 0.5\)</span>.</strong></p>
+<div id="section-normality-of-sampling-dist-when-p-0.5" class="section level3">
+<h3>Normality of Sampling Dist when <span class="math inline">\(p = 0.5\)</span></h3>
+<p>The code below computes and displays four sampling distributions, and overlays a fitted normal distribution on each one.</p>
+<p>For each one, <strong>the true parameter value is <span class="math inline">\(p = 0.5\)</span>.</strong></p>
 <p>But <strong>the sample sizes vary:</strong> 10, 25, 50, and 100.</p>
 <p>You can click to expand the code if you want to review how it’s done, but <strong>you main goal is to see which sample sizes seem to result in a </strong> <em>normal</em> <strong>sampling distribution</strong>.</p>
 <details>
@@ -168,19 +169,7 @@ gf_dhistogram(~prop, data = b2, title = &#39;n =  25&#39;, binwidth = 1/25) %&gt
 gf_dhistogram(~prop, data = b3, title = &#39;n =  50&#39;, binwidth = 1/50) %&gt;% gf_fitdistr()
 gf_dhistogram(~prop, data = b4, title = &#39;n = 100&#39;, binwidth = 1/50) %&gt;% gf_fitdistr()</code></pre>
 </details>
-<pre class="r"><code># note: code written for clarity, not efficiency :)
-b1 &lt;- do(1000)*rflip(n = 10,  prob = 0.5)
-b2 &lt;- do(1000)*rflip(n = 25,  prob = 0.5)
-b3 &lt;- do(1000)*rflip(n = 50,  prob = 0.5)
-b4 &lt;- do(1000)*rflip(n = 100, prob = 0.5)
-
-gf_dhistogram(~prop, data = b1, title = &#39;n =  10&#39;, binwidth = 1/10) %&gt;%
-  gf_fitdistr()
-gf_dhistogram(~prop, data = b2, title = &#39;n =  25&#39;, binwidth = 1/25) %&gt;%
-  gf_fitdistr()
-gf_dhistogram(~prop, data = b3, title = &#39;n =  50&#39;, binwidth = 1/50) %&gt;% gf_fitdistr()
-gf_dhistogram(~prop, data = b4, title = &#39;n = 100&#39;, binwidth = 1/50) %&gt;% gf_fitdistr()</code></pre>
-<p><img src="OneProportion_files/figure-html/unnamed-chunk-2-1.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-2-2.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-2-3.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-2-4.png" width="288" style="display: block; margin: auto;" /></p>
+<p><img src="OneProportion_files/figure-html/unnamed-chunk-1-1.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-1-2.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-1-3.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-1-4.png" width="288" style="display: block; margin: auto;" /></p>
 <p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
 <div class="panel panel-default">
 <div data-label="quiz-med-p-1" class="tutorial-question panel-body">
@@ -191,11 +180,11 @@ gf_dhistogram(~prop, data = b4, title = &#39;n = 100&#39;, binwidth = 1/50) %&gt
 </div>
 </div>
 </div>
-<div id="section-normality-of-sampling-dist-when-hatp-0.07" class="section level3">
-<h3>Normality of Sampling Dist when <span class="math inline">\(\hat{p} = 0.07\)</span></h3>
-<p><strong>All</strong> of the sampling distributions we just checked had <span class="math inline">\(\hat{p} = 0.5\)</span>. Does varying the sample proportion matter?</p>
-<div id="section-lets-repeat-the-same-exploration-but-this-time-with-a-very-small-hatp-value-of-0.07." class="section level4">
-<h4>Let’s repeat the same exploration, but this time with a <strong>very small <span class="math inline">\(\hat{p}\)</span> value of 0.07.</strong></h4>
+<div id="section-normality-of-sampling-dist-when-p-0.07" class="section level3">
+<h3>Normality of Sampling Dist when <span class="math inline">\(p = 0.07\)</span></h3>
+<p><strong>All</strong> of the sampling distributions we just checked had <span class="math inline">\(p = 0.5\)</span>. Does varying the proportion matter?</p>
+<div id="section-lets-repeat-the-same-exploration-but-this-time-with-a-very-small-p-value-of-0.07." class="section level4">
+<h4>Let’s repeat the same exploration, but this time with a <strong>very small <span class="math inline">\(p\)</span> value of 0.07.</strong></h4>
 <p>Again, <strong>the sample sizes vary:</strong> 10, 25, 50, and 100.</p>
 <p>You can click to expand the code if you want to review how it’s done, but <strong>you main goal is to see which sample sizes seem to result in a </strong> <em>normal</em> <strong>sampling distribution</strong>.</p>
 <details>
@@ -215,7 +204,7 @@ gf_dhistogram(~prop, data = b2, title = &#39;n =  25&#39;, binwidth = 1/25) %&gt
 gf_dhistogram(~prop, data = b3, title = &#39;n =  50&#39;, binwidth = 0.02) %&gt;% gf_fitdistr() 
 gf_dhistogram(~prop, data = b4, title = &#39;n = 100&#39;, binwidth = 0.01) %&gt;% gf_fitdistr() </code></pre>
 </details>
-<p><img src="OneProportion_files/figure-html/unnamed-chunk-4-1.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-4-2.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-4-3.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-4-4.png" width="288" style="display: block; margin: auto;" /></p>
+<p><img src="OneProportion_files/figure-html/unnamed-chunk-2-1.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-2-2.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-2-3.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-2-4.png" width="288" style="display: block; margin: auto;" /></p>
 <p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
 <div class="panel panel-default">
 <div data-label="quiz-sm-p-1" class="tutorial-question panel-body">
@@ -235,12 +224,12 @@ gf_dhistogram(~prop, data = b4, title = &#39;n = 100&#39;, binwidth = 0.01) %&gt
 </div>
 </div>
 </div>
-<div id="section-normality-of-sampling-dist-when-hatp-0.88" class="section level3">
-<h3>Normality of Sampling Dist when <span class="math inline">\(\hat{p} = 0.88\)</span></h3>
-<p><strong>All</strong> of the sampling distributions we just checked had <span class="math inline">\(\hat{p} = 0.07\)</span>. Is it only <strong>small</strong> values of <span class="math inline">\(\hat{p}\)</span> that require larger samples sizes to look normal? Or will <strong>big</strong> <span class="math inline">\(\hat{p}\)</span> values have the same problem?</p>
-<div id="section-lets-repeat-the-same-exploration-but-this-time-with-a-large-hatp-value-of-0.88." class="section level4">
-<h4>Let’s repeat the same exploration, but this time with a <strong>large <span class="math inline">\(\hat{p}\)</span> value of 0.88.</strong></h4>
-<p><em>Notice, this <span class="math inline">\(\hat{p}\)</span> is big, but not as extreme as 0.07 – 0.07 is closer to 0 than 0.88 is to 1.</em></p>
+<div id="section-normality-of-sampling-dist-when-p-0.88" class="section level3">
+<h3>Normality of Sampling Dist when <span class="math inline">\(p = 0.88\)</span></h3>
+<p><strong>All</strong> of the sampling distributions we just checked had <span class="math inline">\(p = 0.07\)</span>. Is it only <strong>small</strong> values of <span class="math inline">\(p\)</span> that require larger samples sizes to look normal? Or will <strong>big</strong> <span class="math inline">\(p\)</span> values have the same problem?</p>
+<div id="section-lets-repeat-the-same-exploration-but-this-time-with-a-large-p-value-of-0.88." class="section level4">
+<h4>Let’s repeat the same exploration, but this time with a <strong>large <span class="math inline">\(p\)</span> value of 0.88.</strong></h4>
+<p><em>Notice, this <span class="math inline">\(p\)</span> is big, but not as extreme as 0.07 – 0.07 is closer to 0 than 0.88 is to 1.</em></p>
 <p>Again, <strong>the sample sizes vary:</strong> 10, 25, 50, and 100.</p>
 <p>You can click to expand the code if you want to review how it’s done, but <strong>you main goal is to see which sample sizes seem to result in a </strong> <em>normal</em> <strong>sampling distribution</strong>.</p>
 <details>
@@ -260,7 +249,7 @@ gf_dhistogram(~prop, data = b2, title = &#39;n =  25&#39;, binwidth = 1/25) %&gt
 gf_dhistogram(~prop, data = b3, title = &#39;n =  50&#39;, binwidth = 0.02) %&gt;% gf_fitdistr() 
 gf_dhistogram(~prop, data = b4, title = &#39;n = 100&#39;, binwidth = 0.01) %&gt;% gf_fitdistr() </code></pre>
 </details>
-<p><img src="OneProportion_files/figure-html/unnamed-chunk-6-1.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-6-2.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-6-3.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-6-4.png" width="288" style="display: block; margin: auto;" /></p>
+<p><img src="OneProportion_files/figure-html/unnamed-chunk-3-1.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-3-2.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-3-3.png" width="288" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-3-4.png" width="288" style="display: block; margin: auto;" /></p>
 <p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
 <div class="panel panel-default">
 <div data-label="quiz-lg-p-1" class="tutorial-question panel-body">
@@ -283,8 +272,8 @@ gf_dhistogram(~prop, data = b4, title = &#39;n = 100&#39;, binwidth = 0.01) %&gt
 <div id="section-summary-normality-of-sampling-distributions" class="section level3">
 <h3>Summary: Normality of Sampling Distributions</h3>
 <p>So…what have we learned?</p>
-<p>When the sample proportion <span class="math inline">\(\hat{p}\)</span> is in the middle of the range – around 0.5 – even a pretty small sample size like <span class="math inline">\(n = 10\)</span> will result in a normal-looking sampling distribution.</p>
-<p>But as the sample proportion <span class="math inline">\(\hat{p}\)</span> gets closer to the boundaries of 0 and 1, you need bigger and bigger sample sizes before the sampling distribution looks normal. This is because proportions can never be less than 0 or more than 1; if <span class="math inline">\(n\)</span> is small and there’s a lot of variation from sample to sample, it’s limited at the edge of the possible range (so with <span class="math inline">\(p \approx 0\)</span>, the sampling distribution can “spread out” toward the right but not to the left).</p>
+<p>When the proportion <span class="math inline">\(p\)</span> is in the middle of the range – around 0.5 – even a pretty small sample size like <span class="math inline">\(n = 10\)</span> will result in a normal-looking sampling distribution.</p>
+<p>But as the proportion <span class="math inline">\(p\)</span> (and its estimate(s) <span class="math inline">\(\hat{p}\)</span>) get closer to the boundaries of 0 and 1, you need bigger and bigger sample sizes before the sampling distribution looks normal. This is because proportions can never be less than 0 or more than 1; if <span class="math inline">\(n\)</span> is small and there’s a lot of variation from sample to sample, it’s limited at the edge of the possible range (so with <span class="math inline">\(p \approx 0\)</span>, the sampling distribution can “spread out” toward the right but not to the left).</p>
 <p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
 <div class="panel panel-default">
 <div data-label="skew-direction-1" class="tutorial-question panel-body">
@@ -298,6 +287,7 @@ gf_dhistogram(~prop, data = b4, title = &#39;n = 100&#39;, binwidth = 0.01) %&gt
 </div>
 <div id="section-rule-of-thumb-sample-size-and-normality" class="section level2">
 <h2>Rule of Thumb: Sample Size and Normality</h2>
+<p><em>Text book reference: <a href="https://openintro-ims.netlify.app/inference-cat.html#conditions">IMS Chapter 6.1.2, Conditions</a></em></p>
 <p>So, we know that the required sample size to ensure that the sampling distribution for a proportion is normal <em>depends on the proportion</em> – small samples sizes will do for proportions near 0.5, but not for proportions near 0 or 1.</p>
 <p><em>A handy rule of thumb says:</em></p>
 <p><strong>If <span class="math inline">\(np \geq 10\)</span> and <span class="math inline">\(n(1-p) \geq 10\)</span>, the sampling distribution will be normal.</strong></p>
@@ -310,8 +300,11 @@ gf_dhistogram(~prop, data = b4, title = &#39;n = 100&#39;, binwidth = 0.01) %&gt
 </div>
 <div id="section-se-for-one-proportion-exploration" class="section level2">
 <h2>SE for one proportion: Exploration</h2>
+<p><em>Text book reference: <a href="https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm">IMS Ch. 6.1.2</a></em></p>
 <p>The Central Limit Theorem tells us that (when <span class="math inline">\(n\)</span> is big enough), the sampling distribution will be normal.</p>
-<p>But it tells us more! It also tells us <em>what the standard error of the sampling distribution will be</em>, as a function of the proportion <span class="math inline">\(p\)</span> and the sample size <span class="math inline">\(n\)</span>!</p>
+<div id="section-but-it-tells-us-more" class="section level4">
+<h4>But it tells us more!</h4>
+<p>It also tells us <em>what the standard error of the sampling distribution will be</em>, as a function of the proportion <span class="math inline">\(p\)</span> and the sample size <span class="math inline">\(n\)</span>!</p>
 <p>Before we explore the exact relationship, think for a moment about how you <em>expect</em> the SE to depend on <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span>.</p>
 <p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
 <div class="panel panel-default">
@@ -330,27 +323,27 @@ gf_dhistogram(~prop, data = b4, title = &#39;n = 100&#39;, binwidth = 0.01) %&gt
 <script>if (Tutorial.triggerMathJax) Tutorial.triggerMathJax()</script>
 </div>
 </div>
+</div>
 <div id="section-how-does-the-se-depend-on-n" class="section level3">
 <h3>How does the SE depend on n?</h3>
 <p>We can use bootstrap sampling distributions again to explore how the <span class="math inline">\(SE\)</span> changes as <span class="math inline">\(n\)</span> changes.</p>
 <p>We will compute lots of bootstrap sampling distributions for a range of values of the proportion <span class="math inline">\(n\)</span> from small to large. For each one, we’ll compute a standard error (SE). Then, we’ll plot the SEs as a function of the <span class="math inline">\(n\)</span>s.</p>
-<p>You can click to expand the code below to see how it’s done, but <strong>your main goal is to see exactly how the SE changes as a function of n</strong>.</p>
+<p>You can click to expand the code below to see how it’s done, but <strong>your main goal is to</strong> <em>see</em> <strong>exactly how the SE changes as a function of n</strong> (based on the graph).</p>
 <details>
 <summary>
 Show code
 </summary>
-<pre class="r"><code>ns &lt;- seq(from=10, by = 50, to = 1000)
+<pre class="r"><code>ns &lt;- seq(from=10, by = 50, to = 5000)
 SE &lt;- NA*ns
 for (i in c(1:length(ns))){
   samp.dist &lt;- do(1000)*rflip(n = ns[i], prob = 0.5)
   SE[i] &lt;- sd(~prop, data = samp.dist)
 }
 
-gf_point(SE ~ 1/ns, xlab = &#39;1 / Sample Size (n)&#39;)
-gf_point(SE ~ sqrt(1/ns), xlab = &#39;1 / Square root of\nSample Size&#39;)</code></pre>
-<p><img src="OneProportion_files/figure-html/unnamed-chunk-7-1.png" width="624" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-7-2.png" width="624" style="display: block; margin: auto;" /></p>
+gf_point(SE ~ 1/ns, xlab = expression(frac(1, n)))
+gf_point(SE ~ sqrt(1/ns), xlab = expression(frac(1, sqrt(n))))</code></pre>
 </details>
-<p><img src="OneProportion_files/figure-html/unnamed-chunk-8-1.png" width="624" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-8-2.png" width="624" style="display: block; margin: auto;" /></p>
+<p><img src="OneProportion_files/figure-html/unnamed-chunk-4-1.png" width="624" style="display: block; margin: auto;" /><img src="OneProportion_files/figure-html/unnamed-chunk-4-2.png" width="624" style="display: block; margin: auto;" /></p>
 <p>What can we conclude? As we expected, the SE gets smaller as <span class="math inline">\(n\)</span> gets bigger. But the relationship is nonlinear. Specifically,</p>
 <p><strong>The SE increases with <span class="math inline">\(\frac{1}{\sqrt{n}}\)</span>.</strong></p>
 <p>So we should expect our formula for the SE for a proportion to have a <span class="math inline">\(\frac{1}{\sqrt{n}}\)</span> in it.</p>
@@ -359,7 +352,7 @@ gf_point(SE ~ sqrt(1/ns), xlab = &#39;1 / Square root of\nSample Size&#39;)</cod
 <h3>How does the SE depend on p?</h3>
 <p>We’ll use bootstrap sampling distributions again to explore how the <span class="math inline">\(SE\)</span> changes as <span class="math inline">\(p\)</span> changes.</p>
 <p>We will compute lots of bootstrap sampling distributions for a range of values of the proportion <span class="math inline">\(p\)</span> between 0 and 1. For each one, we’ll compute a standard error (SE). Then, we’ll plot the SEs as a function of the <span class="math inline">\(p\)</span>s.</p>
-<p>You can click to expand the code below to see how it’s done., but <strong>your main goal is to see how the SE changes as a function of p</strong>.</p>
+<p>You can click to expand the code below to see how it’s done, but <strong>your main goal is to see how the SE changes as a function of p</strong>.</p>
 <details>
 <summary>
 Show code
@@ -372,12 +365,13 @@ for (i in c(1:length(ps))){
 
 gf_point(SE ~ ps, xlab = &#39;Proportion&#39;)</code></pre>
 </details>
-<p><img src="OneProportion_files/figure-html/unnamed-chunk-10-1.png" width="624" style="display: block; margin: auto;" /></p>
+<p><img src="OneProportion_files/figure-html/unnamed-chunk-5-1.png" width="624" style="display: block; margin: auto;" /></p>
 <p><strong>Interesting!</strong> The SE is largest when <span class="math inline">\(p\)</span> is around 0.5, and smaller for <span class="math inline">\(p\)</span> closer to 0 or 1. How could we include <span class="math inline">\(p\)</span> in an expression for the SE in a way that would yield a pattern like this? (<em>Click on to the next section to find out…</em>)</p>
 </div>
 </div>
 <div id="section-se-for-one-proportion-formula" class="section level2">
 <h2>SE for one proportion: Formula</h2>
+<p><em>Text book reference: <a href="https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm">IMS Ch. 6.1.2</a></em></p>
 <p>The exploration we just finished has given us some idea of what we’d expect the formula for the SE for a proportion to look like. (Of course, the formula was derived analytically, not guess-and-checked via simulations, but the simulations are an easy way for us to get a sense of what to expect.)</p>
 <p>Without further ado, according to the Central Limit Theorem for a proportion, if <span class="math inline">\(n\)</span> is big enough, then the sampling distribution is normal with standard deviation</p>
 <p><span class="math display">\[ SE = \sqrt{\frac{p(1-p)}{n}}\]</span></p>
@@ -390,7 +384,7 @@ gf_point(SE ~ ps, xlab = &#39;Proportion&#39;)</code></pre>
 </div>
 <div id="section-using-your-power-wisely-cis" class="section level2">
 <h2>Using your Power Wisely: CIs</h2>
-<p>As long as you know the sample size <span class="math inline">\(n\)</span> and the sample proportion <span class="math inline">\(\hat{p}\)</span>, you can now <strong>estimate the SE for a CI without bootstrapping</strong>.</p>
+<p>As long as you know the sample size <span class="math inline">\(n\)</span> and have an estimate of the proportion <span class="math inline">\(p\)</span> (that “estimate” will be your sample stat <span class="math inline">\(\hat{p}\)</span>, if you’re doing a CI…), you can now <strong>estimate the SE for a CI without bootstrapping</strong>.</p>
 <p>Just use</p>
 <p><span class="math display">\[ SE = \sqrt{\frac{\hat{p}(1 - \hat{p})}{n}}\]</span> to get the SE, then</p>
 <p><span class="math display">\[\hat{p} \pm z^*SE\]</span></p>
@@ -436,7 +430,7 @@ gf_point(SE ~ ps, xlab = &#39;Proportion&#39;)</code></pre>
 </table>
 <div id="section-practice-sunday-stalwarts" class="section level3">
 <h3>Practice: Sunday Stalwarts</h3>
-<p>Let’s practice: At the start of the term, we all took the Pew Religious Typology quiz, and 16 of 37 respondents were classed as “Sunday Stalwarts.” Find a 99% confidence interval for the proportion Sunday Stalwarts at Calvin. (<em>Note: this calculation assumes, perhaps incorrectly, that our class is a random sample of all Calvin Students with respect to their religious practice.</em>)</p>
+<p>Let’s practice: At the start of the term, some Calvin students took the <a href="https://www.pewforum.org/quiz/religious-typology/">Pew Religious Typology quiz</a>, and 16 of 37 respondents were classed as “Sunday Stalwarts.” Find a 99% confidence interval for the proportion Sunday Stalwarts at Calvin. (<em>Note: this calculation assumes, perhaps incorrectly, that the class is a random sample of all Calvin Students with respect to their religious practice.</em>)</p>
 <p>You can use the R exercise chunk below as a calculator (and to check your work using the solution):</p>
 <div class="tutorial-exercise" data-label="stalwarts" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false}</script>
@@ -479,7 +473,7 @@ cdata(~prop_TRUE, data = bd, p = 0.99)</code></pre>
 </div>
 <div id="section-practice-better-than-chimps" class="section level3">
 <h3>Practice: Better than Chimps</h3>
-<p>One more practice. On the <em>Factfulness</em> quiz at the start of term, 21 (of the 37 of us) scored 3 or lower (alas, worse than chimpanzees). Assuming (generously) that we are a random sample of US college students, find a 90% CI for the proportion US college students who do worse than chimps on this test.</p>
+<p>One more practice. Some other students took a <a href="https://factfulnessquiz.com/"><em>Factfulness</em> quiz</a>, measuring their knowledge about the state of the world. (<em>Take the quiz yourself if you want - it takes 5 minutes or less and is interesting.</em>) 21 (of the 37 of us) scored 3 or lower (alas, <a href="https://youtu.be/N1dvfH3s1Ak">worse than chimpanzees</a>, that is, worse than expected by random guessing). Assuming (generously) that the class who took the quiz is random sample of all US college students, find a 90% CI for the proportion US college students who do worse than chimps on this test.</p>
 <div class="tutorial-exercise" data-label="chimps" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-ui-opts="1">{"engine":"r","has_checker":false}</script>
 </div>
@@ -489,11 +483,12 @@ SE &lt;- sqrt(phat * (1 - phat) / n)
 CI &lt;- phat + c(-1,1) * 1.64 * SE
 CI</code></pre>
 </div>
-<p>We are 90% confident the true proportion chimp-dominated test-takers is between 0.43 and 0.70! (Kind of a lot, but the same is true all over the world.)</p>
+<p>We are 90% confident the true proportion chimp-dominated test-takers is between 0.43 and 0.70! (Kind of a lot, but <a href="https://youtu.be/N1dvfH3s1Ak">the same is true all over the world</a>.)</p>
 </div>
 </div>
 <div id="section-using-your-power-wisely-tests" class="section level2">
 <h2>Using your Power Wisely: Tests</h2>
+<p><em>Text book reference: <a href="https://openintro-ims.netlify.app/inference-cat.html#single-prop">IMS Ch. 6.1</a></em></p>
 <p>Think back to when we first learned randomization tests. To create a randomization sampling distribution, do you remember what we had to <em>assume</em> before we began?</p>
 <p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
 <div class="panel panel-default">
@@ -523,7 +518,7 @@ CI</code></pre>
 </div>
 <div id="section-practice-stalwarts-again" class="section level3">
 <h3>Practice: Stalwarts again</h3>
-<p><a href="https://calvin.edu/offices-services/enrollment-research/reports/archives/2019/2019-fall-census-day-10-report.pdf#page=1">Data from Calvin University</a> states that the population proportion of Calvin students who are Christian Reformed Church members is 28.3%. Recall, in our survey, 16 of 37 students were “sunday stalwarts”. Let’s test whether the proportion stalwarts could be the same as the proportion CRC members.</p>
+<p><a href="https://calvin.edu/offices-services/enrollment-research/reports/archives/2019/2019-fall-census-day-10-report.pdf#page=1">Data from Calvin University in 2020</a> states that the population proportion of all Calvin students who are Christian Reformed Church members was 28.3%. Recall, in our survey, 16 of 37 students were “sunday stalwarts”. Let’s test whether the proportion stalwarts could be the same as the proportion CRC members.</p>
 <p><div class="panel-heading tutorial-quiz-title">Quiz</div></p>
 <div class="panel panel-default">
 <div data-label="stalwart-test-1" class="tutorial-question panel-body">
@@ -544,7 +539,7 @@ p0 &lt;- 0.283
 SE &lt;- sqrt(p0 * (1- p0) / n)
 2 * xpnorm(phat, mean = p0, sd = SE, lower.tail = FALSE)</code></pre>
 </div>
-<p><strong>Conclusion:</strong> The p-value is pretty small - about 0.04. So we reject <span class="math inline">\(H_0\)</span>. Our data provide pretty strong evidence <em>against</em> the idea that the proportion Stalwarts is the same as the proportion CRC students. (Not surprising - it was a kind of silly idea to begin with!)</p>
+<p><strong>Conclusion:</strong> The p-value is pretty small - about 0.04. So we reject <span class="math inline">\(H_0\)</span>. Our data provide pretty strong evidence <em>against</em> the idea that the proportion Stalwarts is the same as the proportion CRC students. (Not surprising - it was a kind of silly idea to begin with! CRC members are not the only people in the world with regular dedication to religious practice!)</p>
 </div>
 <div id="section-review-stalwart-randomization" class="section level3">
 <h3>Review: Stalwart Randomization</h3>
@@ -619,8 +614,7 @@ SE &lt;- sqrt(p0 * (1 - p0) / n)
 </div>
 <div id="section-more-practice" class="section level2">
 <h2>More Practice</h2>
-<p>You will practice the skills you just learned in Quiz 9 and Homework 12.</p>
-For <em>additional</em> practice on one-proportion problems, there’s also <a href="https://moodle.calvin.edu/mod/page/view.php?id=1007066">a worksheet available for you (with solutions so you can check your work)</a>. 
+Now, all you need is practice at putting your new skills to work! You can expect to work collaboratively on homework, practice problems and projects in class this week. 
 <script type="application/shiny-prerendered" data-context="server-start">
 library(learnr)
 # library(checkr)
@@ -680,20 +674,20 @@ learnr:::store_exercise_setup_chunk("__setup__", c("library(learnr)", "# library
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "quiz-med-p-1", 
-    question = structure("Which sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.5)?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_516ba06", 
+    question = structure("Which sample sizes result in normal-looking sampling distributions for a proportion (when the proportion is 0.5)?", html = TRUE, class = c("html", 
+    "character")), answers = list(structure(list(id = "lnr_ans_b2476c2", 
         option = "Sample sizes of 10 and more look normal", value = "Sample sizes of 10 and more look normal", 
         label = structure("Sample sizes of 10 and more look normal", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_60d8e82", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_1156375", 
         option = "Sample sizes of 25 or more look normal", value = "Sample sizes of 25 or more look normal", 
         label = structure("Sample sizes of 25 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_840d189", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_bf17d42", 
         option = "Sample sizes of 50 or more look normal", value = "Sample sizes of 50 or more look normal", 
         label = structure("Sample sizes of 50 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_bec7b6d", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_23ffa79", 
         option = "The sample size has to be at least 100 to look normal", 
         value = "The sample size has to be at least 100 to look normal", 
         label = structure("The sample size has to be at least 100 to look normal", html = TRUE, class = c("html", 
@@ -705,26 +699,26 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
     "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
     "character")), message = NULL, post_message = NULL), ids = list(
         answer = "quiz-med-p-1-answer", question = "quiz-med-p-1"), 
-    loading = structure("<strong>Loading:<\u002fstrong> \nWhich sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.5)?\n<br/><br/><br/>", html = TRUE, class = c("html", 
+    loading = structure("<strong>Loading:<\u002fstrong> \nWhich sample sizes result in normal-looking sampling distributions for a proportion (when the proportion is 0.5)?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = FALSE, allow_retry = TRUE, 
-    seed = 1579503144.26449, options = list()), class = c("learnr_radio", 
+    seed = 1529386661.28782, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "quiz-sm-p-1", 
     question = structure("What does it mean when part of the left tail of the normal curve is &#39;cut off&#39; on the plot?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_d43957a", 
+    "character")), answers = list(structure(list(id = "lnr_ans_603dd0", 
         option = "Nothing - just a poor choice of x-axis limits", 
         value = "Nothing - just a poor choice of x-axis limits", 
         label = structure("Nothing - just a poor choice of x-axis limits", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_e1cec7e", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_e87f4f1", 
         option = "It's a problem - it means the normal distribution includes some negative proportions, but the sampling distribution does not!", 
         value = "It's a problem - it means the normal distribution includes some negative proportions, but the sampling distribution does not!", 
         label = structure("It&#39;s a problem - it means the normal distribution includes some negative proportions, but the sampling distribution does not!", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_e3e0529", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_3356ebc", 
         option = "It's a problem - it means a mistake was made when fitting the normal distribution to the data", 
         value = "It's a problem - it means a mistake was made when fitting the normal distribution to the data", 
         label = structure("It&#39;s a problem - it means a mistake was made when fitting the normal distribution to the data", html = TRUE, class = c("html", 
@@ -738,26 +732,26 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "quiz-sm-p-1-answer", question = "quiz-sm-p-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhat does it mean when part of the left tail of the normal curve is &#39;cut off&#39; on the plot?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 294345717.362935, options = list()), class = c("learnr_radio", 
+    seed = 37926599.4823391, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "quiz-sm-p-2", 
     question = structure("Which sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.07)?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_61489e8", 
+    "character")), answers = list(structure(list(id = "lnr_ans_fb7a55c", 
         option = "Sample sizes of 10 and more look normal", value = "Sample sizes of 10 and more look normal", 
         label = structure("Sample sizes of 10 and more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_368aebc", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5b56f76", 
         option = "Sample sizes of 25 or more look normal", value = "Sample sizes of 25 or more look normal", 
         label = structure("Sample sizes of 25 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_8306ddc", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_2985aad", 
         option = "Sample sizes of 50 or more look normal", value = "Sample sizes of 50 or more look normal", 
         label = structure("Sample sizes of 50 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_cf9955f", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_b4886cd", 
         option = "The sample size has to be around 100 or more to look normal", 
         value = "The sample size has to be around 100 or more to look normal", 
         label = structure("The sample size has to be around 100 or more to look normal", html = TRUE, class = c("html", 
@@ -771,24 +765,24 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "quiz-sm-p-2-answer", question = "quiz-sm-p-2"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhich sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.07)?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = FALSE, allow_retry = TRUE, 
-    seed = 1260343979.91311, options = list()), class = c("learnr_radio", 
+    seed = 1280866392.40355, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_checkbox", label = "quiz-lg-p-1", 
     question = structure("When part of the right tail of the normal curve is &#39;cut off&#39; on the plot, the normal is a poor fit to the sampling distribution. Why?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_4c2341d", 
+    "character")), answers = list(structure(list(id = "lnr_ans_15f78ab", 
         option = "It's actually fine - just a poor choice of x-axis limits", 
         value = "It's actually fine - just a poor choice of x-axis limits", 
         label = structure("It&#39;s actually fine - just a poor choice of x-axis limits", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_46098bf", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_4b3eff6", 
         option = "It shows the normal distribution is a bad fit, since it includes some (impossible!) proportions greater than one.", 
         value = "It shows the normal distribution is a bad fit, since it includes some (impossible!) proportions greater than one.", 
         label = structure("It shows the normal distribution is a bad fit, since it includes some (impossible!) proportions greater than one.", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_68a7815", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_771df5e", 
         option = "The sampling distribution is skewed to the left, but the normal is perfectly symmetric", 
         value = "The sampling distribution is skewed to the left, but the normal is perfectly symmetric", 
         label = structure("The sampling distribution is skewed to the left, but the normal is perfectly symmetric", html = TRUE, class = c("html", 
@@ -802,26 +796,26 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_checkbox", lab
         answer = "quiz-lg-p-1-answer", question = "quiz-lg-p-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhen part of the right tail of the normal curve is &#39;cut off&#39; on the plot, the normal is a poor fit to the sampling distribution. Why?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 1347942342.87232, options = list()), class = c("learnr_checkbox", 
+    seed = 394363196.31636, options = list()), class = c("learnr_checkbox", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "quiz-lg-p-2", 
     question = structure("Which sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.88)?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_7867900", 
+    "character")), answers = list(structure(list(id = "lnr_ans_a401b13", 
         option = "Sample sizes of 10 and more look normal", value = "Sample sizes of 10 and more look normal", 
         label = structure("Sample sizes of 10 and more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_322e7a0", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_d931531", 
         option = "Sample sizes of 25 or more look normal", value = "Sample sizes of 25 or more look normal", 
         label = structure("Sample sizes of 25 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_9440d0a", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_4338a18", 
         option = "Sample sizes of 50 or more look normal", value = "Sample sizes of 50 or more look normal", 
         label = structure("Sample sizes of 50 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a2404db", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_7524b0e", 
         option = "The sample size has to be around 100 or more to look normal", 
         value = "The sample size has to be around 100 or more to look normal", 
         label = structure("The sample size has to be around 100 or more to look normal", html = TRUE, class = c("html", 
@@ -835,28 +829,28 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "quiz-lg-p-2-answer", question = "quiz-lg-p-2"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhich sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.88)?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = FALSE, allow_retry = TRUE, 
-    seed = 1524180657.29025, options = list()), class = c("learnr_radio", 
+    seed = 1437225981.33074, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "skew-direction-1", 
     question = structure("The sampling distribution for a proportion will be skewed (not normal) if the population proportion is close to 0 or 1 and the sample size is small. Which direction is the skew?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_5048288", 
+    "character")), answers = list(structure(list(id = "lnr_ans_fbaa358", 
         option = "Left for small proportions and right for large proportions", 
         value = "Left for small proportions and right for large proportions", 
         label = structure("Left for small proportions and right for large proportions", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_48bfed", 
-        option = "Right for small proportions and lefts for large proportions", 
-        value = "Right for small proportions and lefts for large proportions", 
-        label = structure("Right for small proportions and lefts for large proportions", html = TRUE, class = c("html", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_cb0e2c8", 
+        option = "Right for small proportions and left for large proportions", 
+        value = "Right for small proportions and left for large proportions", 
+        label = structure("Right for small proportions and left for large proportions", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_afd6390", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_39df6c9", 
         option = "Always right skew", value = "Always right skew", 
         label = structure("Always right skew", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_4ea0391", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5725ecb", 
         option = "Always left skew", value = "Always left skew", 
         label = structure("Always left skew", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
@@ -869,19 +863,19 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "skew-direction-1-answer", question = "skew-direction-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nThe sampling distribution for a proportion will be skewed (not normal) if the population proportion is close to 0 or 1 and the sample size is small. Which direction is the skew?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 685010542.681017, options = list()), class = c("learnr_radio", 
+    seed = 1883614655.12287, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "se-n-quiz-1", 
     question = structure("How do you expect the SE to depend on sample size n?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_1aec4b6", 
+    "character")), answers = list(structure(list(id = "lnr_ans_3d555af", 
         option = "As n increases, the SE will also increase.", 
         value = "As n increases, the SE will also increase.", 
         label = structure("As n increases, the SE will also increase.", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_dae9183", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a046628", 
         option = "As n increases, the SE will decrease.", value = "As n increases, the SE will decrease.", 
         label = structure("As n increases, the SE will decrease.", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = structure("Yes! This is true for any parameter, not just proportions. As the sample size gets bigger, the individual estimates from each dataset are more precise, so the sampling distribution gets narrower and the SE smaller.", html = TRUE, class = c("html", 
@@ -895,26 +889,28 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "se-n-quiz-1-answer", question = "se-n-quiz-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nHow do you expect the SE to depend on sample size n?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = FALSE, allow_retry = TRUE, 
-    seed = 1755127888.6827, options = list()), class = c("learnr_radio", 
+    seed = 1016317797.52674, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "se-n-quiz-2", 
     question = structure("How do you expect the SE to depend on the proportion p?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_7e864e8", 
-        option = "As p increases, SE will increase", value = "As p increases, SE will increase", 
-        label = structure("As p increases, SE will increase", html = TRUE, class = c("html", 
+    "character")), answers = list(structure(list(id = "lnr_ans_50a9b73", 
+        option = "As p increases, SE will increase linearly", 
+        value = "As p increases, SE will increase linearly", 
+        label = structure("As p increases, SE will increase linearly", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_2a7c40d", 
-        option = "As p increases, SE will decrease", value = "As p increases, SE will decrease", 
-        label = structure("As p increases, SE will decrease", html = TRUE, class = c("html", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_92407db", 
+        option = "As p increases, SE will decrease linearly", 
+        value = "As p increases, SE will decrease linearly", 
+        label = structure("As p increases, SE will decrease linearly", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_73ebfbc", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_591c6a9", 
         option = "There won't be a simple linear relationship between p and SE", 
         value = "There won't be a simple linear relationship between p and SE", 
         label = structure("There won&#39;t be a simple linear relationship between p and SE", html = TRUE, class = c("html", 
-        "character")), correct = TRUE, message = structure("You&#39;re right! In the next section, we&#39;ll explore the actual shape of this relationship.", html = TRUE, class = c("html", 
+        "character")), correct = TRUE, message = structure("You&#39;re right! In the next section, we&#39;ll explore the exact shape of this relationship.", html = TRUE, class = c("html", 
         "character"))), class = c("tutorial_question_answer", 
     "tutorial_quiz_answer"))), button_labels = list(submit = structure("Submit Answer", html = TRUE, class = c("html", 
     "character")), try_again = structure("Try Again", html = TRUE, class = c("html", 
@@ -925,7 +921,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "se-n-quiz-2-answer", question = "se-n-quiz-2"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nHow do you expect the SE to depend on the proportion p?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = FALSE, allow_retry = TRUE, 
-    seed = 725149829.662326, options = list()), class = c("learnr_radio", 
+    seed = 443520673.29347, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
@@ -1035,16 +1031,16 @@ learnr:::store_exercise_cache("chimps", list(chunks = list(list(label = "chimps"
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "assume-h0-1", 
     question = structure("What do we have to assume when we start to generate a sampling distribution for a hypothesis test?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_1a7ff54", 
+    "character")), answers = list(structure(list(id = "lnr_ans_eaea0c3", 
         option = "We assume the null hypothesis is true.", value = "We assume the null hypothesis is true.", 
         label = structure("We assume the null hypothesis is true.", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_8316343", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_cb97200", 
         option = "We assume our sample is representative", value = "We assume our sample is representative", 
         label = structure("We assume our sample is representative", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("Yes, of course we do. But that isn&#39;t the main point here -- try again!", html = TRUE, class = c("html", 
         "character"))), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5c5ea43", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_d0b00ec", 
         option = "We assume that our sample size is big enough", 
         value = "We assume that our sample size is big enough", 
         label = structure("We assume that our sample size is big enough", html = TRUE, class = c("html", 
@@ -1059,28 +1055,28 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "assume-h0-1-answer", question = "assume-h0-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhat do we have to assume when we start to generate a sampling distribution for a hypothesis test?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 1084300899.49508, options = list()), class = c("learnr_radio", 
+    seed = 904236991.078932, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "stalwart-test-1", 
     question = structure("What null hypothesis will we test?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_ce3fe8c", 
+    "character")), answers = list(structure(list(id = "lnr_ans_1db9817", 
         option = "$H_0: p = 0.283$", value = "$H_0: p = 0.283$", 
         label = structure("\\(H_0: p = 0.283\\)", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_e1cb7d2", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5d7050f", 
         option = "$H_0: \\hat{p} = 0.283$", value = "$H_0: \\hat{p} = 0.283$", 
         label = structure("\\(H_0: \\hat{p} = 0.283\\)", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("Remember - hypotheses are always statements about <em>parameters<\u002fem>, not <em>statistics<\u002fem>.", html = TRUE, class = c("html", 
         "character"))), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_1c40319", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_23c0a0", 
         option = "$H_0: p = 0.432$", value = "$H_0: p = 0.432$", 
         label = structure("\\(H_0: p = 0.432\\)", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("Not quite. Remember - the sample statistic should <em>never<\u002fem> appear in the hypotheses. The data will <em>never<\u002fem> lead you to reject the null hypothesis that the true parameter value is the same as the sample stat value!", html = TRUE, class = c("html", 
         "character"))), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_9205879", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_eb96989", 
         option = "$H_0: \\hat{p} = 0.432$", value = "$H_0: \\hat{p} = 0.432$", 
         label = structure("\\(H_0: \\hat{p} = 0.432\\)", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("Oops. we <em>know<\u002fem> that the sample proportion is 0.432 -- that is just a fact, not a testable hypothesis.", html = TRUE, class = c("html", 
@@ -1094,7 +1090,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "stalwart-test-1-answer", question = "stalwart-test-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhat null hypothesis will we test?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 378315849.323833, options = list()), class = c("learnr_radio", 
+    seed = 1950038262.09194, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
@@ -1135,17 +1131,17 @@ learnr:::store_exercise_cache("stalwart-test-work", list(chunks = list(list(labe
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "stalwart-strategy-1", 
     question = structure("What randomization strategy will work best in this case?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_8e9d1b5", 
+    "character")), answers = list(structure(list(id = "lnr_ans_e5e7082", 
         option = "rflip()", value = "rflip()", label = structure("rflip()", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_bc912a1", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_bde098", 
         option = "shuffle()", value = "shuffle()", label = structure("shuffle()", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_1f04913", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_b8a6541", 
         option = "randomly flip signs of differences", value = "randomly flip signs of differences", 
         label = structure("randomly flip signs of differences", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_c21bc90", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_3bde4e8", 
         option = "recenter and resample", value = "recenter and resample", 
         label = structure("recenter and resample", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("It seems like this might work at first, but it actually only works for quantitative variables. Think: how would you change the values of the Sunday Stalwart data to &#39;recenter&#39; them?", html = TRUE, class = c("html", 
@@ -1159,7 +1155,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "stalwart-strategy-1-answer", question = "stalwart-strategy-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhat randomization strategy will work best in this case?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 1320886617.38491, options = list()), class = c("learnr_radio", 
+    seed = 1462188858.81912, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  

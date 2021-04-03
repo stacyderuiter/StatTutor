@@ -30,7 +30,7 @@ In the last tutorial, you learned to use normal distributions as an approximatio
 
 You will probably not be surprised to learn that randomization distributions, too, can be approximated well by normal distributions. **We can take advantage of this fact to give us another way to compute p-values for randomization tests.**
 
-*The material in this tutorial is also covered in the textbook: Lock5 Chapter 5.2.*
+*The material in this tutorial is also covered in the textbook: [IMS Chapter 5.3](https://openintro-ims.netlify.app/intro-stat-inference.html#inf-math)*
 
 ## The Dataset
 
@@ -172,7 +172,7 @@ question("What feature on the figure above corresponds to the p-value of the tes
 ```
 
 ### Using pnorm()
-Now, use `pnorm()` (or `xpnorm()`) to compute the p-value and verify that the correct p-value is 0.061. Recall: the parameter of interest is the difference in proportion people who have had checkups; the sample statistic is 0.0276, the $H_0$ value is 0, and the SE of the randomization distribution is `r round(SE, digits=3)`.
+Now, use `pnorm()` (or `xpnorm()`) to compute the p-value and verify that the correct p-value is 0.61. Recall: the parameter of interest is the difference in proportion people who have had checkups; the sample statistic is 0.0276, the $H_0$ value is 0, and the SE of the randomization distribution is `r round(SE, digits=3)`.
 
 ```{r checkup-p, exercise=TRUE}
 
@@ -209,14 +209,14 @@ question("Why was the pnorm() result multiplied by two?",
 ```
 
 ### Another example
-Imagine that a nonprofit in West Michigan provides a free ride program to provide transport to medical appointments. They have limited resources, so they only provide this service in areas where the proportion of people without access to rides is 75% or more. Should they start service in the Zandee study area?
+Imagine that a nonprofit in West Michigan provides a free ride program to provide transport to medical appointments. They have limited resources, so they only provide this service in areas where the proportion of people without access to rides is 20% or more. Should they start service in the Zandee study area?
 
 ```{r transport-q, echo=FALSE}
 question("The parameter of interest here is p, which is...",
-  answer("the difference in proportion with transport between Heartside and Creston neighborhoods"),
-  answer("at least 0.75"),
-    answer("the sample proportion people who have transport available"),
-  answer("the true population proportion people who have transport available", correct=TRUE),
+  answer("the difference in proportion who need transport, between Heartside and Creston neighborhoods"),
+  answer("at least 0.2"),
+    answer("the sample proportion people in this area who DO NOT have transport available"),
+  answer("the true population proportion people in this area who DO NOT have transport available", correct=TRUE),
   allow_retry=TRUE
 )
 ```
@@ -225,7 +225,7 @@ We want to test:
 
 $$ H_0: p = 0.20$$
 $$ H_1: p > 0.20$$
-The alternate is one-sided this time because the nonprofit only cares if the proportion without rides definitely *exceeds* 20%; if it is 20% or less, it's all the same to them.
+The alternate *could be* one-sided this time because the nonprofit literally only cares if the proportion without rides definitely *exceeds* 20%; if it is 20% or less, it's all the same to them.
 
 ```{r transport-q2, echo=FALSE}
 question("If we reject the null, what should the nonprofit decide to do?",
@@ -251,6 +251,8 @@ The sample proportion people without transport in the study area is 0.244. The S
 ```{r transport-solution}
 pnorm(0.244, mean=0.20, sd=0.023, lower.tail=FALSE)
 ```
+
+*Note: if you decided to do a 2-sided test, your answer would be double that shown and stated above. And your conclusion might be different, too!*
 
 ```{r transport-q3, echo=FALSE}
 question("What do you conclude?",
