@@ -43,6 +43,7 @@ This module covers **[IMS Chapter 6.1](https://openintro-ims.netlify.app/inferen
 *It is recommended (but not required) that you read the text book sections either before or after completing the corresponding parts of the tutorial, especially for any sections you feel less confident about.*
 
 ## Exploring SE for a Proportion
+
 *Text book reference: [IMS Ch. 6.1.2](https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm)*
 
 ### Central Limit Theorem
@@ -139,7 +140,7 @@ quiz(question("What does it mean when part of the left tail of the normal curve 
               random_answer_order = TRUE,
               allow_retry = TRUE
 ),
-  question(text = "Which sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.0.07)?",
+  question(text = "Which sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.07)?",
               answer("Sample sizes of 10 and more look normal"),
               answer("Sample sizes of 25 or more look normal"),
               answer("Sample sizes of 50 or more look normal"),
@@ -224,6 +225,7 @@ quiz(question("The sampling distribution for a proportion will be skewed (not no
 ```
 
 ## Rule of Thumb: Sample Size and Normality
+
 *Text book reference: [IMS Chapter 6.1.2, Conditions](https://openintro-ims.netlify.app/inference-cat.html#conditions)*
 
 So, we know that the required sample size to ensure that the sampling distribution for a proportion is normal *depends on the proportion* -- small samples sizes will do for proportions near 0.5, but not for proportions near 0 or 1.
@@ -240,7 +242,9 @@ So, we know that the required sample size to ensure that the sampling distributi
 If you are working with data on one proportion to find a CI or do a hypothesis test, your sample size *must* meet the rule of thumb above ($np \geq 10$ and $n(1-p) \geq 10$) or you can't use the short cut we're about to learn!
 
 ## SE for one proportion: Exploration
+
 *Text book reference: [IMS Ch. 6.1.2](https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm)*
+
 
 The Central Limit Theorem tells us that (when $n$ is big enough), the sampling distribution will be normal.
 
@@ -330,6 +334,7 @@ gf_point(SE ~ ps, xlab = 'Proportion')
 **Interesting!** The SE is largest when $p$ is around 0.5, and smaller for $p$ closer to 0 or 1.  How could we include $p$ in an expression for the SE in a way that would yield a pattern like this? (*Click on to the next section to find out...*)
 
 ## SE for one proportion: Formula
+
 *Text book reference: [IMS Ch. 6.1.2](https://openintro-ims.netlify.app/inference-cat.html#one-prop-norm)*
 
 The exploration we just finished has given us some idea of what we'd expect the formula for the SE for a proportion to look like. (Of course, the formula was derived analytically, not guess-and-checked via simulations, but the simulations are an easy way for us to get a sense of what to expect.)
@@ -358,7 +363,8 @@ to get the SE, then
 
 $$\hat{p} \pm z^*SE$$
 
-to get the CI. (Remember from before -- $z^*$ is the multiplier for your chosen confidence level C, obtained from the boundaries of the central C% of the standard normal distribution.) 
+to get the CI. (Remember -- from [before](https://rsconnect.calvin.edu:3939/content/61/) -- $z^*$ is the multiplier for your chosen confidence level C, obtained from the boundaries of the central C% of the standard normal distribution.) 
+
 
 For reference,
 
@@ -438,6 +444,7 @@ CI
 We are 90% confident the true proportion chimp-dominated test-takers is between 0.43 and 0.70! (Kind of a lot, but [the same is true all over the world](https://youtu.be/N1dvfH3s1Ak).)
 
 ## Using your Power Wisely: Tests
+
 *Text book reference: [IMS Ch. 6.1](https://openintro-ims.netlify.app/inference-cat.html#single-prop)*
 
 Think back to when we first learned randomization tests. To create a randomization sampling distribution, do you remember what we had to *assume* before we began?
@@ -542,7 +549,7 @@ While the p-value is not too different, it's actually a bit larger from the rand
 
 
 ### One Last Practice Problem: Classes
-Last one (for this tutorial)! In 2019 779 first-year students came to Calvin (out of 3570 students total). Test whether the proportion Calvin first-years is now 1/4 ($H_0: p = 0.25$).
+Last one (for this tutorial)! In 2019 779 first-year students came to Calvin (out of 3570 students total). *Test* whether the proportion Calvin first-years is now 1/4 ($H_0: p = 0.25$).
 
 ```{r, ftiacs, exercise = TRUE}
 
@@ -550,12 +557,15 @@ Last one (for this tutorial)! In 2019 779 first-year students came to Calvin (ou
 
 ```{r, ftiacs-solution}
 n <- 3570
-phat <- 779/n
-SE <- sqrt(phat * (1 - phat) / n)
-2 * xpnorm(phat, mean = p0, sd = SE, lower.tail = TRUE)
+p_hat <- 779/n
+p0 <- 0.25
+SE <- sqrt(p0 * (1 - p0) / n)
+2 * xpnorm(p_hat, mean = p0, sd = SE, lower.tail = TRUE)
 ```
 
-The p-value is very small: about $7\times10^{-21}$. We reject $H_0$ and conclude that the proportion first-years is less than 25% (suggesting declining enrollment at Calvin).
+The p-value is very small: about $1\times10^{-5}$. We reject $H_0$ and conclude that the proportion first-years is less than 25% (suggesting declining enrollment at Calvin).
+
+*Comprehension checks: why do we use $p_0$ when computing the SE? And why is the first input to `xpnorm()` $\hat{p}$, and the second input (`mean`) $p_0$?*
 
 ## Conditions: When Can You Use The Power?
 
