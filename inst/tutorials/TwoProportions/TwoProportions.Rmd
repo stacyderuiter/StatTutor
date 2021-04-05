@@ -186,11 +186,11 @@ Finally, choose a confidence level, and use it (with the sample stat  and SE fro
 ```{r brown-ci-solution}
 # note: this is for 95% confidence; change z* for other confidence level.
 stat <- diff(tally(~EyeColor | Island, data = island_eyes, format = 'prop')[1,])
-CI <- stat + c(-1,1) * 1.96 * 0.05687706
+CI <- stat + c(-1,1) * 1.96 * 0.06421489 # 0.064 should match SE from last calculation
 CI
 ```
 
-**Solution:** We are 95% confident that the true difference in proportion brown-eyed islanders (South minus North Island) is between -0.041 and 0.181.  This means it is plausible that the proportion brown-eyed people is the same on both islands, since 0 (no difference) is in the CI.
+**Solution:** We are 95% confident that the true difference in proportion brown-eyed islanders (South minus North Island) is between -0.09 and 0.16.  This means it is plausible that the proportion brown-eyed people is the same on both islands, since 0 (no difference) is in the CI.
 
 
 ## Using your Power Wisely: Tests
