@@ -441,7 +441,7 @@ SE &lt;- sqrt(phat * (1 - phat) / 37)
 CI &lt;- phat + c(-1,1) * 2.58 * SE
 CI</code></pre>
 </div>
-<p>We are 95% confident the true proportion of Sunday Stalwarts at Calvin is between 22.2 and 64.3%.</p>
+<p>We are 99% confident the true proportion of Sunday Stalwarts at Calvin is between 22.2 and 64.3%.</p>
 </div>
 <div id="section-review-bootstrap-ci" class="section level3">
 <h3>Review: Bootstrap CI</h3>
@@ -501,7 +501,7 @@ CI</code></pre>
 </div>
 <div id="section-implications" class="section level3">
 <h3>Implications</h3>
-<p>Wait a second. If we are <strong>assuming <span class="math inline">\(H_0\)</span> is true</strong>, then suddenly (and wierdly!), <span class="math inline">\(\hat{p}\)</span> is <em>no longer</em> our best estimate of the true proportion <span class="math inline">\(p\)</span>.</p>
+<p>Wait a second. If we are <strong>assuming <span class="math inline">\(H_0\)</span> is true</strong>, then suddenly (and weirdly!), <span class="math inline">\(\hat{p}\)</span> is <em>no longer</em> our best estimate of the true proportion <span class="math inline">\(p\)</span>.</p>
 <p><strong><span class="math inline">\(H_0\)</span> tells us exactly what the value of <span class="math inline">\(p\)</span> is.</strong> And if we’re assuming that <span class="math inline">\(H_0\)</span> is true for the purposes of the test, then what-<span class="math inline">\(H_0\)</span>-says-p-is-supposed-to-be is our new best estimate of the population proportion <span class="math inline">\(p\)</span>!</p>
 <p>For short, we call the value of <span class="math inline">\(p\)</span> specified in the null hypothesis <span class="math inline">\(p_0\)</span> (which people usually read “p naught” or “p zero”).</p>
 </div>
@@ -675,19 +675,19 @@ learnr:::store_exercise_setup_chunk("__setup__", c("library(learnr)", "# library
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "quiz-med-p-1", 
     question = structure("Which sample sizes result in normal-looking sampling distributions for a proportion (when the proportion is 0.5)?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_b2476c2", 
+    "character")), answers = list(structure(list(id = "lnr_ans_ca2b8bd", 
         option = "Sample sizes of 10 and more look normal", value = "Sample sizes of 10 and more look normal", 
         label = structure("Sample sizes of 10 and more look normal", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_1156375", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_89e6b8d", 
         option = "Sample sizes of 25 or more look normal", value = "Sample sizes of 25 or more look normal", 
         label = structure("Sample sizes of 25 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_bf17d42", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5163c79", 
         option = "Sample sizes of 50 or more look normal", value = "Sample sizes of 50 or more look normal", 
         label = structure("Sample sizes of 50 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_23ffa79", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_974ba82", 
         option = "The sample size has to be at least 100 to look normal", 
         value = "The sample size has to be at least 100 to look normal", 
         label = structure("The sample size has to be at least 100 to look normal", html = TRUE, class = c("html", 
@@ -701,24 +701,24 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "quiz-med-p-1-answer", question = "quiz-med-p-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhich sample sizes result in normal-looking sampling distributions for a proportion (when the proportion is 0.5)?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = FALSE, allow_retry = TRUE, 
-    seed = 1529386661.28782, options = list()), class = c("learnr_radio", 
+    seed = 1978790812.07855, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "quiz-sm-p-1", 
     question = structure("What does it mean when part of the left tail of the normal curve is &#39;cut off&#39; on the plot?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_603dd0", 
+    "character")), answers = list(structure(list(id = "lnr_ans_1c63dad", 
         option = "Nothing - just a poor choice of x-axis limits", 
         value = "Nothing - just a poor choice of x-axis limits", 
         label = structure("Nothing - just a poor choice of x-axis limits", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_e87f4f1", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_288693b", 
         option = "It's a problem - it means the normal distribution includes some negative proportions, but the sampling distribution does not!", 
         value = "It's a problem - it means the normal distribution includes some negative proportions, but the sampling distribution does not!", 
         label = structure("It&#39;s a problem - it means the normal distribution includes some negative proportions, but the sampling distribution does not!", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_3356ebc", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_54c6fad", 
         option = "It's a problem - it means a mistake was made when fitting the normal distribution to the data", 
         value = "It's a problem - it means a mistake was made when fitting the normal distribution to the data", 
         label = structure("It&#39;s a problem - it means a mistake was made when fitting the normal distribution to the data", html = TRUE, class = c("html", 
@@ -732,26 +732,26 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "quiz-sm-p-1-answer", question = "quiz-sm-p-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhat does it mean when part of the left tail of the normal curve is &#39;cut off&#39; on the plot?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 37926599.4823391, options = list()), class = c("learnr_radio", 
+    seed = 606363157.71764, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "quiz-sm-p-2", 
     question = structure("Which sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.07)?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_fb7a55c", 
+    "character")), answers = list(structure(list(id = "lnr_ans_1413b15", 
         option = "Sample sizes of 10 and more look normal", value = "Sample sizes of 10 and more look normal", 
         label = structure("Sample sizes of 10 and more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5b56f76", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_31a50f3", 
         option = "Sample sizes of 25 or more look normal", value = "Sample sizes of 25 or more look normal", 
         label = structure("Sample sizes of 25 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_2985aad", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_73b941e", 
         option = "Sample sizes of 50 or more look normal", value = "Sample sizes of 50 or more look normal", 
         label = structure("Sample sizes of 50 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_b4886cd", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_158834b", 
         option = "The sample size has to be around 100 or more to look normal", 
         value = "The sample size has to be around 100 or more to look normal", 
         label = structure("The sample size has to be around 100 or more to look normal", html = TRUE, class = c("html", 
@@ -765,24 +765,24 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "quiz-sm-p-2-answer", question = "quiz-sm-p-2"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhich sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.07)?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = FALSE, allow_retry = TRUE, 
-    seed = 1280866392.40355, options = list()), class = c("learnr_radio", 
+    seed = 2019925137.0594, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_checkbox", label = "quiz-lg-p-1", 
     question = structure("When part of the right tail of the normal curve is &#39;cut off&#39; on the plot, the normal is a poor fit to the sampling distribution. Why?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_15f78ab", 
+    "character")), answers = list(structure(list(id = "lnr_ans_afc00e6", 
         option = "It's actually fine - just a poor choice of x-axis limits", 
         value = "It's actually fine - just a poor choice of x-axis limits", 
         label = structure("It&#39;s actually fine - just a poor choice of x-axis limits", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_4b3eff6", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a903845", 
         option = "It shows the normal distribution is a bad fit, since it includes some (impossible!) proportions greater than one.", 
         value = "It shows the normal distribution is a bad fit, since it includes some (impossible!) proportions greater than one.", 
         label = structure("It shows the normal distribution is a bad fit, since it includes some (impossible!) proportions greater than one.", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_771df5e", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a01fd21", 
         option = "The sampling distribution is skewed to the left, but the normal is perfectly symmetric", 
         value = "The sampling distribution is skewed to the left, but the normal is perfectly symmetric", 
         label = structure("The sampling distribution is skewed to the left, but the normal is perfectly symmetric", html = TRUE, class = c("html", 
@@ -796,26 +796,26 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_checkbox", lab
         answer = "quiz-lg-p-1-answer", question = "quiz-lg-p-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhen part of the right tail of the normal curve is &#39;cut off&#39; on the plot, the normal is a poor fit to the sampling distribution. Why?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 394363196.31636, options = list()), class = c("learnr_checkbox", 
+    seed = 2046026806.54724, options = list()), class = c("learnr_checkbox", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "quiz-lg-p-2", 
     question = structure("Which sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.88)?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_a401b13", 
+    "character")), answers = list(structure(list(id = "lnr_ans_76fba7c", 
         option = "Sample sizes of 10 and more look normal", value = "Sample sizes of 10 and more look normal", 
         label = structure("Sample sizes of 10 and more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_d931531", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_138ce76", 
         option = "Sample sizes of 25 or more look normal", value = "Sample sizes of 25 or more look normal", 
         label = structure("Sample sizes of 25 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_4338a18", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_4ed252b", 
         option = "Sample sizes of 50 or more look normal", value = "Sample sizes of 50 or more look normal", 
         label = structure("Sample sizes of 50 or more look normal", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_7524b0e", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_90423d9", 
         option = "The sample size has to be around 100 or more to look normal", 
         value = "The sample size has to be around 100 or more to look normal", 
         label = structure("The sample size has to be around 100 or more to look normal", html = TRUE, class = c("html", 
@@ -829,28 +829,28 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "quiz-lg-p-2-answer", question = "quiz-lg-p-2"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhich sample sizes result in normal-looking sampling distributions for a proportion (when the sample proportion is 0.88)?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = FALSE, allow_retry = TRUE, 
-    seed = 1437225981.33074, options = list()), class = c("learnr_radio", 
+    seed = 1568668239.76953, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "skew-direction-1", 
     question = structure("The sampling distribution for a proportion will be skewed (not normal) if the population proportion is close to 0 or 1 and the sample size is small. Which direction is the skew?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_fbaa358", 
+    "character")), answers = list(structure(list(id = "lnr_ans_c799088", 
         option = "Left for small proportions and right for large proportions", 
         value = "Left for small proportions and right for large proportions", 
         label = structure("Left for small proportions and right for large proportions", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_cb0e2c8", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a1515f8", 
         option = "Right for small proportions and left for large proportions", 
         value = "Right for small proportions and left for large proportions", 
         label = structure("Right for small proportions and left for large proportions", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_39df6c9", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_8a556b4", 
         option = "Always right skew", value = "Always right skew", 
         label = structure("Always right skew", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5725ecb", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_21ac57a", 
         option = "Always left skew", value = "Always left skew", 
         label = structure("Always left skew", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
@@ -863,19 +863,19 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "skew-direction-1-answer", question = "skew-direction-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nThe sampling distribution for a proportion will be skewed (not normal) if the population proportion is close to 0 or 1 and the sample size is small. Which direction is the skew?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 1883614655.12287, options = list()), class = c("learnr_radio", 
+    seed = 1271807094.40777, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "se-n-quiz-1", 
     question = structure("How do you expect the SE to depend on sample size n?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_3d555af", 
+    "character")), answers = list(structure(list(id = "lnr_ans_788e0b9", 
         option = "As n increases, the SE will also increase.", 
         value = "As n increases, the SE will also increase.", 
         label = structure("As n increases, the SE will also increase.", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_a046628", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_611d1d8", 
         option = "As n increases, the SE will decrease.", value = "As n increases, the SE will decrease.", 
         label = structure("As n increases, the SE will decrease.", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = structure("Yes! This is true for any parameter, not just proportions. As the sample size gets bigger, the individual estimates from each dataset are more precise, so the sampling distribution gets narrower and the SE smaller.", html = TRUE, class = c("html", 
@@ -889,24 +889,24 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "se-n-quiz-1-answer", question = "se-n-quiz-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nHow do you expect the SE to depend on sample size n?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = FALSE, allow_retry = TRUE, 
-    seed = 1016317797.52674, options = list()), class = c("learnr_radio", 
+    seed = 238054278.389147, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "se-n-quiz-2", 
     question = structure("How do you expect the SE to depend on the proportion p?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_50a9b73", 
+    "character")), answers = list(structure(list(id = "lnr_ans_3236654", 
         option = "As p increases, SE will increase linearly", 
         value = "As p increases, SE will increase linearly", 
         label = structure("As p increases, SE will increase linearly", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_92407db", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_8488155", 
         option = "As p increases, SE will decrease linearly", 
         value = "As p increases, SE will decrease linearly", 
         label = structure("As p increases, SE will decrease linearly", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_591c6a9", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_2b3e911", 
         option = "There won't be a simple linear relationship between p and SE", 
         value = "There won't be a simple linear relationship between p and SE", 
         label = structure("There won&#39;t be a simple linear relationship between p and SE", html = TRUE, class = c("html", 
@@ -921,7 +921,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "se-n-quiz-2-answer", question = "se-n-quiz-2"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nHow do you expect the SE to depend on the proportion p?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = FALSE, allow_retry = TRUE, 
-    seed = 443520673.29347, options = list()), class = c("learnr_radio", 
+    seed = 105901426.450686, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
@@ -1031,16 +1031,16 @@ learnr:::store_exercise_cache("chimps", list(chunks = list(list(label = "chimps"
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "assume-h0-1", 
     question = structure("What do we have to assume when we start to generate a sampling distribution for a hypothesis test?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_eaea0c3", 
+    "character")), answers = list(structure(list(id = "lnr_ans_11b1e35", 
         option = "We assume the null hypothesis is true.", value = "We assume the null hypothesis is true.", 
         label = structure("We assume the null hypothesis is true.", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_cb97200", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_1fed2ce", 
         option = "We assume our sample is representative", value = "We assume our sample is representative", 
         label = structure("We assume our sample is representative", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("Yes, of course we do. But that isn&#39;t the main point here -- try again!", html = TRUE, class = c("html", 
         "character"))), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_d0b00ec", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_4ab3e95", 
         option = "We assume that our sample size is big enough", 
         value = "We assume that our sample size is big enough", 
         label = structure("We assume that our sample size is big enough", html = TRUE, class = c("html", 
@@ -1055,28 +1055,28 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "assume-h0-1-answer", question = "assume-h0-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhat do we have to assume when we start to generate a sampling distribution for a hypothesis test?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 904236991.078932, options = list()), class = c("learnr_radio", 
+    seed = 1763238540.67893, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "stalwart-test-1", 
     question = structure("What null hypothesis will we test?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_1db9817", 
+    "character")), answers = list(structure(list(id = "lnr_ans_2f3c99a", 
         option = "$H_0: p = 0.283$", value = "$H_0: p = 0.283$", 
         label = structure("\\(H_0: p = 0.283\\)", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_5d7050f", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_20fb640", 
         option = "$H_0: \\hat{p} = 0.283$", value = "$H_0: \\hat{p} = 0.283$", 
         label = structure("\\(H_0: \\hat{p} = 0.283\\)", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("Remember - hypotheses are always statements about <em>parameters<\u002fem>, not <em>statistics<\u002fem>.", html = TRUE, class = c("html", 
         "character"))), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_23c0a0", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_21f68fa", 
         option = "$H_0: p = 0.432$", value = "$H_0: p = 0.432$", 
         label = structure("\\(H_0: p = 0.432\\)", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("Not quite. Remember - the sample statistic should <em>never<\u002fem> appear in the hypotheses. The data will <em>never<\u002fem> lead you to reject the null hypothesis that the true parameter value is the same as the sample stat value!", html = TRUE, class = c("html", 
         "character"))), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_eb96989", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_aa19d71", 
         option = "$H_0: \\hat{p} = 0.432$", value = "$H_0: \\hat{p} = 0.432$", 
         label = structure("\\(H_0: \\hat{p} = 0.432\\)", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("Oops. we <em>know<\u002fem> that the sample proportion is 0.432 -- that is just a fact, not a testable hypothesis.", html = TRUE, class = c("html", 
@@ -1090,7 +1090,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "stalwart-test-1-answer", question = "stalwart-test-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhat null hypothesis will we test?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 1950038262.09194, options = list()), class = c("learnr_radio", 
+    seed = 825264148.615706, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
@@ -1131,17 +1131,17 @@ learnr:::store_exercise_cache("stalwart-test-work", list(chunks = list(list(labe
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "stalwart-strategy-1", 
     question = structure("What randomization strategy will work best in this case?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_e5e7082", 
+    "character")), answers = list(structure(list(id = "lnr_ans_20abad7", 
         option = "rflip()", value = "rflip()", label = structure("rflip()", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_bde098", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_3c5334b", 
         option = "shuffle()", value = "shuffle()", label = structure("shuffle()", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_b8a6541", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_e709b7c", 
         option = "randomly flip signs of differences", value = "randomly flip signs of differences", 
         label = structure("randomly flip signs of differences", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = NULL), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_3bde4e8", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_28d6832", 
         option = "recenter and resample", value = "recenter and resample", 
         label = structure("recenter and resample", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("It seems like this might work at first, but it actually only works for quantitative variables. Think: how would you change the values of the Sunday Stalwart data to &#39;recenter&#39; them?", html = TRUE, class = c("html", 
@@ -1155,7 +1155,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "stalwart-strategy-1-answer", question = "stalwart-strategy-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhat randomization strategy will work best in this case?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 1462188858.81912, options = list()), class = c("learnr_radio", 
+    seed = 1152656602.46325, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
