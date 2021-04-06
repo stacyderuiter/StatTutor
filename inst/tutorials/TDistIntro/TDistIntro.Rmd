@@ -34,7 +34,7 @@ Our goal in this module will be to obtain the tools we need to be able to do hyp
 
 By the end of the module you will:
 
-1) Be able to quote the Central Limit Theorem for a mean, which says that the sampling distribution of a mean (if the sample size is big enough) is **normal**, with mean $\mu$ (the *population* mean) and standard deviation $\frac{\sigma}{\sqrt{n}}$ ($\sigma$ is the standard deviation of the *population*, and $n$ is the sample size).  For a difference between the means of two groups, the sampling distribution is $\sqrt{\frac{\sigma_1^2}{n_1} + \frac{\sigma_2^2}{n_2}}$ (where $\sigma_1$ and $\sigma_2$ are the population standard deviations of the two groups, and $n_1$ and $n_2$ are the sample sizes of the two groups)
+1) Be able to quote the Central Limit Theorem for a mean, which says that the sampling distribution of a mean (if the sample size is big enough) is **normal**, with mean $\mu$ (the *population* mean) and standard deviation $\frac{\sigma}{\sqrt{n}}$ ($\sigma$ is the standard deviation of the *population*, and $n$ is the sample size).  For a difference between the means of two groups, the SE is $\sqrt{\frac{\sigma_1^2}{n_1} + \frac{\sigma_2^2}{n_2}}$ (where $\sigma_1$ and $\sigma_2$ are the population standard deviations of the two groups, and $n_1$ and $n_2$ are the sample sizes of the two groups)
 2) Realize that, since we can't know $\sigma$ (the population standard deviation) in most practical cases, we'll have to use our best estimate of $\sigma$ -- the sample standard deviation $s$ -- to compute those standard errors. *This has consequences!*
 3) Specifically, you'll be able to explain why using $s$ instead of $\sigma$ in those formulas affects the shape of the sampling distribution, turning it from a *normal* distribution to a *t distribution*.
 4) You'll also be able to describe a t-distribution and how it differs from a normal distribution.
@@ -381,7 +381,7 @@ What about here?
 
 Before doing a t-test or constructing a t confidence interval, it's important to verify that all the conditions below are met:
 
-- The sample must be **representative** of the population of interest
+- The sample must be **representative** of the population of interest (as always)
 - The cases must be **independent** (no lurking variables linking them)
 - The sample size must be "big enough" *or* the data distribution must be "nearly normal". 
   - "big enough" -- if the sample size is larger than about 40, great.

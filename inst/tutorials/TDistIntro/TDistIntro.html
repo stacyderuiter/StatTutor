@@ -121,7 +121,7 @@ $(document).ready(function () {
 <p>Our goal in this module will be to obtain the tools we need to be able to do hypothesis tests and compute confidence intervals for a <strong>mean</strong> or a <strong>difference in means between two groups</strong>, using a shortcut (the t model) to estimate the standard error of the required sampling distribution from <em>one data sample</em>. No resampling or simulation required!</p>
 <p>By the end of the module you will:</p>
 <ol style="list-style-type: decimal">
-<li>Be able to quote the Central Limit Theorem for a mean, which says that the sampling distribution of a mean (if the sample size is big enough) is <strong>normal</strong>, with mean <span class="math inline">\(\mu\)</span> (the <em>population</em> mean) and standard deviation <span class="math inline">\(\frac{\sigma}{\sqrt{n}}\)</span> (<span class="math inline">\(\sigma\)</span> is the standard deviation of the <em>population</em>, and <span class="math inline">\(n\)</span> is the sample size). For a difference between the means of two groups, the sampling distribution is <span class="math inline">\(\sqrt{\frac{\sigma_1^2}{n_1} + \frac{\sigma_2^2}{n_2}}\)</span> (where <span class="math inline">\(\sigma_1\)</span> and <span class="math inline">\(\sigma_2\)</span> are the population standard deviations of the two groups, and <span class="math inline">\(n_1\)</span> and <span class="math inline">\(n_2\)</span> are the sample sizes of the two groups)</li>
+<li>Be able to quote the Central Limit Theorem for a mean, which says that the sampling distribution of a mean (if the sample size is big enough) is <strong>normal</strong>, with mean <span class="math inline">\(\mu\)</span> (the <em>population</em> mean) and standard deviation <span class="math inline">\(\frac{\sigma}{\sqrt{n}}\)</span> (<span class="math inline">\(\sigma\)</span> is the standard deviation of the <em>population</em>, and <span class="math inline">\(n\)</span> is the sample size). For a difference between the means of two groups, the SE is <span class="math inline">\(\sqrt{\frac{\sigma_1^2}{n_1} + \frac{\sigma_2^2}{n_2}}\)</span> (where <span class="math inline">\(\sigma_1\)</span> and <span class="math inline">\(\sigma_2\)</span> are the population standard deviations of the two groups, and <span class="math inline">\(n_1\)</span> and <span class="math inline">\(n_2\)</span> are the sample sizes of the two groups)</li>
 <li>Realize that, since we can’t know <span class="math inline">\(\sigma\)</span> (the population standard deviation) in most practical cases, we’ll have to use our best estimate of <span class="math inline">\(\sigma\)</span> – the sample standard deviation <span class="math inline">\(s\)</span> – to compute those standard errors. <em>This has consequences!</em></li>
 <li>Specifically, you’ll be able to explain why using <span class="math inline">\(s\)</span> instead of <span class="math inline">\(\sigma\)</span> in those formulas affects the shape of the sampling distribution, turning it from a <em>normal</em> distribution to a <em>t distribution</em>.</li>
 <li>You’ll also be able to describe a t-distribution and how it differs from a normal distribution.</li>
@@ -381,7 +381,7 @@ gf_histogram(~sd, data=s_check) %&gt;%
 <p><strong>What conditions must hold to be able to use a t-test or a t confidence interval?</strong></p>
 <p>Before doing a t-test or constructing a t confidence interval, it’s important to verify that all the conditions below are met:</p>
 <ul>
-<li>The sample must be <strong>representative</strong> of the population of interest</li>
+<li>The sample must be <strong>representative</strong> of the population of interest (as always)</li>
 <li>The cases must be <strong>independent</strong> (no lurking variables linking them)</li>
 <li>The sample size must be “big enough” <em>or</em> the data distribution must be “nearly normal”.
 <ul>
@@ -519,17 +519,17 @@ learnr:::store_exercise_cache("mean-samp-dist-sim", list(chunks = list(list(labe
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "small-n-effect-1", 
     question = structure("What do you expect will happen when sample size is small?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_5b452e2", 
+    "character")), answers = list(structure(list(id = "lnr_ans_56a98bd", 
         option = "s will often be an underestimate.", value = "s will often be an underestimate.", 
         label = structure("s will often be an underestimate.", html = TRUE, class = c("html", 
         "character")), correct = TRUE, message = structure("Yes!  Smart thinking (or good guess). Continue to the next section to see the simulation that confirms your answer.", html = TRUE, class = c("html", 
         "character"))), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_3ebff55", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_401ab4e", 
         option = "s will often be an overestimate.", value = "s will often be an overestimate.", 
         label = structure("s will often be an overestimate.", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("Nope...not quite. Continue to the next section to see the simulation and learn what actually happens!", html = TRUE, class = c("html", 
         "character"))), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_490d0e9", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_912b93d", 
         option = "s will still be correct on average.", value = "s will still be correct on average.", 
         label = structure("s will still be correct on average.", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("Nope...not quite. Continue to the next section to see the simulation and learn what actually happens!", html = TRUE, class = c("html", 
@@ -543,7 +543,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
         answer = "small-n-effect-1-answer", question = "small-n-effect-1"), 
     loading = structure("<strong>Loading:<\u002fstrong> \nWhat do you expect will happen when sample size is small?\n<br/><br/><br/>", html = TRUE, class = c("html", 
     "character")), random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 852000664.603256, options = list()), class = c("learnr_radio", 
+    seed = 2122883669.01146, options = list()), class = c("learnr_radio", 
 "tutorial_question")))
 </script>
  
