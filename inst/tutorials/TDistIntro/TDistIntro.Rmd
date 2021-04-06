@@ -30,7 +30,7 @@ tutorial_options(exercise.eval = FALSE)
 
 ## Learning Outcomes
 
-Our goal in this module will be to obtain the tools we need to be able to do hypothesis tests and compute confidence intervals for a **mean** or a **difference in means between two groups**, using a shortcut (the t model) to estimate the standard error of the required sampling distribution from *one data sample*.
+Our goal in this module will be to obtain the tools we need to be able to do hypothesis tests and compute confidence intervals for a **mean** or a **difference in means between two groups**, using a shortcut (the t model) to estimate the standard error of the required sampling distribution from *one data sample*. No resampling or simulation required!
 
 By the end of the module you will:
 
@@ -40,7 +40,7 @@ By the end of the module you will:
 4) You'll also be able to describe a t-distribution and how it differs from a normal distribution.
 5) Finally, you will be able to use t-distributions to find CIs and do tests for means (and differences in means for paired data, or between two groups).
 
-*These materials come from your text book, Lock5 Chapter 6.4 - 6.6 and 6.10 - 6.13. Book sections corresponding to parts of this tutorial will be noted throughout; you are encouraged but not required to read them before or after completing the tutorial.*
+*These materials come from your text book, [Intro to Modern Statistics Chapter 7](https://openintro-ims.netlify.app/inference-num.html#inference-num). Book sections corresponding to parts of this tutorial will be linked throughout; you are encouraged but not required to read them before or after completing the tutorial.*
 
 ## Reminder: Central Limit Theorem
 
@@ -52,7 +52,7 @@ Let's take three minutes to review the main point of the Central Limit Theorem, 
 To sum up:  The *sampling distribution* of a mean will be **normal**, if the sample size is big enough.  The bigger the sample size, the smaller the standard error (SE) will be. What was not mentioned in amongst the rabbits and dragons was *a specific expression for the SE of a mean*.
 
 ## SE for a Mean
-*Text book reference: Lock5 Chapter 6.4*
+*Text book reference: [IMS Chapter 7.1.2](https://openintro-ims.netlify.app/inference-num.html#one-mean-math)*
 
 It turns out that the SE for a mean is:
 
@@ -67,6 +67,7 @@ This kind of makes sense:  The spread of the sampling distribution will always b
 Let's look at a simulated example to picture this.  
 
 **Run the code below to plot a parent population, a sample from that population of size $n$, and the sampling distribution of the mean. Change the value of $n$ in the code to see how it affects the sampling distribution.** *The rest of the code is shown for completeness, but you won't have to interpret or reproduce it.*
+
 
 ```{r mean-samp-dist-sim, exercise = TRUE, fig.width = 6, fig.height = 3, fig.align='center'}
 n <- 50
@@ -84,8 +85,10 @@ gf_density(~population, color = 'grey44', fill = 'grey24') %>%
   gf_text(0.15 ~ 9, label = 'Sampling Distribution', color = "#D55E00", hjust = 0)
 ```
 
+
+
 ## SE for a Mean - For Real
-*Text book reference: Lock5 Chapter 6.4*
+*Text book reference: [IMS, "Introducing the t-distribution"](https://openintro-ims.netlify.app/inference-num.html#introducing-the-t-distribution)*
 
 Well, that's great.  But *we can't actually compute $\frac{\sigma}{\sqrt{n}}$!* If we have a sample...sure, we know what $n$ is. But $\sigma$ is the population standard deviation, which we *don't* know.
 
@@ -105,7 +108,7 @@ Here, the true mean is $\mu = 0$ and the standard deviation is $\sigma = 1$. Our
 
 <details>
   <summary>Show code</summary>
-```{r, echo = TRUE, eval = FALSE}
+```{r, t-dist-sim, echo = TRUE, eval = FALSE}
 s_check <- do(1000)*sd(~rnorm(400, mean = 0, sd = 1))
 gf_histogram(~sd, data=s_check) %>% 
   gf_vline(xintercept=1) %>%
@@ -114,11 +117,8 @@ gf_histogram(~sd, data=s_check) %>%
 </details>
 
 
-```{r, echo = FALSE, fig.width = 6, fig.height = 3, fig.align='center'}
-s_check <- do(1000)*sd(~rnorm(400, mean = 0, sd = 1))
-gf_histogram(~sd, data=s_check) %>% 
-  gf_vline(xintercept=1) %>%
-  gf_labs(x='s (estimates of standard deviation)\n from samples of size 400')
+```{r, ref.label = 't-dist-sim', eval = TRUE, echo = FALSE, fig.width = 6, fig.height = 3, fig.align='center'}
+
 ```
 
 **What a relief! For big $n$, $s$ works great as an estimate of $\sigma$ - no problems at all.  Sometimes we get a sample that underestimates or overestimates, but on average, it's right.**
@@ -148,7 +148,8 @@ Again, the true mean is $\mu = 0$ and the standard deviation is $\sigma = 1$. Ou
 
 <details>
   <summary>Show code</summary>
-```{r, echo = TRUE, eval = FALSE}
+```{r, t-sim-2, echo = TRUE, eval = FALSE}
+set.seed(13)
 s_check <- do(1000)*sd(~rnorm(4, mean = 0, sd = 1))
 gf_histogram(~sd, data=s_check) %>% 
   gf_vline(xintercept=1) %>%
@@ -157,12 +158,8 @@ gf_histogram(~sd, data=s_check) %>%
 </details>
 
 
-```{r, echo = FALSE, fig.width = 6, fig.height = 3, fig.align='center'}
-set.seed(13)
-s_check <- do(1000)*sd(~rnorm(4, mean = 0, sd = 1))
-gf_histogram(~sd, data=s_check) %>% 
-  gf_vline(xintercept=1) %>%
-  gf_labs(x='s (estimates of standard deviation)\n from samples of size 4')
+```{r, ref.label = 't-sim-2', eval = TRUE, echo = FALSE, fig.width = 6, fig.height = 3, fig.align='center'}
+
 ```
 
 **Shucks! For small $n$, $s$ works less well as an estimate of $\sigma$ - it is frequently an underestimate. (More than half of the area of the distribution is to the left of 1.)**
@@ -170,7 +167,7 @@ gf_histogram(~sd, data=s_check) %>%
 *Will this be a problem for us? Alas, yes. Let's see why.*
 
 ## Why we need the t-distribution
-*Text book reference: Lock5 Chapter 6.4*
+*Text book reference: still [IMS, "Introducing the t-distribution"](https://openintro-ims.netlify.app/inference-num.html#introducing-the-t-distribution)*
 
 So...why is underestimating $\sigma$ just a little such a big problem that we need a whole new probability distribution? Let's see...
 
@@ -227,10 +224,10 @@ OK, so now we know a few things:
 
 - We need to compute $\frac{s}{\sqrt{n}}$ to estimate the SE for a mean
 - Our SE will be an *underestimate* when sample sizes are small, which will affect the sampling distribution
-- The result of all this is that **we should use t distributions rather than normal distributions to find CIs or do tests for a mean**.
+- The result of all this is that **we should (ALWAYS) use t distributions rather than normal distributions to find CIs or do tests for a mean**.
 
 ## Confidence Intervals for a Mean
-*Text book reference: Lock5 Chapter 6.5*
+*Text book reference: [IMS, "One sample t confidence intervals"](https://openintro-ims.netlify.app/inference-num.html#one-sample-t-confidence-intervals)*
 
 Before this, we have found CIs according to
 
@@ -259,7 +256,7 @@ For example, if we have a sample size of 15, that is 14 degrees of freedom. For 
 qt(0.975, df = 14, lower.tail = FALSE)
 ```
 
-Notice, it's quite a bit bigger than the corresponding $z^* = 1.96$!
+Notice, because of the squashed-ness of the t-distribution compared to the normal, this $t^*$ is quite a bit **bigger**  than the corresponding $z^* = 1.96$!
 
 ### Example 2
 Another example. What if our sample size is $n = 24$ and we want 98% confidence?
@@ -324,7 +321,7 @@ $$ \bar{x} \pm t^* SE = 14.1 \pm 5.84 * 1.1$$
 The CI is (7.68, 20.52). We are 99% confident the true mean dragon wingspan is between 7.68 and 20.52 meters.
 
 ## Tests for a Mean
-*Text book reference: Lock5 Chapter 6.6*
+*Text book reference: [IMS, "Tests for a mean"](https://openintro-ims.netlify.app/inference-num.html#one-sample-t-tests)*
 
 We can also use t-distributions to do tests for a mean ("t-tests"). We will *always work with the * **standardized** *test statistic t*, and we'll use a t distribution with $n - 1$ degrees of freedom to compute our p-value, instead of a standard normal.
 
@@ -355,7 +352,7 @@ The p-value is pretty small -- 0.013. So we might reject the null hypothesis tha
 
 Sometimes, we are interested in comparing means between two groups, but we have *paired data*.  This means that each row of our dataset contains a *pair* of measurements: weights before and after a nutrition program, or weekly income before and after a job retraining program, or ... the idea is that the measurements come naturally in pairs.
 
-(Next week, we'll consider comparing means with *unpaired* data -- just subdivided into two groups. For example, *unpaired* data might be something like: we measured the wingspans of 16 magic dragons and 12 muggle dragons; we want to know whether the mean wingspan of magic and muggle dragons is the same.)
+(Soon, we'll consider comparing means with *unpaired* data -- just subdivided into two groups. For example, *unpaired* data might be something like: we measured the wingspans of 16 magic dragons and 12 muggle dragons; we want to know whether the mean wingspan of magic and muggle dragons is the same.)
 
 The key here is to realize that in the *paired* data scenario, the sample stat of interest can be computed by subtracting the two observations *in each row* of the data to get a variable that gives a list of *differences* between the two groups/conditions; then taking the mean of the list of differences.  If we consider the column of differences to be "our dataset" -- the variable of which we want to find the mean -- then: **we have a one-mean problem just like the rabbits and dragons ones we just learned to do!** It's just that instead of "rabbit weight" or "dragon wingspan" each row of our data contains an observation of "difference between ...".
 
@@ -374,7 +371,7 @@ Want a brief recap of everything just discussed -- in cartoon form?  You're in l
 (Or [watch directly on YouTube](https://www.youtube.com/watch?v=32CuxWdOlow).)
 
 ## Conditions
-*Text book reference: Lock5 Chapter 6.4*
+*Text book reference: [IMS on conditions for the t model for a mean](https://openintro-ims.netlify.app/inference-num.html#evaluating-the-two-conditions-required-for-modeling-barx)*
 
 For the proportion tests/intervals, we had a bunch of conditions that had to hold in order to use the normal model "shortcut".
 
@@ -388,8 +385,18 @@ Before doing a t-test or constructing a t confidence interval, it's important to
 - The cases must be **independent** (no lurking variables linking them)
 - The sample size must be "big enough" *or* the data distribution must be "nearly normal". 
   - "big enough" -- if the sample size is larger than about 40, great.
-  - "nearly normal" -- if the sample size is smaller than about 40, but the data distribution is relatively symmetric and unimodal and bell-shaped (no major skew, no extreme outliers), great.
+  - "nearly normal" -- if the sample size is *smaller* than about 40, but the data look like they could be a sample from a normal population -- that is, the distribution is somewhat symmetric and unimodal and bell-shaped (no major skew, no extreme outliers), great. Sigh. With a sample size this small, it's super hard to tell, so as long as there is no major skew or extreme outliers, we will say it's okay.
 
-## More Practice
-Before you tackle your quiz and homework, please consider completing one or both of the [worksheets with practice problems (solutions also provided).](https://moodle.calvin.edu/mod/page/view.php?id=1011030)
+## What about Two Means?
 
+What about the case where we want to estimate a *difference in means* between two groups, and find a CI or do a test?
+
+Sure, we can already do this with a bootstrap CI or a randomization test. But what about a shortcut?
+
+Is it possible? *Certainly.* So why are we waiting until next week?
+
+Right now, we've been doing a lot of the nuts and bolts of the calculations ourselves, finding SEs, sketching sampling distributions, finding $t^*$ values, etc.
+
+That becomes less practical for a test or interval for a difference in means; the expression for the SE is a bit more complicated, and the expression to estimate the degrees of freedom for this scenario is even more so.  It becomes less useful to do the work "by hand" and more appealing to let R do all the number crunching; we just control what numbers we want it to crunch via our inputs to the function `t.test()`.
+
+So next week, we will learn to let R do all the work for tests for one and two proportion tests and CIs (using function `prop.test()`), and also for one mean, paired means, and two means (using function `t.test()`). So now you have something lovely to look forward to!
