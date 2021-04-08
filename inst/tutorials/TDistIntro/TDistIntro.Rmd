@@ -218,7 +218,7 @@ He turns them from normal distributions into t-distributions, that's what.  So i
 (Or [watch directly on YouTube if you want](https://youtu.be/LRhAeE-WgXQ).)
 
 ## Why it Matters
-*Text book reference: Lock5 Chapter 6.4*
+*Text book reference: [IMS section "Introducing the t-distribution"](https://openintro-ims.netlify.app/inference-num.html#introducing-the-t-distribution)*
 
 OK, so now we know a few things:
 
