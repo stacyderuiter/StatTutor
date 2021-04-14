@@ -7,7 +7,7 @@ output:
 runtime: shiny_prerendered
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 library(learnr)
 # library(checkr)
 # library(statPREP)
@@ -15,14 +15,14 @@ library(tibble)
 library(ggformula)
 library(mosaic)
 theme_set(theme_bw())
-# knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
+# knitr::opts_chunk$set(exercise.checker  =  checkr::checkr_tutor)
 knitr::opts_chunk$set(
-  echo = TRUE,
-  fig.align = "center",
-  fig.width = 6, fig.height = 2.5)
-tutorial_options(exercise.eval = FALSE)
+  echo  =  TRUE,
+  fig.align  =  "center",
+  fig.width  =  6, fig.height  =  2.5)
+tutorial_options(exercise.eval  =  FALSE)
 elephants <- read.csv('http://sldr.netlify.com/data/elephants.csv')
-elephants <- subset(elephants, Country == 'Tanzania')
+elephants <- subset(elephants, Country  ==  'Tanzania')
 elephants$HighDensity <- 'Yes'
 elephants$HighDensity[elephants$Density<1] <- 'No'
 elephants$HighDensity <- factor(elephants$HighDensity)
@@ -31,10 +31,34 @@ robins$Year <- factor(robins$Year)
 robins$DiurnalDiff <- robins$DayNoise - robins$NightNoise
 ```
 
+## Learning Outcomes
+
+In the past 2 weeks, we have learned shortcut methods to estimate the standard error of the sampling distribution for several common scenarios, including when the parameter of interest is:
+
+- One proportion
+- A difference in proportions between two groups
+- One mean
+- Paired mean (mean of differences between paired observations)
+- A difference in means between two groups
+
+We have made calculations for these scenarios sort-of "by hand" -- computing SE, $z^*$, $t^*$, and p-values using SE formulas, along with R functions `pnorm()`, `qnorm()`, `pt()`, and `qt()`.  It is good practice to think through the whole CI or test process, but all these calculations can get a bit tedious. And we have not really solved "difference in mean between 2 groups" problems this way because the calculation of the degrees of freedom of the t-distribution is bothersome. 
+
+*So we are ready to learn a shortcut for our shortcuts!*
+
+This module is designed to help you learn to:
+
+1. Build skills and efficiency at identifying the *parameter of interest* based on the description of a dataset and research question
+2. Use R functions `prop.test()` and `t.test()` to compute CIs and carry out hypothesis tests for means and proportions
+3. Interpret output of `prop.test()` and `t.test()` to draw conclusions in context
+
+### Conditions
+
+A note about conditions:  to streamline the tutorial, we won't be checking conditions for every example done here. But the same conditions still hold, just like when we are using the normal/t model shortcuts to compute CIs and do tests "by hand" -- the independence and sample size/nearly normal conditions still have to hold in order to get reliable results!
+
 ## Data
 
 ### Elephants
-The first dataset we will use for examples in the following tutorial is from surveys of elephant populations in Tanzania, originally collected by M. Chase and colleagues,(Reference: Chase et al. 2016, *Continent-wide survey reveals massive decline in African savannah elephants,* PeerJ. 2016 Aug 31;4:e2354.). 
+The first dataset we will use for examples in the following tutorial is from surveys of elephant populations in Tanzania, originally collected by M. Chase and colleagues,(Reference: Chase et al. 2016, [*Continent-wide survey reveals massive decline in African savannah elephants](https://peerj.com/articles/2354/),* PeerJ. 2016 Aug 31;4:e2354.). 
 
 The variables in the dataset include:
 
@@ -43,13 +67,13 @@ The variables in the dataset include:
 - `HighDensity`: 'Yes' if there is more than 1 elephant per square km, and 'No' if there is not.
 
 ### English Robins
-We will also use a dataset on English robins from a 2007 paper by R. Fuller and colleagues (Reference: Fuller et al. 2007, *Daytime noise predicts nocturnal singing in urban robins*). This dataset includes  the variables below, observed at n=121 different urban sites in Sheffield, England:
+We will also use a dataset on English robins from a 2007 paper by R. Fuller and colleagues (Reference: Fuller et al. 2007, *[Daytime noise predicts nocturnal singing in urban robins](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2390663/)*). This dataset includes  the variables below, observed at n  =  121 different urban sites in Sheffield, England:
 
-- `DaySong` Whether robin song was `Present` or `Absent` during the day
-- `NightSong` Whether robin song was `Present` or `Absent` during the night
+- `DaySong` Whether robin song was "Present" or "Absent" during the day
+- `NightSong` Whether robin song was "Present" or "Absent" during the night
 - `Year` of data collection (2005 or 2006) 
-- `DayNoise` Noise level recorded during the day
-- `NightNoise` Noise level recorded during the night
+- `DayNoise` Noise level recorded during the day (in dB relative to 20 $\mu$Pa)
+- `NightNoise` Noise level recorded during the night  (in dB relative to 20$\mu$Pa)
 - `DiurnalDiff` For each site, the night time noise level minus the day time noise level
 
 ## One Proportion
@@ -58,72 +82,72 @@ We will also use a dataset on English robins from a 2007 paper by R. Fuller and 
 Recall that we can use the function `tally()` to compute sample proportions.  For example, if we wanted to find the number of protected and unprotected sites at which elephants were surveyed, we could run:
 
 ```{r}
-tally(~ Protected, data=elephants)
+tally(~ Protected, data = elephants)
 ```
 
 We could also format the same information as proportions rather than counts:
 
 ```{r}
-tally(~ Protected , data=elephants, format='prop')
+tally(~ Protected , data = elephants, format = 'prop')
 ```
 
 ### Practice: tally()
 Try computing the number of observations in 2005 and 2006 (variable `Year`) in the `robins` dataset.
 
-```{r robin-year, exercise=TRUE}
+```{r robin-year, exercise = TRUE}
 
 
 ```
 
-```{r robin-year-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-tally(~..., data=...)
+```{r robin-year-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+tally(~..., data = ...)
 ```
 
-```{r robin-year-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-tally(~, data=robins)
+```{r robin-year-hint-2, eval = FALSE, echo = FALSE, results = 'hide'}
+tally(~, data = robins)
 ```
 
-```{r robin-year-solution, eval=FALSE, echo=FALSE, results='hide'}
-tally(~Year, data=robins)
+```{r robin-year-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+tally(~Year, data = robins)
 ```
 
 ### Practice: tally() with proportion output
 What about computing the same table with proportions rather than counts as the output?
 
-```{r robin-year2, exercise=TRUE}
+```{r robin-year2, exercise = TRUE}
 
 
 ```
 
-```{r robin-year2-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-tally(~..., data=..., format=...)
+```{r robin-year2-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+tally(~..., data  =  ..., format  =  ...)
 ```
 
-```{r robin-year2-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-tally(~, data=robins, format='prop')
+```{r robin-year2-hint-2, eval = FALSE, echo = FALSE, results = 'hide'}
+tally(~, data  =  robins, format  =  'prop')
 ```
 
-```{r robin-year2-solution, eval=FALSE, echo=FALSE, results='hide'}
-tally(~Year, data=robins, format='prop')
+```{r robin-year2-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+tally(~Year, data  =  robins, format  =  'prop')
 ```
 
 ## 1 proportion CI with summary data
 What if we want to use `prop.test()` to find a confidence interval for the proportion elephant survey sites that are protected, using the summary information we just computed?
 
 ```{r}
-tally(~Protected, data=elephants)
+tally(~Protected, data  =  elephants)
 ```
 
 We need to provide 2 or 3 inputs to `prop.test()` to obtain a CI:
 
 - `x`, the number of "successes". Here we consider a "success" a site that *is* protected, so there are 24 such sites
-- `n`, the sample size. Here it is 17+24 = 41
-- `conf.level`, the desired confidence level as a proportion (so for 95% confidence, we would use `conf.level=0.95`). This input is optional; if you leave it out, it will default to 0.95.
+- `n`, the sample size. Here it is 17+24  =  41
+- `conf.level`, the desired confidence level as a proportion (so for 95% confidence, we would use `conf.level  =  0.95`). This input is optional; if you leave it out, it will default to 0.95.
 
 For example,
 
 ```{r}
-prop.test(x=24, n=41, conf.level=0.99)
+prop.test(x  =  24, n  =  41, conf.level  =  0.99)
 ```
 
 We are 99% confident that the true proportion elephant survey sites that are protected is between 0.378 and 0.767.
@@ -132,91 +156,100 @@ We are 99% confident that the true proportion elephant survey sites that are pro
 Your turn to compute a CI with summary data. Find a **98% CI** for the proportion sites with day song in the `robins` dataset. First, be sure to check the `tally()`:
 
 ```{r}
-tally(~DaySong, data=robins)
+tally(~DaySong, data  =  robins)
 ```
 
-```{r day-song, exercise=TRUE, eval=FALSE}
+```{r day-song, exercise = TRUE, eval = FALSE}
 
 
 ```
 
-```{r day-song-hint-1, , eval=FALSE, echo=FALSE, results='hide'}
-prop.test(x=...,n=..., conf.level=...)
+```{r day-song-hint-1, , eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(x  =  ...,n  =  ..., conf.level  =  ...)
 ```
 
-```{r day-song-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(x=...,n=..., conf.level=0.98)
+```{r day-song-hint-2, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(x = ...,n = ..., conf.level = 0.98)
 ```
 
-```{r day-song-solution, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(x=67,n=54+67, conf.level=0.98)
+```{r day-song-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(x = 67,n = 54+67, conf.level = 0.98)
 ```
 
 ## 1 proportion test with summary data
-To carry out a test instead of computing a CI, we just have to specify our hypotheses. Some elephant management plans have set a goal to keep elephant density low (less than 1 animal per $km^2$) to prevent vegetation damage and habitat change.  Imagine Tanzania set a goal to keep elephant density low at at least half of sites; is this goal being met?Let $p$ be the proportion sites with `HighDensity` TRUE in Tanzania; we want to test:
+To carry out a test instead of computing a CI, we just have to specify our hypotheses (and tell `prop.test()` what they are). 
 
-$$H_0: p = 0.5$$
+Some elephant management plans have set a goal to keep elephant density low (less than 1 animal per $km^2$) to prevent vegetation damage and habitat change.  
+
+Imagine Tanzania set a goal to keep elephant density low at at least half of sites; is this goal being met?
+
+Let $p$ be the proportion sites with `HighDensity` TRUE in Tanzania; we want to test:
+
+$$H_0: p  =  0.5$$
 $$H_1: p > 0.5$$
+
 The sample data indicate:
 
 ```{r}
-tally(~HighDensity, data=elephants)
+tally(~HighDensity, data = elephants)
 ```
 
-To carry out the test with `prop.test`, we need to specify just two more input arguments:
+To carry out the test with `prop.test()`, we need to specify two new input arguments:
 
-- `p`, the null hypothesis proportion (here 0.5)
+- `p`, the null hypothesis proportion (here $p = 0.5$)
 - `alternative`, which can be either 'two.sided' (the default if you leave this input out), 'greater' (one-sided test with $>$), or 'less' (one-sided test with $<$).
--Note we can now leave out `conf.level` as we are trying to obtain a p-value, not a CI.
+- Note: we can now leave out `conf.level` as we are trying to obtain a p-value, not a CI.
 
 Our test:
 
 ```{r}
-prop.test(x=19, n=19+22, p=0.5,
-          alternative='greater')
+prop.test(x = 19, n = 19+22, p = 0.5,
+          alternative = 'greater')
 ```
 
 Since the p-value is large, we can not reject $H_0$ - based on these data it is reasonable to believe that elephant density is high in no more than half of sites.
 
 ### Practice - one proportion test
-What would you change to test whether the proportion low-density sites is no less than 0.5? You will still test $H_0: p=0.5$, but now p is the true proportion low density sites. 
+What would you change to test whether the proportion low-density sites is no less than 0.5? You will still test $H_0: p = 0.5$, but now p is the true proportion low density sites. 
 
-```{r Ha, echo=FALSE}
+```{r Ha, echo = FALSE}
 question("What alternate hypothesis would you test?",
   answer("p is greater than 0.5"),
-  answer("p is less than 0.5", correct=TRUE, message='Correct! We want to test whether the true proportion is 0.5 (or more) so we want to reject the null hypothesis if there is evidence it is below 0.5.'),
+  answer("p is less than 0.5", correct = TRUE, message = 'Correct! We want to test whether the true proportion is 0.5 (or more) so we want to reject the null hypothesis if there is evidence it is below 0.5.'),
   answer("p is not equal to 0.5"),
-  allow_retry=TRUE)
+  allow_retry = TRUE)
 ```
 
-Use `prop.test` to carry out the test with the summary data
+Use `prop.test()` to carry out the test with the summary data.
 
 ```{r}
-tally(~HighDensity, data=elephants)
+tally(~HighDensity, data = elephants)
 ```
 
-```{r, elephant-density, exercise=TRUE, eval=FALSE}
+```{r, elephant-density, exercise = TRUE, eval = FALSE}
 
 
 ```
 
-```{r, elephant-density-hint1, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(x=...,n=..., p=...)
+```{r, elephant-density-hint1, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(x = ...,n = ..., p = ...)
 ```
 
-```{r, elephant-density-solution, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(x=22,n=22+19, p=0.5
-          alternative='less')
+```{r, elephant-density-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(x = 22, n = 22+19, p = 0.5
+          alternative = 'less')
 ```
 
-With the same p-value as before, you will again fail to reject the null!
+With the same p-value as before, you will again fail to reject the null! Based on this dataset, it is reasonable to believe that the true proportion low-density sites is at least 0.5.
 
 ## 1 proportion CI with full dataset
-We can also (perhaps more usefully) compute CIs directly from a dataset using `prop.test`.  For example, to find a 95% CI for the proportion high-density sites, we use the formula interface and the appropriate variable and dataset names.  We also need to provide the input `success`, which gives the value of the variable of interest that we are interested in computing the proportion of.
+We can also (perhaps more usefully) compute CIs directly from a dataset using `prop.test()`.  For example, to find a 95% CI for the proportion high-density sites, we use the formula interface and the appropriate variable and dataset names.  We also need to provide the input `success`, which gives the value of the variable of interest that we are interested in computing the proportion of.
 
 ```{r}
-prop.test(~HighDensity, data=elephants,
-          success='Yes', conf.level=0.95)
+prop.test(~HighDensity, 
+          data = elephants,
+          success = 'Yes', 
+          conf.level = 0.95)
 ```
 
 We are 95% confident that the true proportion high density sites is between 0.31 and 0.62.
@@ -225,133 +258,142 @@ We are 95% confident that the true proportion high density sites is between 0.31
 
 Your turn: compute a 99% CI for the proportion low-density sites.
 
-```{r low-dens, exercise=TRUE, eval=FALSE}
+```{r low-dens, exercise = TRUE, eval = FALSE}
 
 
 ```
 
-```{r low-dens-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~..., data=..., success=..., 
-          conf.level=...)
+```{r low-dens-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~..., data = ..., success = ..., 
+          conf.level = ...)
 
 ```
 
-```{r low-dens-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~..., data=..., success='No', 
-          conf.level=0.99)
+```{r low-dens-hint-2, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~..., data = ..., success = 'No', 
+          conf.level = 0.99)
 
 ```
 
-```{r low-dens-solution, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~HighDensity, data=elephants, success='No', 
-          conf.level=0.99)
+```{r low-dens-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~HighDensity, data = elephants, success = 'No', 
+          conf.level = 0.99)
 
 ```
 
 How would you state your conclusion in context?
 
 ## 1 proportion test with full dataset
-To do a test instead, we simply need to specify `p` as we did with the summary data -- `p` is the true proportion according to the null hypothesis.  How would you use the full `elephants` dataset to test whether the true proportion high-density sites is no more than 0.5?
+To do a test instead, we simply need to specify `p`, as we did with the summary data. The quantity that `prop.test()` is calling `p` is what we often denote $p_0$ in by-hand calculations: the true proportion *according to the null hypothesis* we want to test.  
 
-```{r high-test, exercise=TRUE, eval=FALSE}
+How would you use the full `elephants` dataset to test whether the true proportion high-density sites is no more than 0.5?
+
+```{r high-test, exercise = TRUE, eval = FALSE}
 
 ```
 
-```{r high-test-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~..., data=elephants, p=...,
-          alternative=..., success=...)
+```{r high-test-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~..., data = elephants, p = ...,
+          alternative = ..., success = ...)
 ```
 
-```{r high-test-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~HighDensity, data=elephants, p=0.5,
-          alternative=..., success=...)
+```{r high-test-hint-2, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~HighDensity, data = elephants, p = 0.5,
+          alternative = ..., success = ...)
 ```
 
-```{r high-test-solution, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~HighDensity, data=elephants, p=0.5,
-          alternative='greater', success='Yes')
+```{r high-test-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~HighDensity, data = elephants, p = 0.5,
+          alternative = 'greater', success = 'Yes')
 ```
 
-```{r which-p, echo=FALSE}
+```{r which-p, echo = FALSE}
 question("What p-value did you get?",
   answer("0.0975"),
-  answer("0.6226", correct=TRUE, message='Correct! look for the "p-value" label.'),
+  answer("0.6226", correct = TRUE, message = 'Correct! look for the "p-value" label.'),
   answer('0.463'),
-  incorrect='Careful...in the prop.test output, "p" is the sample proportion, not the p-value.',
-  allow_retry=TRUE)
+  incorrect = 'Careful...in the prop.test output, "p" is the sample proportion, not the p-value. To find the p-value, look for the "p-value" label.',
+  allow_retry = TRUE)
 ```
 
 ## 2 proportion CI
-It is possible to compute a CI for a difference in two proportions using `prop.test` with summary information. For example, to find a 95% CI for the difference in proportion Sheffield sites with robin song in 2005 vs 2006, we can examine the data:
+It is possible to compute a CI for a difference in two proportions using `prop.test()` with summary information. For example, to find a 95% CI for the difference in proportion Sheffield sites with robin song in 2005 vs 2006, we can examine the data:
 
 ```{r}
-tally(~DaySong | Year, data=robins)
+tally(~DaySong | Year, data = robins)
 ```
 
-To pass this information to `prop.test`, we now need `x` to have two entries (the number of "successes" in 2005 and 2006) and `n` also needs to have two entries (the sample size in each group).  We would run:
+To pass this information to `prop.test()`, we now need `x` to have two entries (the number of "successes" in 2005 and 2006) and `n` also needs to have two entries (the sample size in each group).  We would run:
 
 ```{r}
-prop.test(x=c(35,32), n=c(22+35, 32+32),
-          conf.level=0.95)
+prop.test(x = c(35,32), n = c(22+35, 32+32),
+          conf.level = 0.95)
 ```
 
-Perhaps more simply, we can use the full dataset to make the same calculation:
+Perhaps more simply, we can use the full dataset to make the same calculation, using the formula syntax like `~Main_Variable | Group_Variable` to tell `prop.test()` that we want to compute the difference in proportion `Main_Variable` between two groups encoded in the `Group_Variable`:
 
 ```{r}
-prop.test(~DaySong | Year, data=robins,
-          conf.level=0.95, success='Present')
+prop.test(~DaySong | Year, data = robins,
+          conf.level = 0.95, success = 'Present')
 ```
 
 ### Practice
 
 How would you compute a 95% CI for the difference in proportion sites with *Night* song in 2005 vs 2006?
 
-```{r night-song, exercise=TRUE, eval=FALSE}
+```{r night-song, exercise = TRUE, eval = FALSE}
 
 ```
 
-```{r night-song-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~... | ..., data=..., conf.level=...,
-          success=...)
+```{r night-song-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~... | ..., data = ..., conf.level = ...,
+          success = ...)
 ```
 
-```{r, night-song-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~... | ..., data=robins, conf.level=...,
-          success='Present')
+```{r, night-song-hint-2, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~... | ..., data = robins, conf.level = ...,
+          success = 'Present')
 ```
 
-```{r, night-song-solution, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~NightSong | Year, data=robins, conf.level=0.95,
-          success='Present')
+```{r, night-song-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~NightSong | Year, data = robins, conf.level = 0.95,
+          success = 'Present')
 ```
 
 ## 2 proportion test with full dataset
-To carry out tests instead of the CIs above, we just have to specify our hypotheses to test, and the include the input `alternative` (either 'two.sided', the default; or 'less' or 'greater'). The default option (and really the only option we will use) is to test whether the proportions in the two groups are equal.
+To carry out tests instead of the CIs above, we just have to specify our hypotheses to test, by including the input `alternative` (either 'two.sided', the default; or 'less' or 'greater'). 
+
+The default option (and really the main option we will ever use) is to test whether the proportions in the two groups are equal.
 
 How would you test the hypotheses below?  Let $p_{N2005}$ be the proportion sites with night song in 2005 and $p_{N2006}$ be the proportion sites with night song in 2006.
 
-```{r night-test, exercise=TRUE, eval=FALSE}
+Test:
+
+$$H_0: p_{N2005} - p_{N2006} = 0 $$
+$$H_1: p_{N2005} - p_{N2006} \neq 0$$
+
+```{r night-test, exercise = TRUE, eval = FALSE}
 
 ```
 
-```{r night-test-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~...|..., data=..., 
-          alternative=..., success=...)
+```{r night-test-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~...|..., data = ..., 
+          alternative = ..., success = ...)
 ```
 
-```{r night-test-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~NightSong|Year, data=robins, 
-          alternative=..., success=...)
+```{r night-test-hint-2, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~NightSong | Year, data = robins, 
+          alternative = ..., success = ...)
 ```
 
-```{r night-test-hint-3, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~NightSong|Year, data=robins,
-          success=...)
+```{r night-test-hint-3, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~NightSong | Year, data = robins,
+          alternative = 'two.sided', success = ...)
 ```
 
-```{r night-test-solution, eval=FALSE, echo=FALSE, results='hide'}
-prop.test(~NightSong|Year, data=robins, 
-          alternative='two.sided')
+```{r night-test-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+prop.test(~NightSong | Year, data = robins, 
+          alternative = 'two.sided', success = 'Present')
 ```
 
 What do you conclude? Is the proportion night song different between two years? (This might be important if the researchers wanted to pool data from the two years and use it together to answer other questions...)
@@ -366,148 +408,206 @@ What if our sample statistic is a mean rather  than a proportion? For example, w
 So we would run:
 
 ```{r}
-t.test(~Density, data=elephants, conf.level=0.95)
+t.test(~Density, data = elephants, conf.level = 0.95)
 ```
 
 and then we could say we are 95% confident that the true mean density of elephants at Tanzania sites is between 0.569 and 3.49 elephants per $km^2$.
 
 ### Practice
-How would you find a 90% t interval for the mean noise level (variable `NightNoise`) in the `robins` dataset?
+How would you find a 90% t-interval for the mean noise level (variable `NightNoise`) in the `robins` dataset?
 
-```{r night-robins, exercise=TRUE, eval=FALSE}
+```{r night-robins, exercise = TRUE, eval = FALSE}
 
 ```
 
-```{r night-robins-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~..., data=..., conf.level=...)
+```{r night-robins-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~..., data = ..., conf.level = ...)
 ```
 
-```{r night-robins-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~NightNoise, data=robins, conf.level=...)
+```{r night-robins-hint-2, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~NightNoise, data = robins, conf.level = ...)
 ```
 
 
-```{r night-robins-solution, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~NightNoise, data=robins, conf.level=0.90)
+```{r night-robins-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~NightNoise, data = robins, conf.level = 0.90)
 ```
 
 ## One-sample t-test
-What if, instead of finding a CI, we wanted to test the null hypothesis that the true mean elephant density was above 1 per square km? If $\mu$ is the true mean elephant density, we would test $H_0: \mu = 1$ versus the alternative $H_A: \mu > 1$. To do this with `t.test`, we have to specify the additional inputs:
+What if, instead of finding a CI, we wanted to test the null hypothesis that the true mean elephant density was above 1 per square km? If $\mu$ is the true mean elephant density, we would test $H_0: \mu  =  1$ versus the alternative $H_A: \mu > 1$. To do this with `t.test`, we have to specify the additional inputs:
 
-- `mu`, the mean under $H_0$
+- `mu`, the mean according to $H_0$ (we usually notate this quantity $\mu_0$)
 - `alternative` (as before, it can be either 'two.sided', the default, or it can be 'less' or 'greater')
 
 ```{r}
-t.test(~Density, data=elephants, mu=1,
-       alternative='greater')
+t.test(~Density, data = elephants, mu = 1,
+       alternative = 'greater')
 ```
 
 With a p-value of 0.081, we have only weak evidence (if any) against the null hypothesis. We would probably fail to reject the null and conclude that it's reasonable to believe that the true density is 1 (or less) elephants per $km^2$.
 
 ### Practice
-Your turn: How would you use the `robins` data to test the hypotheses below? Let $\mu$ be the true mean noise level during the day. According to the *Handbook of Environmental Noise*, the typical suburban area has background noise levels of about 50dBA. Does Sheffield match this prediction?
+Your turn: How would you use the `robins` data to test the hypotheses below? Let $\mu$ be the true mean noise level during the day. According to the *Handbook of Environmental Noise*, the typical suburban area has background noise levels of about 50 dBA. Does Sheffield match this prediction?
 
-$$H_0: \mu = 50$$
+$$H_0: \mu  =  50$$
 $$H_A: \mu \neq 50$$
 
 
-```{r day-mean, exercise=TRUE, eval=FALSE}
+```{r day-mean, exercise = TRUE, eval = FALSE}
 
 
 ```
 
-```{r day-mean-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~..., data=..., mu=..., alternative=...)
+```{r day-mean-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~..., data = ..., mu = ..., alternative = ...)
 
 ```
 
-```{r day-mean-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~..., data=robins, mu=..., 
-       alternative='two.sided')
+```{r day-mean-hint-2, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~..., data = robins, mu = ..., 
+       alternative = 'two.sided')
 
 ```
 
-```{r day-mean-solution, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~DayNoise, data=robins, mu=50, alternative='two.sided')
+```{r day-mean-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~DayNoise, data = robins, mu = 50, alternative = 'two.sided')
 
 ```
 
-What would you conclude?
+
+
+```{r Sheffield-dBA, echo = FALSE}
+question("What do you conclude??",
+  answer("p-value is small, so reject the null: Sheffield noise levels match the 50dBA prediction."),
+  answer("p-value is small, so reject the null: Sheffield noise levels DO NOT match the 50dBA prediction.", correct = TRUE, message = 'Correct! Small p-values give strong evidence AGAINST the null, allowing us to reject it.'),
+  answer("p-value is small, so FAIL TO reject the null: Sheffield noise levels match the 50dBA prediction."),
+  answer("p-value is small, so FAIL TO reject the null: Sheffield noise levels DO NOT match the 50dBA prediction."),
+  random_answer_order = TRUE,
+  allow_retry = TRUE)
+```
 
 
 ## Paired t interval
 We can use very similar code to compute a CI for a difference in means for paired data - we just need an appropriate dataset where the data is a list of differences for which we want to compute the mean. We might find a 95% CI for the difference in noise day minus night in the `robins` data, using the variable `DiurnalDiff`:
 
 ```{r}
-t.test(~DiurnalDiff, data=robins, conf.level=0.95)
+t.test(~DiurnalDiff, data = robins, conf.level = 0.95)
 ```
 
 We would find that we were 95% percent confident that the true difference between night and day, over all sites, is between 7.59 and 9.38 dB.
 
 ## Paired t-test
-How would you use `t.test()` with the same data to do a paired t-test of the hypotheses $H_0: \mu_D = 0$ vs. $H_A: \mu_D \neq 0$, where $\mu_D$ is the true population mean of the day-night noise level differences?
+How would you use `t.test()` with the same data to do a paired t-test of the hypotheses 
 
-```{r diurn, exercise=TRUE, eval=FALSE}
+$$H_0: \mu_D  =  0$$
+$$H_A: \mu_D \neq 0$$,
 
+where $\mu_D$ is the true population mean of the day-night noise level differences?
 
-```
+```{r diurn, exercise = TRUE, eval = FALSE}
 
-```{r diurn-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~..., data=..., mu=...,
-       alternative=...)
-
-```
-
-```{r diurn-hint-2, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~DiurnalDiffs, data=robins, mu=0,
-       alternative=...)
 
 ```
 
-```{r diurn-solution, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~DiurnalDiff, data=robins, mu=0,
-       alternative='two.sided')
+```{r diurn-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~..., data = ..., mu = ...,
+       alternative = ...)
+
+```
+
+```{r diurn-hint-2, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~DiurnalDiffs, data = robins, mu = 0,
+       alternative = ...)
+
+```
+
+```{r diurn-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~DiurnalDiff, data = robins, mu = 0,
+       alternative = 'two.sided')
 
 ```
 
 ## Two-sample t interval
-What if we want to find a CI for a difference between the means of two groups?  The only change from before is that we need to alter the formula to have the form: ` ~MainVariableName | GroupVariable`, where `MainVariableName` is the name of the variable of which you want to compute the mean, and `GroupVariable` is the name of a categorical variable that divides the data into 2 groups.
+What if we want to find a CI for a difference between the means of two groups?  The only change from before is that we need to alter the formula to have the form: ` ~Main_Variable_Name | Group_Variable`, where `Main_Variable_Name` is the name of the variable of which you want to compute the mean, and `Group_Variable` is the name of a categorical variable that divides the data into 2 groups.
 
 For example, we might want to find a 98% CI for the difference in `DayNoise` levels between the two years 2005 and 2006. How would you do it?
 
-```{r day-year, exercise=TRUE, eval=FALSE}
+```{r day-year, exercise = TRUE, eval = FALSE}
 
 ```
 
-```{r day-year-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~... | ..., data=..., conf.level=...)
+```{r day-year-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~... | ..., data = ..., conf.level = ...)
 ```
 
-```{r day-year-solution, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~DayNoise | Year, data= robins,
-       conf.level=0.98)
+```{r day-year-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~DayNoise | Year, data =  robins,
+       conf.level = 0.98)
 ```
 
-We are 95% confident that the true difference in day noise levels by year is between -2.39 and 2.73.  Since 0 is in the interval, we know that we would fail to reject the null hypothesis of no difference between years at the $\alpha=0.02$ level, if we were to do the test.  Let's try...
+We are 98% confident that the true difference in day noise levels by year is between -2.39 and 2.73.  
+
+Since *0 is in the interval*, we know that we would *fail to reject the null hypothesis* of no difference between years at the $\alpha = 0.02$ level, if we were to do the test.  Let's try...
 
 
 ## Two-sample t-test
 To convert the example above to a test, we just need to specify the `alternative` and `mu`, the difference in means according to the null hypothesis.
 
-```{r t2, exercise=TRUE, eval=FALSE}
+```{r t2, exercise = TRUE, eval = FALSE}
 
 
 ```
 
-```{r t2-hint-1, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~...|..., data=..., mu=...,
-       alternative=...)
+```{r t2-hint-1, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~...|..., data = ..., mu = ...,
+       alternative = ...)
 
 ```
 
-```{r t2-solution, eval=FALSE, echo=FALSE, results='hide'}
-t.test(~DayNoise|Year, data=robins, mu=0,
-       alternative='two.sided')
+```{r t2-solution, eval = FALSE, echo = FALSE, results = 'hide'}
+t.test(~DayNoise|Year, data = robins, mu = 0,
+       alternative = 'two.sided')
 ```
 
 As we expected, the p-value is very large (0.88), so we fail to reject the null - it is reasonable to think the noise levels are the same between years.
+
+## Recap
+
+You have learned to use `prop.test()` and `t.test()` in R to compute CIs and do hypothesis tests for means and proportions.
+
+Brief code examples for the scenarios we work with are available on our [R Code Reference site](https://rsconnect.calvin.edu:3939/content/142/R-Examples.html) - check the "Tests and CIs" pulldown.
+
+There are also notes and examples on the backs of the "Menu" handouts that you have for proportions and means.
+
+If you forget the names or possible values of the input arguments to either of these functions, don't forget that you can run in R `?function.name` to get help:
+
+```{r, eval = FALSE, echo = TRUE}
+?prop.test()
+?t.test()
+```
+
+### `prop.test()` inputs list
+
+For `prop.test()`, inputs can include:
+
+- `x`, the count of successes (could be one number for one proportion, or two values for two groups concatenated with `c()`)
+- `n`, the count of trials (sample size, or sample sizes in each of the two groups concatenated with `c()`)
+- a formula like `~Main_Variable` or `~Main_Variable | Group_Variable`
+- `p`, the null-hypothesis value of the population proportion
+- `alternative`, either "two.sided", "less", or "greater"
+- `conf.level`, a value between 0-1 giving the desired confidence level
+- `data`, the name of the dataset containing any needed variables
+
+### `t.test()` inputs list
+
+For `t.test()`, inputs can include:
+
+- a formula like `~Main_Variable` or `~Main_Variable | Group_Variable`
+- `mu`, the null hypothesis value of the  mean (or difference in means if you are performing a two sample test)
+- `alternative`, either "two.sided", "less", or "greater"
+- `conf.level`, a value between 0-1 giving the desired confidence level
+- `data`, the name of the dataset containing any needed variables
+
+### Parting Note
+
+Now you have power to very quickly and easily compute CIs and do hypothesis tests; the main responsibilities that go with it are to *make sure that the conditions are met so the calculation you are doing is appropriate and reliable* and to *make sure you provide the function with the correct inputs so you avoid a garbage-in, garbage-out type situation*!
