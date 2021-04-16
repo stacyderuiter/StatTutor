@@ -47,7 +47,7 @@ By the end of the module you will:
 
 ## Case Study: Gratitude
 
-A growing body of research has documented the effects that practicing gratitude can have on people -- providing not just spiritual and mental-health benefits, but even improving physical health.
+A growing body of research has documented the effects that practicing gratitude can have on people -- providing not just spiritual and mental-health benefits, but also improving physical health.
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/_sokh9e2WGc" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
@@ -152,10 +152,11 @@ But what is its sampling distribution? We've hypothesized that it will probably 
 
 ```{r f-samp-dist, echo = FALSE}
 quiz(question("If the null hypothesis is true, what will the value of the F-ratio be?",
-              answer("Close to 0", correct = TRUE, message = "Yes! If H0 is true, then SSG will be 'close to 0' because the group means will be very close to the overall mean. So, MSG and the whole F-ratio will also be near 0 - but since it MSG is not exactly zero, it matters  a lot what the corresponding value of MSE is..."),
+              answer("Close to 0", correct = TRUE, message = "Yes! If H0 is true, then SSG will be 'close to 0' because the group means will be very close to the overall mean. So, MSG and the whole F-ratio will also be near 0 - but since MSG is not exactly zero, it matters  a lot what the corresponding value of MSE is..."),
               answer("Close to 1", correct = TRUE, message = 'Yes, F will be close to 1 if the null is true and the sample sizes in the groups are equal. MSE and MSG will BOTH depend on the overall variance of the data. In terms of intuition about the F ratio, though, it can be more useful to think about what happens to MSG when H0 is true (it gets smaller, and so so does F...). Bigger F is more evidence against H0.' ),
               answer("Very large"),
               answer("It depends on the specific scenario"),
+              type = 'radio',
               random_answer_order = TRUE,
               allow_retry = TRUE),
      question("If the population group means are actually very different, with little variation within groups, what will the value of the F-ratio be?",

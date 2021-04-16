@@ -392,7 +392,7 @@ CI <- phat + c(-1,1) * 2.58 * SE
 CI
 ```
 
-We are 95% confident the true proportion of Sunday Stalwarts at Calvin is between 22.2 and 64.3%.
+We are 99% confident the true proportion of Sunday Stalwarts at Calvin is between 22.2 and 64.3%.
 
 ### Review: Bootstrap CI
 
@@ -462,7 +462,7 @@ quiz(question("What do we have to assume when we start to generate a sampling di
 
 ### Implications
 
-Wait a second.  If we are **assuming $H_0$ is true**, then suddenly (and wierdly!), $\hat{p}$ is *no longer* our best estimate of the true proportion $p$.
+Wait a second.  If we are **assuming $H_0$ is true**, then suddenly (and weirdly!), $\hat{p}$ is *no longer* our best estimate of the true proportion $p$.
 
 **$H_0$ tells us exactly what the value of $p$ is.** And if we're assuming that $H_0$ is true for the purposes of the test, then what-$H_0$-says-p-is-supposed-to-be is our new best estimate of the population proportion $p$!
 

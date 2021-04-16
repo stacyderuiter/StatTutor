@@ -166,6 +166,7 @@ $$ SE = \sqrt{\frac{\hat{p}_1(1-\hat{p}_1)}{n_1} + \frac{\hat{p}_2(1-\hat{p}_2)}
 
 ```{r, brown-SE-solution}
 phats <- tally(~EyeColor | Island, data = island_eyes, format = 'prop')[1,]
+diff(phats)
 phat_N <- phats[1]
 phat_S <- phats[2]
 ns <- tally(~Island, data = island_eyes); ns
@@ -186,7 +187,7 @@ Finally, choose a confidence level, and use it (with the sample stat  and SE fro
 ```{r brown-ci-solution}
 # note: this is for 95% confidence; change z* for other confidence level.
 stat <- diff(tally(~EyeColor | Island, data = island_eyes, format = 'prop')[1,])
-CI <- stat + c(-1,1) * 1.96 * 0.06421489 # 0.064 should match SE from last calculation
+CI <- stat + c(-1,1) * 1.96 * 0.06421489 # use SE from above here
 CI
 ```
 
@@ -205,7 +206,7 @@ quiz(question("What null hypothesis will we test?",
            answer("$H_0: p_N - p_S = 0$", correct = TRUE),
            answer("$H_0: \\hat{p}_n = \\hat{p}_S$", message = "Remember - hypotheses are always statements about *parameters*, not *statistics*."),
            answer("$H_0: p = 0$", message = "Not quite. Remember - There are two groups, so there should be two proportions appearing in your hypotheses."),
-           answer("$H_0: \\hat{p} = 0.07$", message = "Oops. we *know* that the sample difference in proportions is 0.07 -- that is just a fact, not a testable hypothesis."),
+           answer("$H_0: \\hat{p} = 0.036$", message = "Oops. we *know* that the sample difference in proportions is 0.036 -- that is just a fact, not a testable hypothesis."),
            allow_retry = TRUE,
            random_answer_order = TRUE)
 )
@@ -228,7 +229,7 @@ quiz(question("What is the key, driving assumption when we start work to generat
 
 ### Implications
 
-Wait a second.  If we are **assuming $H_0$ is true**, then suddenly (and wierdly!), $\hat{p}_S - \hat{p}_N$ is *no longer* our best estimate of the true difference in proportions $p_S - p_N$.
+Wait a second.  If we are **assuming $H_0$ is true**, then suddenly (and weirdly!), $\hat{p}_S - \hat{p}_N$ is *no longer* our best estimate of the true difference in proportions $p_S - p_N$.
 
 **$H_0$ tells us that $p_N$ and $p_S$ should be THE SAME.** 
 
