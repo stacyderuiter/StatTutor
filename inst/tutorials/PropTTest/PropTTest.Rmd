@@ -75,15 +75,15 @@ Try computing the number of observations in 2005 and 2006 (variable `Year`) in t
 
 ```
 
-```{r robin-year-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r robin-year-hint-1}
 tally(~..., data=...)
 ```
 
-```{r robin-year-hint-2, eval=FALSE, echo=FALSE, results='hide'}
+```{r robin-year-hint-2}
 tally(~, data=robins)
 ```
 
-```{r robin-year-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r robin-year-solution}
 tally(~Year, data=robins)
 ```
 
@@ -95,15 +95,15 @@ What about computing the same table with proportions rather than counts as the o
 
 ```
 
-```{r robin-year2-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r robin-year2-hint-1}
 tally(~..., data=..., format=...)
 ```
 
-```{r robin-year2-hint-2, eval=FALSE, echo=FALSE, results='hide'}
+```{r robin-year2-hint-2}
 tally(~, data=robins, format='prop')
 ```
 
-```{r robin-year2-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r robin-year2-solution}
 tally(~Year, data=robins, format='prop')
 ```
 
@@ -135,20 +135,20 @@ Your turn to compute a CI with summary data. Find a **98% CI** for the proportio
 tally(~DaySong, data=robins)
 ```
 
-```{r day-song, exercise=TRUE, eval=FALSE}
+```{r day-song, exercise = TRUE}
 
 
 ```
 
-```{r day-song-hint-1, , eval=FALSE, echo=FALSE, results='hide'}
+```{r day-song-hint-1}
 prop.test(x=...,n=..., conf.level=...)
 ```
 
-```{r day-song-hint-2, eval=FALSE, echo=FALSE, results='hide'}
+```{r day-song-hint-2}
 prop.test(x=...,n=..., conf.level=0.98)
 ```
 
-```{r day-song-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r day-song-solution}
 prop.test(x=67,n=54+67, conf.level=0.98)
 ```
 
@@ -195,16 +195,16 @@ Use `prop.test` to carry out the test with the summary data
 tally(~HighDensity, data=elephants)
 ```
 
-```{r, elephant-density, exercise=TRUE, eval=FALSE}
+```{r, elephant-density, exercise=TRUE}
 
 
 ```
 
-```{r, elephant-density-hint1, eval=FALSE, echo=FALSE, results='hide'}
+```{r, elephant-density-hint1, eval = FALSE}
 prop.test(x=...,n=..., p=...)
 ```
 
-```{r, elephant-density-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r, elephant-density-solution}
 prop.test(x=22,n=22+19, p=0.5
           alternative='less')
 ```
@@ -225,24 +225,24 @@ We are 95% confident that the true proportion high density sites is between 0.31
 
 Your turn: compute a 99% CI for the proportion low-density sites.
 
-```{r low-dens, exercise=TRUE, eval=FALSE}
+```{r low-dens, exercise=TRUE}
 
 
 ```
 
-```{r low-dens-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r low-dens-hint-1, eval=FALSE}
 prop.test(~..., data=..., success=..., 
           conf.level=...)
 
 ```
 
-```{r low-dens-hint-2, eval=FALSE, echo=FALSE, results='hide'}
+```{r low-dens-hint-2, eval=FALSE}
 prop.test(~..., data=..., success='No', 
           conf.level=0.99)
 
 ```
 
-```{r low-dens-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r low-dens-solution, eval=FALSE}
 prop.test(~HighDensity, data=elephants, success='No', 
           conf.level=0.99)
 
@@ -253,21 +253,21 @@ How would you state your conclusion in context?
 ## 1 proportion test with full dataset
 To do a test instead, we simply need to specify `p` as we did with the summary data -- `p` is the true proportion according to the null hypothesis.  How would you use the full `elephants` dataset to test whether the true proportion high-density sites is no more than 0.5?
 
-```{r high-test, exercise=TRUE, eval=FALSE}
+```{r high-test, exercise=TRUE}
 
 ```
 
-```{r high-test-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r high-test-hint-1, eval=FALSE}
 prop.test(~..., data=elephants, p=...,
           alternative=..., success=...)
 ```
 
-```{r high-test-hint-2, eval=FALSE, echo=FALSE, results='hide'}
+```{r high-test-hint-2, eval=FALSE}
 prop.test(~HighDensity, data=elephants, p=0.5,
           alternative=..., success=...)
 ```
 
-```{r high-test-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r high-test-solution, eval=FALSE}
 prop.test(~HighDensity, data=elephants, p=0.5,
           alternative='greater', success='Yes')
 ```
@@ -306,21 +306,21 @@ prop.test(~DaySong | Year, data=robins,
 
 How would you compute a 95% CI for the difference in proportion sites with *Night* song in 2005 vs 2006?
 
-```{r night-song, exercise=TRUE, eval=FALSE}
+```{r night-song, exercise=TRUE}
 
 ```
 
-```{r night-song-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r night-song-hint-1}
 prop.test(~... | ..., data=..., conf.level=...,
           success=...)
 ```
 
-```{r, night-song-hint-2, eval=FALSE, echo=FALSE, results='hide'}
+```{r, night-song-hint-2}
 prop.test(~... | ..., data=robins, conf.level=...,
           success='Present')
 ```
 
-```{r, night-song-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r, night-song-solution}
 prop.test(~NightSong | Year, data=robins, conf.level=0.95,
           success='Present')
 ```
@@ -330,26 +330,26 @@ To carry out tests instead of the CIs above, we just have to specify our hypothe
 
 How would you test the hypotheses below?  Let $p_{N2005}$ be the proportion sites with night song in 2005 and $p_{N2006}$ be the proportion sites with night song in 2006.
 
-```{r night-test, exercise=TRUE, eval=FALSE}
+```{r night-test, exercise=TRUE}
 
 ```
 
-```{r night-test-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r night-test-hint-1}
 prop.test(~...|..., data=..., 
           alternative=..., success=...)
 ```
 
-```{r night-test-hint-2, eval=FALSE, echo=FALSE, results='hide'}
+```{r night-test-hint-2}
 prop.test(~NightSong|Year, data=robins, 
           alternative=..., success=...)
 ```
 
-```{r night-test-hint-3, eval=FALSE, echo=FALSE, results='hide'}
+```{r night-test-hint-3}
 prop.test(~NightSong|Year, data=robins,
           success=...)
 ```
 
-```{r night-test-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r night-test-solution}
 prop.test(~NightSong|Year, data=robins, 
           alternative='two.sided')
 ```
@@ -374,20 +374,20 @@ and then we could say we are 95% confident that the true mean density of elephan
 ### Practice
 How would you find a 90% t interval for the mean noise level (variable `NightNoise`) in the `robins` dataset?
 
-```{r night-robins, exercise=TRUE, eval=FALSE}
+```{r night-robins, exercise=TRUE}
 
 ```
 
-```{r night-robins-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r night-robins-hint-1}
 t.test(~..., data=..., conf.level=...)
 ```
 
-```{r night-robins-hint-2, eval=FALSE, echo=FALSE, results='hide'}
+```{r night-robins-hint-2}
 t.test(~NightNoise, data=robins, conf.level=...)
 ```
 
 
-```{r night-robins-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r night-robins-solution}
 t.test(~NightNoise, data=robins, conf.level=0.90)
 ```
 
@@ -411,23 +411,23 @@ $$H_0: \mu = 50$$
 $$H_A: \mu \neq 50$$
 
 
-```{r day-mean, exercise=TRUE, eval=FALSE}
+```{r day-mean, exercise=TRUE}
 
 
 ```
 
-```{r day-mean-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r day-mean-hint-1, eval=FALSE}
 t.test(~..., data=..., mu=..., alternative=...)
 
 ```
 
-```{r day-mean-hint-2, eval=FALSE, echo=FALSE, results='hide'}
+```{r day-mean-hint-2, eval=FALSE}
 t.test(~..., data=robins, mu=..., 
        alternative='two.sided')
 
 ```
 
-```{r day-mean-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r day-mean-solution, eval=FALSE}
 t.test(~DayNoise, data=robins, mu=50, alternative='two.sided')
 
 ```
@@ -447,24 +447,24 @@ We would find that we were 95% percent confident that the true difference betwee
 ## Paired t-test
 How would you use `t.test()` with the same data to do a paired t-test of the hypotheses $H_0: \mu_D = 0$ vs. $H_A: \mu_D \neq 0$, where $\mu_D$ is the true population mean of the day-night noise level differences?
 
-```{r diurn, exercise=TRUE, eval=FALSE}
+```{r diurn, exercise=TRUE}
 
 
 ```
 
-```{r diurn-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r diurn-hint-1}
 t.test(~..., data=..., mu=...,
        alternative=...)
 
 ```
 
-```{r diurn-hint-2, eval=FALSE, echo=FALSE, results='hide'}
+```{r diurn-hint-2}
 t.test(~DiurnalDiffs, data=robins, mu=0,
        alternative=...)
 
 ```
 
-```{r diurn-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r diurn-solution}
 t.test(~DiurnalDiff, data=robins, mu=0,
        alternative='two.sided')
 
@@ -475,15 +475,15 @@ What if we want to find a CI for a difference between the means of two groups?  
 
 For example, we might want to find a 98% CI for the difference in `DayNoise` levels between the two years 2005 and 2006. How would you do it?
 
-```{r day-year, exercise=TRUE, eval=FALSE}
+```{r day-year, exercise=TRUE}
 
 ```
 
-```{r day-year-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r day-year-hint-1}
 t.test(~... | ..., data=..., conf.level=...)
 ```
 
-```{r day-year-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r day-year-solution}
 t.test(~DayNoise | Year, data= robins,
        conf.level=0.98)
 ```
@@ -494,18 +494,18 @@ We are 95% confident that the true difference in day noise levels by year is bet
 ## Two-sample t-test
 To convert the example above to a test, we just need to specify the `alternative` and `mu`, the difference in means according to the null hypothesis.
 
-```{r t2, exercise=TRUE, eval=FALSE}
+```{r t2, exercise=TRUE}
 
 
 ```
 
-```{r t2-hint-1, eval=FALSE, echo=FALSE, results='hide'}
+```{r t2-hint-1}
 t.test(~...|..., data=..., mu=...,
        alternative=...)
 
 ```
 
-```{r t2-solution, eval=FALSE, echo=FALSE, results='hide'}
+```{r t2-solution}
 t.test(~DayNoise|Year, data=robins, mu=0,
        alternative='two.sided')
 ```
