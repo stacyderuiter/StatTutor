@@ -13,7 +13,7 @@ library(learnr)
 # library(statPREP)
 library(tibble)
 library(ggformula)
-library(mosaic)
+require(mosaic)
 #library(fastR)
 #library(fastR2)
 library(RColorBrewer)
@@ -33,7 +33,7 @@ grateful <- read.csv('http://sldr.netlify.com/data/gratitude-experiment.csv')
 
 ## Learning Outcomes
 
-This module introduces **An**alysis **o**f **Va**riance (ANOVA), which allows us to test whether the means of three or more groups are all equal. (Like a two-sample t-test for more than two groups).
+This module introduces **An**alysis **o**f **Va**riance (ANOVA), which allows us to test whether the means of **three or more groups** are all equal. (Like a two-sample t-test for more than two groups).
 
 By the end of the module you will:
 
@@ -43,7 +43,7 @@ By the end of the module you will:
 4) Use `TukeyHSD()` in R to determine which group means are different, **if** an ANOVA has allowed you to reject the null hypothesis that they are all the same
 5) Be able to list the conditions under which ANOVA is reliable and appropriate, and check them in a specific scenario
 
-*These materials come from your text book, Lock5 Chapter 8.*
+Text book reference: [IMS Chapter 7.5](https://openintro-ims.netlify.app/inference-num.html#anovaAndRegrWithCategoricalVariables)
 
 ## Case Study: Gratitude
 
@@ -61,7 +61,7 @@ The data are simulated based on the results of a paper published in 2003:
 
 [![](images/count-blessings.png){width=450px}](https://moodle.calvin.edu/pluginfile.php/1481445/mod_page/content/1/Counting_blessings_versus_burd.pdf)
 
-*Click on the image above to get the full PDF. Reading it is not required, but it is interesting and accesible - check it out if you have time!*
+*Click on the image above to get the full PDF. Reading it is not required, but it is interesting and accessible - check it out if you have free time!*
 
 ## Can We Induce Gratitude?
 
@@ -130,7 +130,7 @@ The big challenge here is to come up with a **test statistic** -- *one number* t
 
 **How can we define a good test statistic to measure how different** *more than two* **numbers are?**
 
-The video below will walk through the derivation of the F-ratio statistic.  I recommend that you download or print [a worksheet](https://moodle.calvin.edu/pluginfile.php/1481445/mod_page/content/1/ANOVA-handout.pdf) where you can take notes and summarize the material from this video (and other key parts of the tutorial). Writing and drawing it yourself will make it easier to understand and remember!
+The video below will walk through the derivation of the F-ratio statistic.  I recommend that you download or print [a worksheet](https://stacyderuiter.github.io/s243-2021/ANOVA-handout.pdf) where you can take notes and summarize the material from this video (and other key parts of the tutorial). Writing and drawing it yourself can make it easier to understand and remember!
 
 ### Part 1: What we need to measure
 
@@ -179,7 +179,7 @@ Let's consider a simulation tailored to the case study we're currently investiga
 
 ### Plan of Attack for Simulation
 
-- We will simulate dataset with $n =$ `r nrow(grateful)` and three groups
+- We will simulate datasets with $n =$ `r nrow(grateful)` and three groups
 - In our simulations, $H_0$ is true, so all the groups actually have the same mean (let's make it 10).
 - We'll draw simulated data points from a $N(10,2)$ distribution
 - We will allocate them randomly to the three groups
@@ -248,7 +248,7 @@ gf_density(~F) %>%
 
 - It looks how we expected!
 - But...*what PDF looks like that*???
-- Thanks to analysis done by statisticians who have come before us and done lots of math, we know that this statistic has an **F distribution** with $df1 = (K-1)$ and $df2 = (n - K)$ degrees of freedom (the black line is the F distribution):
+- Thanks to analysis done by statisticians who have come before us and done plenty of math, we know that this statistic has an **F distribution** with $df1 = (K-1)$ and $df2 = (n - K)$ degrees of freedom (the black line is the F distribution):
 
 ```{r}
 gf_density(~F) %>%
@@ -256,7 +256,8 @@ gf_density(~F) %>%
           params = c(df1 = 2, df2 = (nrow(grateful) - 3))) 
 ```
 
-*You may notice there's a little mismatch between the simulated sampling distribution and the theoretical F distribution for very small F-values, but...where it counts, in the right tail, the match is very good. So our p-value estimates should be pretty good using this distribution (and for the record, you won't see this issue so much with $K > 3$...)*
+*You may notice there's a little mismatch between the simulated sampling distribution and the theoretical F distribution for very small F-values, but...where it counts, in the right tail, the match is very good. So our p-value estimates should be pretty good using this distribution (and for the record, you won't see this issue so much with $K > 3$ - that is, when there are more groups under comparison)*
+
 ## P-value!
 
 To get the p-value of our test, we just need to find the probability of getting an $F$ stat *at least as big as ours*, in a $F_{2, 193}$ distribution:
@@ -267,24 +268,83 @@ pf(11.15, df1 = 2, df2 = 193, lower.tail = FALSE)
 
 This is *very* small, so we reject $H_0$: at least one of the pairs of groups in the study had different `gratitude_score`s.
 
-## Letting R do all the work
+Side note about sided-ness: since the F statistic is a ratio of sums of squares, it gets bigger and bigger as differences in means between any groups grow (no matter which mean(s) are bigger/smaller than the others).  So there is no need to look at "both sides" of the F-distribution or multiply our `pf()` value by 2; ANOVA is always a 2-sided test. And it is always computed from the "upper" tail only of the F distribution (so we always use `lower.tail = FALSE`).
+
+## Letting R do all the work (Recap)
+
+*This section is labelled "Recap" as it is the one you may want to come back to as a summary/reference.*
 
 Of course, we won't do all the calculations by hand each time; there's an R function to automate it all.
 
-```{r}
+We use `car::Anova()`.
+
+*Note: You may see others using `anova()` or `aov()`. In the simple case we are considering here, they should all work the same. But in more complicated situations -- using ANOVA with multiple regression models or with more than one grouping variable - `car::Anova()` works and the others can mislead. So we choose this more flexible option.*
+
+The syntax is a little odd.  `car::Anova()` takes as input a fitted *regression* model from `lm()`, with the variable you want the mean of as the *response* and the group variable as the *predictor*.
+
+You could do something like:
+
+```{r, eval = FALSE, echo = TRUE}
+my_model <- lm(quantitative_variable_I_want_the_mean_of ~ variable_that_gives_groups, 
+               data = my_dataset)
+car::Anova(my_model)
+```
+
+Or, putting it all into one line since we don't really need the fitted `lm()` object for anything:
+
+```{r, eval = FALSE, echo = TRUE}
+my_model <- lm(quantitative_variable_I_want_the_mean_of ~ variable_that_gives_groups, 
+               data = my_dataset)
+car::Anova(my_model)
+```
+
+### Your Turn
+
+See if you can write the code to run an ANOVA for our gratitude example. Recall, the dataset is called `grateful` and we want to test whether the mean `gratitude_score` is the same for the different `group`s.
+
+
+```{r grateful-Anova-code, exercise = TRUE}
+
+```
+
+```{r grateful-Anova-code-hint-1}
+car::Anova()
+```
+
+```{r grateful-Anova-code-hint-2}
+car::Anova(lm())
+```
+
+
+```{r grateful-Anova-code-hint-3, eval = FALSE}
+car::Anova(lm(... ~ ..., data = ...))
+```
+
+```{r grateful-Anova-code-hint-4, eval = FALSE}
+car::Anova(lm(... ~ ..., data = grateful))
+```
+
+```{r grateful-Anova-code-hint-5, eval = FALSE}
+car::Anova(lm(gratitude_score ~ ..., data = grateful))
+```
+
+```{r grateful-Anova-code-solution}
 car::Anova(lm(gratitude_score ~ group, data = grateful))
 ```
 
-But **notice** -- all the quantities that we used in our derivation of the F-statistic are *right there in the ANOVA output table*! (The numeric values also all match with the ones we've previously computed by hand.)
+**Well done! Now, let's examine the output.**
 
-- The "group" row gives the SSG and its df (from which we can get MSG) and then the F stat and p-value)
-- The "Residuals" row gives the SSE and its df (from which we can get MSE). (*Residuals* is another statistical term for *errors*.)
-- The "Sum Sq" column corresponds to "SS" terms
-- "MS" terms are not shown in the table, but can be computed from the "SS" terms and the degrees of freedom
-- The "F value" is the F-ratio (test statistic)
-- The "Pr(>F)" is the p-value of the test
 
-(A classic text book ANOVA problem is to give you a partially-filled-in ANOVA results table, and ask you to fill in the missing values.)
+**Notice** -- all the quantities that we used in our derivation of the F-statistic are *right there in the ANOVA output table*! (The numeric values also all match with the ones we've previously computed by hand.)
+
+- The "group" row gives the $SSG$ and its $df$ (from which we can get $MSG$) and then the $F$ stat and p-value)
+- The "Residuals" row gives the $SSE$ and its $df$ (from which we can get $MSE$). (*Residuals* is another statistical term for *errors*.)
+- The `Sum Sq` column corresponds to $SS$ terms
+- $MS$ terms are not shown in the table, but can be computed from the $SS$ terms and the degrees of freedom
+- The `F value` is the F-ratio (test statistic)
+- The `Pr(>F)` is the p-value of the test
+
+(A classic text book ANOVA problem -- or, ahem, a quiz problem -- is to give you a partially-filled-in ANOVA results table, and ask you to fill in the missing values.)
 
 ## Pairwise Comparisons
 
@@ -312,9 +372,11 @@ What if we could do a 2-sample t-test for each pair, but *inflate* the p-value o
 
 **Tukey's pairwise Honest Significant Difference test** (`TukeyHSD()`) in R does this for us.
 
+*Note: Why the name Tukey? It was one of many [contributions by John Tukey to statistics (and math and computer science)](https://www.stat.berkeley.edu/~brill/Papers/life.pdf)*
+
 We **only** carry out the `TukeyHSD()` test *after* an ANOVA rejects $H_0$ and indicates that at least one pair has different means. This restraint -- not doing pairwise tests unless we already have evidence there will be at least one pair that are significantly different (plus the Tukey HSD adjustment-of-the-p-values) -- helps us avoid Type I errors. 
 
-Coding the test in R is simple:
+Coding the test in R is simple. The input is the same fitted `lm()` object you already used for the `car::Anova()`. You can also specify a `conf.level` (confidence level) if you want something other than the default 95% confidence.
 
 ```{r}
 TukeyHSD(lm(gratitude_score ~ group, data = grateful), 
@@ -327,7 +389,7 @@ In the results table,
 - The `diff` column gives the numeric difference in means for the two groups
 - The `lwr` column gives the lower bound of a confidence interval for the difference in means. (If you want a confidence level other than 95%, just change the input `conf.level = ...` in your call to `TukeyHSD()`. If you omit it, 95% is the default.)
 - The `upr` column gives the upper bound of a CI for the difference in means.
-- The `p adj` column gives the p-value of a test with $H_0: \mu_1 = \mu_2$ (agains a two-sided alternate).
+- The `p adj` column gives the p-value of a test with $H_0: \mu_1 = \mu_2$ (against a two-sided alternate).
 
 Here, we see that the `gratitude` group has higher `gratitude_score`s than the `hassles` and `events` groups, but there is no evidence from the data that `hassles` and `events` are different from each other.
 
@@ -378,21 +440,19 @@ TukeyHSD(lm(your_variable_name ~ group, data = grateful))
 
 Colossians 3:12-17 reminds us:
 
-*Therefore, as God’s chosen people, holy and dearly loved, clothe yourselves with compassion, kindness, humility, gentleness and patience. Bear with each other and forgive one another if any of you has a grievance against someone. Forgive as the Lord forgave you. And over all these virtues put on love, which binds them all together in perfect unity.*
-
-*Let the peace of Christ rule in your hearts, since as members of one body you were called to peace. And be thankful. Let the message of Christ dwell among you richly as you teach and admonish one another with all wisdom through psalms, hymns, and songs from the Spirit, singing to God with gratitude in your hearts. And whatever you do, whether in word or deed, do it all in the name of the Lord Jesus, giving thanks to God the Father through him.*
+>>Therefore, as God’s chosen people, holy and dearly loved, clothe yourselves with compassion, kindness, humility, gentleness and patience. Bear with each other and forgive one another if any of you has a grievance against someone. Forgive as the Lord forgave you. And over all these virtues put on love, which binds them all together in perfect unity. Let the peace of Christ rule in your hearts, since as members of one body you were called to peace. And be thankful. Let the message of Christ dwell among you richly as you teach and admonish one another with all wisdom through psalms, hymns, and songs from the Spirit, singing to God with gratitude in your hearts. And whatever you do, whether in word or deed, do it all in the name of the Lord Jesus, giving thanks to God the Father through him.
 
 We *do know* that God expects our gratitude of us.  The Heidelberg catechism is pretty clear on this requirement too (from Lord's Day 45):
 
 **116. Why is prayer necessary for Christians?**
 
-*Because it is the chief part of thankfulness which God requires of us (Psalm 50:14-15), and because God will give His grace and Holy Spirit only to those who earnestly and without ceasing ask them of Him, and render thanks unto Him for them (Matthew 7:7–8; Luke 11:9–10, 13; Matthew 13:12; Ephesians 6:18).*
+>>Because it is the chief part of thankfulness which God requires of us (Psalm 50:14-15), and because God will give His grace and Holy Spirit only to those who earnestly and without ceasing ask them of Him, and render thanks unto Him for them (Matthew 7:7–8; Luke 11:9–10, 13; Matthew 13:12; Ephesians 6:18).
 
 But this can all begin to feel burdensome, being told repeatedly that we *should* be thankful. It seems so unlikely to be fruitful.  Being forced to be grateful -- what possible good could that do?
 
 Of course, we can consider that question theologically and get profound answers.
 
-But *data tells us too*.  What happened to the students in the study? *Someone forced them to be grateful.* And actually, it did them a kind of startling amount of good. How wonderful, that what is *required* of us is so *good* for us.
+But *data tells us too*.  What happened to the students in the study? *Someone forced them to be grateful.* And actually, it did them a kind of startling amount of good. How wonderful, that what is *required* of us could sometimes also be so *good* for us.
 
 ## Conditions
 
@@ -406,6 +466,32 @@ Like all the "shortcuts" we've explored in the past few weeks, ANOVA relies on t
 ### Exercise
 
 Return to the example you just did in R and verify that the ANOVA conditions hold (at least, to the extent that you are able to check them).
+
+You may want to compute the standard deviations of each group. You might also view histograms or check sample sizes in each group.
+
+*I started you with a `glimpse()` of the data as a reminder of variable names.*
+
+```{r check-conditions, exercise = TRUE}
+glimpse(grateful)
+```
+
+```{r check-conditions-hint-1}
+gf_histogram(gratitude_score ~ group, data = grateful)
+```
+
+```{r check-conditions-hint-2}
+gf_histogram(gratitude_score ~ group, data = grateful)
+
+tally(~group, data = grateful)
+```
+
+```{r check-conditions-hint-3}
+gf_histogram(gratitude_score ~ group, data = grateful)
+
+tally(~group, data = grateful)
+
+sd(~gratitude_score | group, data = grateful)
+```
 
 ## Parting Gift
 
