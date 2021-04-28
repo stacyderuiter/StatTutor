@@ -317,7 +317,7 @@ quiz(
 ))
 ```
 
-Do you think this difference is big enough to be, not just potentially *statistically* significant, but *biologically* meaningful? Is a 10% decrease in chance of survival big enough to worry about, and perhaps motivate scientists to think twice before putting bands on penguins?
+Do you think this difference is big enough to be, not just potentially *statistically* significant, but *practically* meaningful? Is a 10% decrease in chance of survival big enough to worry about, and perhaps motivate scientists to think twice before putting bands on penguins?
 
 ## Penguin Foraging: Setup
 Next, let's use the same dataset, but answer an new question: Was the duration of foraging trips made by banded penguins different from that of non-banded penguins?
@@ -683,6 +683,161 @@ Now that we have shown that there *is* a difference between day and night, we mi
 ```{r, more-robins, exercise=TRUE}
 
 ```
+
+## Other `shuffle()`s: Correlation and Regression
+
+What if we wanted to consider this data:
+
+```{r}
+gf_point(DayNoise ~ NightNoise, data = robins)
+```
+
+And we wanted to ask: is there an association between `DayNoise` and `NightNoise`?
+
+There are at least 2 possible sample statistics; one would be the correlation coefficient:
+
+```{r}
+cor(DayNoise ~ NightNoise, data = robins)
+```
+
+Another might be the slope of a linear regression:
+
+```{r}
+noise_lm <- lm(DayNoise ~ NightNoise, data = robins)
+summary(noise_lm)
+```
+
+In either case, we could do a randomization test to test the null hypothesis of no association. We would use the `shuffle()` strategy, shuffling the "predictor" variable values.
+
+### Correlation example
+
+We want to test:
+
+$$H_0: \rho = 0$$
+
+$$H_A: \rho \neq 0$$
+Our randomization distribution will be created by:
+
+```{r}
+noise_cor_rand <- do(1000)*cor(DayNoise ~ shuffle(NightNoise),
+                               data = robins)
+glimpse(noise_cor_rand)
+```
+
+Can you plot a histogram of the randomization distribution, and show on it the observed sample stat?
+
+```{r, noise-cor-hist, exercise = TRUE}
+
+```
+
+```{r, noise-cor-hist-hint-1}
+gf_histogram(~ ..., data = noise_cor_rand)
+```
+
+```{r, noise-cor-hist-hint-2}
+gf_histogram(~cor, data = noise_cor_rand)
+```
+
+```{r, noise-cor-hist-hint-3}
+ss <- data.frame(samp_cor = 0.775, height=0)
+gf_histogram(~cor, data = noise_cor_rand)  %>%
+  gf_refine(geom_emoji(emoji = '1f423', 
+                       mapping = aes(samp_cor, height), 
+                       data = ss, size = 0.07))
+```
+
+We can compute the p-value as shown below, but just from the graph, we know the p-value is tiny. We reject the null; the data support the idea that there is nonzero correlation between day and night noise levels at a site.
+
+```{r, echo = TRUE}
+2 * prop1(~cor >= 0.775, data = noise_cor_rand)
+```
+
+### Linear regression version
+
+What if we wanted to use regression rather than correlation? Then our parameter of interest will be the true slope of the regression line (`DayNoise` vs `NightNoise`).
+
+This time the randomization distribution will look involve fitting the regression with the predictor variable values shuffled -- give it a try:
+
+```{r noise-lm-rdist, exercise = TRUE}
+
+```
+
+```{r noise-lm-rdist-hint-1, eval = FALSE}
+noise_lm_rand <- do(1000) * lm( ... ~ ...,
+                                        data = ...)
+```
+
+```{r noise-lm-rdist-hint-2, eval = FALSE}
+noise_lm_rand <- do(1000) * lm(DayNoise ~ ...,
+                                        data = robins)
+```
+
+```{r noise-lm-rdist-hint-3, eval = FALSE}
+noise_lm_rand <- do(1000) * lm(DayNoise ~ shuffle(NightNoise),
+                                        data = robins)
+```
+
+```{r noise-lm-rdist-hint-4, eval = FALSE}
+noise_lm_rand <- do(1000) * lm(DayNoise ~ shuffle(NightNoise),
+                                        data = robins)
+glimpse(noise_lm_rand)
+```
+
+The `noise_lm_rand` results' first two columns are the intercept `Intercept` and slope `NightNoise` (so `NightNoise` is what we want).
+
+Make a histogram of this null distribution with our sample stat (the observed slope 0.5884) on it.
+
+```{r, noise-lm-dist, exercise = TRUE}
+
+```
+
+```{r, noise-lm-dist-hint-1, eval = FALSE}
+ss <- data.frame(samp_slope = 0.5884, height = 0)
+gf_histogram(~ ... , data = ... )  %>%
+  # this part below is to add the emoji
+  gf_refine(geom_emoji(emoji = '1f423', 
+                       mapping = aes(..., ...), 
+                       data = ..., size = 0.07))
+```
+
+```{r, noise-lm-dist-hint-2, eval = FALSE}
+ss <- data.frame(samp_slope = 0.5884, height = 0)
+gf_histogram(~NightNoise, data = noise_lm_rand)  %>%
+  # this part below is to add the emoji
+  gf_refine(geom_emoji(emoji = '1f423', 
+                       mapping = aes(..., ...), 
+                       data = ..., size = 0.07))
+```
+
+```{r, noise-lm-dist-hint-3, eval = FALSE}
+ss <- data.frame(samp_slope = 0.5884, height = 0)
+gf_histogram(~NightNoise, data = noise_lm_rand)  %>%
+  # this part below is to add the emoji
+  gf_refine(geom_emoji(emoji = '1f423', 
+                       mapping = aes(samp_slope, height), 
+                       data = ss, size = 0.07))
+```
+
+Can you find the p-value? (We can see it will be very small.)
+
+```{r, noise-lm-p-val, exercise = TRUE}
+
+```
+
+```{r, noise-lm-p-val-hint-1, eval = FALSE}
+2 * prop1( ~ ..., data = ...)
+```
+
+```{r, noise-lm-p-val-hint-2, eval = FALSE}
+2 * prop1( ~ NightNoise ... , data = noise_lm_rand)
+```
+
+```{r, noise-lm-p-val-hint-3, eval = FALSE}
+2 * prop1( ~ NightNoise >= 0.5884 , data = noise_lm_rand)
+```
+
+So our conclusion is the same as before: we have strong evidence to reject the null hypothesis; the data give evidence that the slope of the regression line for `DayNoise` as a function of `NightNoise` is not 0.
+
 
 ## Extra Practice: Bad(?) Words
 

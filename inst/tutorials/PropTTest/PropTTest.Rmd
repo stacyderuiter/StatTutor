@@ -522,7 +522,7 @@ t.test(~..., data=..., mu=...,
 ```
 
 ```{r diurn-hint-2}
-t.test(~DiurnalDiffs, data=robins, mu=0,
+t.test(~DiurnalDiff, data=robins, mu=0,
        alternative=...)
 
 ```
