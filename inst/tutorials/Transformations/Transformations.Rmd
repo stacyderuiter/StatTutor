@@ -303,7 +303,7 @@ For reference,  here are the ladder and bulge diagrams:
 
 It's a fair question!
 
-(What does it mean? Well, who says that you have to transform your variables only using integer powers?  If $x^2$ is too much and $x$ is not enough, why not try $x^1.64$?)
+(What do I mean by "rungs"? Well, who says that you have to transform your variables only using integer powers?  If $x^2$ is too much and $x$ is not enough, why not try $x^{1.64}$?)
 
 The problem is, if we're going to consider an infinite set of possible power transformations, then "guess and check" isn't going to cut it as a method to choose the one we ought to use...
 

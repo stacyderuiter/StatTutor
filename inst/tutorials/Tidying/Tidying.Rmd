@@ -30,7 +30,7 @@ For more (**optional**) reference material, you may consult:
 Note that for all the examples in this tutorial to work, we also need the `tidyverse` package, so make sure to add it to your settings chunk if you are going to use these methods:
 
 ```{r, echo = TRUE, eval = FALSE}
-require(tidyverse)
+library(tidyverse)
 ```
 
 ## Untidy Data
@@ -69,8 +69,6 @@ glimpse(both_together)
 
 ## Combining data files by key
 To join together several tables using a **key** variable, you want to `join` them. I very often use  `left_join()` (which means that I want to keep all the rows in the first dataset I name, and no more). Other options are covered at: <https://dplyr.tidyverse.org/reference/join.html>.
-
-You can find examples of this in HW2, where we worked with the gapminder dataset. 
 
 There is also an awesome set of examples and explanations by Jenny Bryan at: <https://stat545.com/join-cheatsheet.html>
 
@@ -384,7 +382,7 @@ terrible_demographics %>% select(Birthday) %>% head()
 Note that some entries are month, day, year and some are year, month, day -- so we will have to parse both and then put them back together...
 
 ```{r}
-require(lubridate)
+library(lubridate)
 demo <- terrible_demographics %>%
   mutate(birthday_datetime = mdy(Birthday),
          birthday_datetime2 = ymd(Birthday))
@@ -427,7 +425,7 @@ This tutorial provides a few examples and practice with basic techniques. One th
 You can read in data directly from Excel files (.xls or .xlsx). 
 
 ```{r}
-require(readxl)
+library(readxl)
 dsets <- read_excel("data/datasets.xlsx")
 head(dsets)
 ```
@@ -452,7 +450,7 @@ More help and examples are at: <https://readxl.tidyverse.org/>.
 You can read in data from .dta files using the package `foreign`:
 
 ```{r}
-require(foreign)
+library(foreign)
 contraceptive_use <- read.dta('https://data.princeton.edu/wws509/datasets/cusew.dta')
 ```
 
@@ -463,7 +461,7 @@ You can read in data from general text files (.txt, .dat, and more) using
 Here is a simple example for a text file with a header row:
 
 ```{r}
-require(readr)
+library(readr)
 contraceptive_use <- read_table('https://data.princeton.edu/wws509/datasets/cuse.dat')
 ```
 
