@@ -24,8 +24,8 @@ obscene <- read.csv('http://sldr.netlify.com/data/obscenity.csv') %>%
 robins <- read.csv('http://sldr.netlify.com/data/robins.csv') %>%
   mutate(DiurnalDiff = DayNoise - NightNoise)
 
-RRD <- do(1000)*mean( ~( sample(c(-1,1), size= 121, replace = TRUE)*DiurnalDiff ),
-                      data=robins)
+RRD <- do(1000)*mean( ~( sample(c(-1,1), size =  121, replace = TRUE)*DiurnalDiff ),
+                      data = robins)
 ```
 
 ## Survival of Banded Penguins: The Study
@@ -107,11 +107,11 @@ Before doing our test, we need to **plot the data** and **compute the sample sta
 Which of the plots do you think best shows the proportion penguins that survived with and without bands? (There are reasons to prefer each of them.) Feel free to edit the code to make further customizations to the plots.
 
 ```{r peng-surv-explore, exercise = TRUE, exercise.eval=TRUE}
-gf_percents(~tag.type, fill=~survived, data=penguins)
+gf_percents(~tag.type, fill=~survived, data = penguins)
 ```
 
 ```{r peng-surv-explore2, exercise = TRUE, exercise.eval=TRUE}
-gf_percents(~tag.type, fill=~survived, data=penguins, position=position_fill())
+gf_percents(~tag.type, fill=~survived, data = penguins, position=position_fill())
 ```
 
 How would you compute the sample statistic (difference in proportion surviving, by `tag.type`)?
@@ -139,7 +139,7 @@ diff(tally(~ survived | tag.type, data = penguins, format = 'prop')[2,])
 A more concise alternate method:
 
 ```{r, echo=TRUE}
-diff(prop(~survived == 'lived' | tag.type, data=penguins))
+diff(prop(~survived == 'lived' | tag.type, data = penguins))
 ```
 
 ## Penguin Survival: Randomization Distribution
@@ -151,20 +151,20 @@ Generate the randomization distribution.
 ```
 
 ```{r, peng-surv-rd-hint-1, eval=FALSE}
-PRD <- do(____)*diff(____(~__________ | _________, data=____________))
+PRD <- do(____)*diff(____(~__________ | _________, data = ____________))
 ```
 
 ```{r, peng-surv-rd-hint-2, eval=FALSE}
-PRD <- do(1000)*diff(prop(~__________ | shuffle(_________), data=____________))
+PRD <- do(1000)*diff(prop(~__________ | shuffle(_________), data = ____________))
 ```
 
 ```{r, peng-surv-rd-hint-3, eval=FALSE}
-PRD <- do(1000)*diff(prop(~__________ | shuffle(tag.type), data=penguins))
+PRD <- do(1000)*diff(prop(~__________ | shuffle(tag.type), data = penguins))
 ```
 
 
 ```{r, peng-surv-rd-hint-4, eval=FALSE}
-PRD <- do(1000)*diff(prop(~survived == 'lived' | shuffle(tag.type), data=penguins))
+PRD <- do(1000)*diff(prop(~survived == 'lived' | shuffle(tag.type), data = penguins))
 ```
 
 **We did it!** Nice work. Wouldn't it be nice to get some congratulatory comments from a friendly farm animal?  We can do that...
@@ -192,19 +192,19 @@ To your settings R code chunk.
 Here is another way of doing the same thing, that we haven't seen yet.  What if we didn't compute the diff, but just found the proportions by groups? What would `do()` do with that?
 
 ```{r, echo=TRUE}
-PRD2 <- do(1000)*prop(~survived == 'lived' | shuffle(tag.type), data=penguins)
+PRD2 <- do(1000)*prop(~survived == 'lived' | shuffle(tag.type), data = penguins)
 head(PRD2)
 ```
 
 Aha. Then, we could use our `mutate()` skills to compute the difference afterward:
 
 ```{r, setup-prd, echo=FALSE}
-PRD2 <- do(1000)*prop(~survived == 'lived' | shuffle(tag.type), data=penguins)
+PRD2 <- do(1000)*prop(~survived == 'lived' | shuffle(tag.type), data = penguins)
 
 PRD2 <- PRD2 %>%
   mutate(surv_diff = prop_TRUE.no.band - prop_TRUE.band)
 
-samp_surv_diff <- diff(prop(~survived == 'lived' | tag.type, data=penguins))
+samp_surv_diff <- diff(prop(~survived == 'lived' | tag.type, data = penguins))
 ```
 
 ```{r, pengdiff, exercise=TRUE, exercise.setup = 'setup-prd'}
@@ -257,7 +257,7 @@ ss <- data.frame(samp_surv_diff = samp_surv_diff, height=0)
 
 gf_histogram(~ surv_diff , data = PRD2) %>%
   gf_vline(xintercept = samp_surv_diff, color = 'darkred', linetype = 'dashed')%>%
-  gf_point(height ~ samp_surv_diff, data=ss, size=3) 
+  gf_point(height ~ samp_surv_diff, data = ss, size = 3) 
 ```
 
 Hey, *that's not a penguin emoji.* **That's just a dot.** How do I turn it into a penguin?
@@ -267,7 +267,7 @@ ss <- data.frame(samp_surv_diff = samp_surv_diff, height=0)
 gf_histogram(~ surv_diff , data = PRD2)  %>%
   gf_refine(geom_emoji(emoji = '1f427', 
                        mapping = aes(samp_surv_diff, height), 
-                       data=ss, size=0.07))
+                       data = ss, size = 0.07))
 ```
 
 Adjust the `size` to make the emoji bigger or smaller, and change the '1f427' to change the emoji. How can you find the code for the emoji you want? Here's a way to search:
@@ -288,7 +288,7 @@ To your settings R code chunk.
 To find the p-value, we have to compute the proportion of randomization sample stats that were at least as extreme as our real sample stat, which was:
 
 ```{r, peng-surv-samp-stat, echo=TRUE}
-samp_surv_diff <- diff(prop(~survived == 'lived' | tag.type, data=penguins))
+samp_surv_diff <- diff(prop(~survived == 'lived' | tag.type, data = penguins))
 samp_surv_diff
 ```
 
@@ -330,15 +330,15 @@ First, a look at the data. Make a plot that shows `foraging.duration` by `tag.ty
 ```
 
 ```{r, pfe-hint-1, eval=FALSE}
-gf_density(~foraging.duration, fill = ~tag.type, data=penguins)
+gf_density(~foraging.duration, fill = ~tag.type, data = penguins)
 ```
 
 ```{r, pfe-hint-2, eval=FALSE}
-gf_histogram(~foraging.duration | tag.type, data=penguins)
+gf_histogram(~foraging.duration | tag.type, data = penguins)
 ```
 
 ```{r, pfe-hint-3, eval=FALSE}
-gf_boxplot(foraging.duration ~ tag.type, data=penguins)
+gf_boxplot(foraging.duration ~ tag.type, data = penguins)
 ```
 
 ### Parameters
@@ -449,19 +449,19 @@ gf_histogram( ... )
 
 
 ```{r, frd-hist-hint-1, eval=FALSE}
-gf_histogram(~no.band, data=FRD)
+gf_histogram(~no.band, data = FRD)
 ```
 
 ```{r, frd-hist-hint-2, eval=FALSE}
-gf_histogram(~no.band, data=FRD) %>%
+gf_histogram(~no.band, data = FRD) %>%
   gf_vline(xintercept = -1.086, color='hotpink')
 ```
 
 ```{r, frd-hist-hint-3, eval=FALSE}
 ss <- data.frame(x = -1.086, y = 0)
-gf_histogram(~no.band, data=FRD)%>%
+gf_histogram(~no.band, data = FRD)%>%
   gf_vline(xintercept = -1.086, color='hotpink') %>%
-  gf_refine(geom_emoji(emoji = '1f41f', mapping = aes(x,y), data=ss, size=0.1))
+  gf_refine(geom_emoji(emoji = '1f41f', mapping = aes(x,y), data = ss, size = 0.1))
 ```
 
 ### Penguin Foraging: P-value
@@ -483,15 +483,15 @@ prop1(...)
 ```
 
 ```{r, peng-p-calc-hint-1, eval=FALSE}
-2*prop1(~no.band ____, data=FRD)
+2*prop1(~no.band ____, data = FRD)
 ```
 
 ```{r, peng-p-calc-hint-2, eval=FALSE}
-2*prop1(~no.band ____ -1.086, data=FRD)
+2*prop1(~no.band ____ -1.086, data = FRD)
 ```
 
 ```{r, peng-p-calc-hint-3, eval=FALSE}
-2*prop1(~no.band <= -1.086, data=FRD)
+2*prop1(~no.band <= -1.086, data = FRD)
 ```
 
 
@@ -545,11 +545,11 @@ According to the hypotheses we just posed, our sample statistic will be the mean
 ```
 
 ```{r, robin-stat-hint-1, eval=FALSE}
-mean(~ _______, data= ________)
+mean(~ _______, data =  ________)
 ```
 
 ```{r, robin-stat-hint-2, eval=FALSE}
-mean(~ DiurnalDiff, data= robins)
+mean(~ DiurnalDiff, data =  robins)
 ```
 
 ## Robins and Noise: Randomization 
@@ -578,25 +578,25 @@ Apply the "randomly change signs of differences" strategy to create the randomiz
 ```
 
 ```{r, robin-rd-hint-1, eval=FALSE}
-RRD <- do(1000)*mean( ~( sample(...)*DiurnalDiff ), data=robins)
+RRD <- do(1000)*mean( ~( sample(...)*DiurnalDiff ), data = robins)
 ```
 
 ```{r, robin-rd-hint-2, eval=FALSE}
-RRD <- do(1000)*mean( ~( sample(c(-1,1),  size= _____, replace = ______)*DiurnalDiff ),
-                      data=robins)
+RRD <- do(1000)*mean( ~( sample(c(-1,1),  size =  _____, replace = ______)*DiurnalDiff ),
+                      data = robins)
 ```
 
 ```{r, robin-rd-hint-3, eval=FALSE}
-RRD <- do(1000)*mean( ~( sample(c(-1,1), size= 121, replace = TRUE)*DiurnalDiff ),
-                      data=robins)
+RRD <- do(1000)*mean( ~( sample(c(-1,1), size =  121, replace = TRUE)*DiurnalDiff ),
+                      data = robins)
 ```
 
 ```{r, rrd-setup, echo=FALSE}
 require(mosaic)
 robins <- read.csv('http://sldr.netlify.com/data/robins.csv') %>%
   mutate(DiurnalDiff = DayNoise - NightNoise)
-RRD <- do(1000)*mean( ~( sample(c(-1,1), size= 121, replace = TRUE)*DiurnalDiff ),
-                      data=robins)
+RRD <- do(1000)*mean( ~( sample(c(-1,1), size =  121, replace = TRUE)*DiurnalDiff ),
+                      data = robins)
 ```
 
 ### Robins and Noise: Histogram of RD
@@ -648,13 +648,13 @@ prop1(~mean __ sample_stat_value, data = RRD)
 ```
 
 ```{r, robin-pval-hint-4, eval=FALSE}
-robin_stat <- mean(~DiurnalDiff, data=robins)
+robin_stat <- mean(~DiurnalDiff, data = robins)
 robin_stat
 prop1(~mean __ robin_stat, data = RRD)
 ```
 
 ```{r, robin-pval-hint-5, eval=FALSE}
-robin_stat <- mean(~DiurnalDiff, data=robins)
+robin_stat <- mean(~DiurnalDiff, data = robins)
 robin_stat
 prop1(~mean >= robin_stat, data = RRD)
 ```

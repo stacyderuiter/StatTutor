@@ -61,16 +61,16 @@ Notes about the summary:
 - The fitted model parameters are in the "Estimate" column of the coefficient table.
 - The last column of the coefficient table contains p-values.  The first row is the p-value for a test of the null hypothesis that the true intercept, $\beta_0$, is 0 (this is not usually of much interest). The second row is the p-value for a test of the hypothesis that $\beta_1$, the slope for the first predictor variable, is 0.  This *is* usually of interest, because it tells us whether there is a "real" linear relationship between the two variables.
 - $\hat{\sigma}$ (an estimate of the standard deviation of the residuals from the data) is near the bottom of the output, called "Residual standard error."
-- Also near the bottom of the summary output, the $R^2$ value is reported.  (If there are more than one predictors in the model, we prefer to use the adjusted $R^2$ value instead of the standard one.)
+- Also near the bottom of the summary output, the $R^2$ value is reported.  (If there is more than one predictor in the model, we prefer to use the adjusted $R^2$ value instead of the standard one.)
 
 If there is only one predictor variable, we can also easily make a scatter plot of the response variable as a function of the predictor variable, with the best-fit line overlaid:
 
 ```{r, echo=TRUE}
-gf_point(Lead ~ Fluoride, data=lead) %>%
+gf_point(Lead ~ Fluoride, data = lead) %>%
   gf_lm()
 ```
 
-To include a 95% confidence interval around the line (indicative of our uncertainty about the true values of the slope and intercept), we can add the input `interval='confidence'`:
+To include a 95% confidence interval around the line (indicative of our uncertainty about the true values of the slope and intercept), we can add the input `interval = 'confidence'`:
 
 ```{r, echo=TRUE}
 gf_point(Lead ~ Fluoride, data=lead) %>%
