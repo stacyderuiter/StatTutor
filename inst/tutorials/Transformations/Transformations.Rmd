@@ -16,8 +16,8 @@ library(ggformula)
 library(mosaic)
 #library(fastR)
 #library(fastR2)
-library(maxLik)
-library(car)
+# library(maxLik)
+# library(car)
 theme_set(theme_bw(base_size=16))
 # knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
 knitr::opts_chunk$set(
@@ -336,7 +336,7 @@ Earlier, we used the bulge rules to determine that perhaps a regression of log(`
 Using `car::powerTransform()`, we can search for the best power transformation of the `BodyMass` variable (to get the most-normal-possible residuals):
 
 ```{r, echo = TRUE}
-power_trans <- powerTransform(BodyMass ~ HumerusLength, 
+power_trans <- car::powerTransform(BodyMass ~ HumerusLength, 
                               data = dinos)
 summary(power_trans)
 ```
@@ -359,7 +359,7 @@ We *could* consider a normalizing power transformation on *it*, although the arg
 If we try it:
 
 ```{r}
-summary(powerTransform(dinos$HumerusLength))
+summary(car::powerTransform(dinos$HumerusLength))
 ```
 
 Then, re-doing the response transformation with this predictor:
@@ -367,7 +367,7 @@ Then, re-doing the response transformation with this predictor:
 ```{r}
 dinos <- dinos %>%
   mutate(HL2 = HumerusLength^(-0.25))
-summary(powerTransform(BodyMass ~ HL2, 
+summary(car::powerTransform(BodyMass ~ HL2, 
                               data = dinos))
 ```
 
@@ -457,4 +457,4 @@ sim_y <- exp(0.1*x + rnorm(500))
 gf_point(sim_y ~ x) 
 ```
 
-Before using the log-transformed model, you should understand this key difference and think about whether hte transformed model is consistent with your data, and your understanding of the data-generating mechanism.
+Before using the log-transformed model, you should understand this key difference and think about whether the transformed model is consistent with your data, and your understanding of the data-generating mechanism.
