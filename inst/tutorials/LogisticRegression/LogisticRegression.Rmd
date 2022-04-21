@@ -125,7 +125,7 @@ levels(factor(bonobos$Sex))
 
 The **second** one is the one R defines as a "success", so in our model before, $p$ was the probability of "Male".
 
-### Predictions
+## Predictions by hand
 Now that we know what $p$ is the probability *of*, we can use our model to make predictions.
 
 Let's say we want to estimate the Sex of a bonobo with a `fWHR` of 1.5.
@@ -155,7 +155,7 @@ predict(bonobo_logit, newdata = new_data, type = 'link')
 predict(bonobo_logit, newdata = new_data, type = 'response')
 ```
 
-### Graphically
+## Prediction plots by Hand
 Finally, we can plot the fitted model.  We'll overlay the observed data-points, too, coding them as 0 for "Female" and 1 for "Male".
 
 ```{r}
@@ -168,7 +168,47 @@ gf_line(preds ~ fWHR, data = new_data) %>%
   gf_point(iSex ~ fWHR, data = bonobos, alpha = 0.3)
 ```
 
-From this exploration of the predictions, it's pretty clear that our model is not great at predicting sex from fWHR.  Could we measure how well it's doing, or test whether fWHR is a "good" predictor?  Stay tuned for the last module of class to find out...
+From this exploration of the predictions, it's pretty clear that our model is not great at predicting sex from fWHR.  Could we measure how well it's doing, or test whether fWHR is a "good" predictor?  We can consider using ANOVA for this.
+
+## Prediction plots in R
+All the ways that we have made predictions so far have been kind of a LOT of R code and a lot of work for us. Can we hand all that work over to R and get  a pretty picture out? YES!
+
+In other words, we want a simpler way to create  *prediction plots* showing model values. Ideally, we want a graph that **includes uncertainty** (that is, confidence intervals on the predicted values). And one that  will work if and when we include *more* than just a single predictor variable.  We can use the `ggeffects::ggpredict()` function to do ALL this, just like we did for linear regression models fitted with `lm()`.
+
+```{r}
+library(ggeffects)
+ggpredict(bonobo_logit, 
+          terms = c("fWHR")) |>
+  plot()
+```
+
+The only downside there is the y axis label: It's labelled "Probability of Sex" but which sex? Edit below to improve the label:
+
+```{r, relabel-y, exercise = TRUE}
+library(ggeffects)
+ggpredict(bonobo_logit, 
+          terms = c("fWHR")) |>
+  plot()
+```
+
+```{r, relabel-y-hint-1}
+library(ggeffects)
+ggpredict(bonobo_logit, 
+          terms = c("fWHR")) |>
+  plot() |>
+  gf_labs(y = ...)
+```
+
+```{r, relabel-y-hint-2}
+library(ggeffects)
+ggpredict(bonobo_logit, 
+          terms = c("fWHR")) |>
+  plot() |>
+  gf_labs(y = "Predicted probability of being male")
+```
+
+The code above will work for any model; you just  need to customize the inputs: the name of *your* fitted model instead of `bonobo_logit`; the name of *your* predictor(s) of interest instead of "fWHR"; and an axis label that makes sense for *your* model.
+
 
 ## How the Magic Happens: MLE
 
@@ -239,18 +279,7 @@ Maybe you should work with them for 10-20 more years, and *then* maybe you will 
 
 OK, sorry for the sarcasm. The fact is, many people find odds ratios un-intuitive to work with and think about.  My honest recommendation is that, if you are going to work with models like these in an applied setting, the best way to communicate the results is to compute and report (and probably summarize graphically) *predicted probabilities* according to the fitted model.
 
-For example, for our bonobos:
-
-```{r}
-# you can install the s245 package on standalone R via:
-# install.packages('remotes')
-# remotes::install_github('stacyderuiter/s245')
-require(s245)
-pred_plot(bonobo_logit, 'fWHR') %>%
-  gf_labs(y = 'Predicted P(Male)')
-```
-
-*(No need to understand how that was done or replicate it -- if you want to know, join us in STAT 245!)*
+We saw earlier how to make these prediction plots using `ggeffects::ggpredict() |> plot()`.
 
 However, there *is* a (somewhat) useful way to interpret the parameters of a logistic regression model in terms of odds ratios.  It's kind of analogous to interpreting a slope of a linear regression, along the lines of, "if the predictor value increases by 1, then the response increases by [slope]."
 
