@@ -75,7 +75,7 @@ This is the perfect moment for you to finish the substitution on your own to com
 Where were we?  We had found an expression for $\beta_0$ by taking the partial derivative of $S$ with respect to $\beta_0$ and then setting it equal to 0 to find the minimum. (*Side note: how did we know it would be a minimum? Blind trust, basically. You could check that if you wanted to be thorough.*)
 
 $$ \hat{\beta}_0 = \bar{y} - \hat{\beta}_1 \bar{x}$$
-We wanted to subsitute that $\hat{\beta}_0$ expression into our second partial derivative, set equal to 0 (the one for $\frac{\partial{S}}{\partial{\beta_1}}$):
+We wanted to substitute that $\hat{\beta}_0$ expression into our second partial derivative, set equal to 0 (the one for $\frac{\partial{S}}{\partial{\beta_1}}$):
 
 $$\frac{\partial{S}}{\partial{\beta_1}} = 0 = -2\sum_{i = 1}^{n} (x_iy_i - \beta_0x_i - \beta_1x_i^2)$$
 

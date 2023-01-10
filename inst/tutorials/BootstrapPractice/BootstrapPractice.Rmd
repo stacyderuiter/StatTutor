@@ -101,7 +101,7 @@ While the mean will be the simple sample statistic that we use most often, of co
 ### Correlation
 If you are short on time feel free to skip ahead to the next main section (Means by Groups). If not, enjoy this section on correlation.
 
-A sample statistic that we haven't yet talked much about, but which you have probably heard of and worked with in previous classes, is the correlation coefficient. We use $\rho$ (Greek letter rho) for the population correlation and $r$ for the sample correlation between two quantitative variables.  $r$ ranges from -1 to 1 and measures the strength of the linear relationship between the variables, with 0 indicating no relationship, 1 a perfect linear relationship (one goes up and so does the other, by a set amount), and -1 a perfect linear relationship (one goes up and the other goes down, by a set amount).
+Another sample statistic is the correlation coefficient. We use $\rho$ (Greek letter rho) for the population correlation and $r$ for the sample correlation between two quantitative variables.  $r$ ranges from -1 to 1 and measures the strength of the linear relationship between the variables, with 0 indicating no relationship, 1 a perfect linear relationship (one goes up and so does the other, by a set amount), and -1 a perfect linear relationship (one goes up and the other goes down, by a set amount).
 
 R function `cor()` computes correlation coefficients.  It takes a formula of the form `y ~ x` but notice - in this case the order (which variable is x and which is y) makes no difference to the result.
 
@@ -331,7 +331,7 @@ That was a lot of code!
 
 Don't forget you can return to this tutorial anytime to view the examples.
 
-There are also examples of these calculations on [the class R reference site](https://rsconnect.calvin.edu:3939/connect/#/apps/142/access). (If there is something that should be there and isn't, let Prof DR know.)
+There are also examples of these calculations on [an Intro STAT R reference site](https://rsconnect.calvin.edu:3939/connect/#/apps/142/access). (If there is something that should be there and isn't, let Prof DR know.)
 
 ## The Actual Bootstrap
 Whoa, that was a lot of sample statistics you just calculated. Wasn't this supposed to be about practicing bootstrap CIs?
@@ -417,43 +417,43 @@ cdata(~prop_TRUE.Low, data=rein.boots, p=0.95)
 
 **We are 95% confident that the true difference in proportion pregnant reindeer (Low ROS conditions minus High ROS conditions) is between `r myCI[1]` and `r myCI[2]`.**
 
-## A Special Case: More than two Groups
-If you have a sample stat that you are computing for each of *more than two* groups in the data, it may be of interest to have `do()` compute and store the means (or proportions, or whatever) for *all* the groups, and then compute the differences later on. This is a way to get CIs for differences between several pairs of variables, with one set of bootstrap samples.
+<!-- ## A Special Case: More than two Groups -->
+<!-- If you have a sample stat that you are computing for each of *more than two* groups in the data, it may be of interest to have `do()` compute and store the means (or proportions, or whatever) for *all* the groups, and then compute the differences later on. This is a way to get CIs for differences between several pairs of variables, with one set of bootstrap samples. -->
 
-For example, we can look at the `obscene` data and compare mean `messageAgree` scores by `swearing`.
-The example below only does 5 bootstrap samples, just to show you how it works -- in a real analysis you would use many (1,000-10,000 or so).
+<!-- For example, we can look at the `obscene` data and compare mean `messageAgree` scores by `swearing`. -->
+<!-- The example below only does 5 bootstrap samples, just to show you how it works -- in a real analysis you would use many (1,000-10,000 or so). -->
 
-```{r, echo=TRUE}
-obscene.boot <- do(5)*mean(~messageAgree | swearing, data=resample(obscene))
-obscene.boot
-```
+<!-- ```{r, echo=TRUE} -->
+<!-- obscene.boot <- do(5)*mean(~messageAgree | swearing, data=resample(obscene)) -->
+<!-- obscene.boot -->
+<!-- ``` -->
 
-Cool! It stored all three means for each bootstrap sample. Now, if we want differences, we can use `mutate()` to compute them and store them in the same dataset:
+<!-- Cool! It stored all three means for each bootstrap sample. Now, if we want differences, we can use `mutate()` to compute them and store them in the same dataset: -->
 
-```{r, echo=TRUE}
-obscene.boot <- obscene.boot %>%
-  mutate(beg_minus_end = beginning - end)
-obscene.boot
-```
+<!-- ```{r, echo=TRUE} -->
+<!-- obscene.boot <- obscene.boot %>% -->
+<!--   mutate(beg_minus_end = beginning - end) -->
+<!-- obscene.boot -->
+<!-- ``` -->
 
-Try it: write code to add a variable with the difference in mean agreement scores between "none" and "end".
+<!-- Try it: write code to add a variable with the difference in mean agreement scores between "none" and "end". -->
 
-```{r, mut-diff, exercise=TRUE}
+<!-- ```{r, mut-diff, exercise=TRUE} -->
 
-```
+<!-- ``` -->
 
-```{r, mut-diff-hint-1, eval=FALSE}
-obscene.boot <- obscene.boot %>%
-  mutate(new_variable_name = old_variable1 - old_variable2)
-obscene.boot
-```
+<!-- ```{r, mut-diff-hint-1, eval=FALSE} -->
+<!-- obscene.boot <- obscene.boot %>% -->
+<!--   mutate(new_variable_name = old_variable1 - old_variable2) -->
+<!-- obscene.boot -->
+<!-- ``` -->
 
 
-```{r, mut-diff-hint-2, eval=FALSE}
-obscene.boot <- obscene.boot %>%
-  mutate(none_minus_end = none - end)
-obscene.boot
-```
+<!-- ```{r, mut-diff-hint-2, eval=FALSE} -->
+<!-- obscene.boot <- obscene.boot %>% -->
+<!--   mutate(none_minus_end = none - end) -->
+<!-- obscene.boot -->
+<!-- ``` -->
 
 ## Practice Computing CIs
 Now you have *all* the pieces - try computing some confidence intervals for:
