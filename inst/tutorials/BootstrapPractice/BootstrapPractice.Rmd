@@ -10,7 +10,7 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(mosaic)
-library(emoGG)
+# library(emoGG)
 knitr::opts_chunk$set(echo = FALSE)
 penguins <- read.csv('http://sldr.netlify.com/data/bandedPenguins.csv')
 # reindeer data: ROS (rain on snow) is bad for reindeer, so ROS High is Poor conditions

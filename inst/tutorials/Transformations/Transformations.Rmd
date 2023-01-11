@@ -16,8 +16,8 @@ library(ggformula)
 library(mosaic)
 #library(fastR)
 #library(fastR2)
-library(maxLik)
-library(car)
+# library(maxLik)
+# library(car)
 theme_set(theme_bw(base_size=16))
 # knitr::opts_chunk$set(exercise.checker = checkr::checkr_tutor)
 knitr::opts_chunk$set(
@@ -85,7 +85,7 @@ But what about uncertainty?
 We could do this two ways!
 
 - **A confidence interval:** We could find an interval that gives plausible values for "where the line is located", taking into account uncertainty in the intercept and slope estimates. Another way of thinking about this is that it gives a plausible range of values for the *expected value* (mean) of the response variable for all hypothetical new observations with $X = x_*$.
-- **A prediction interval:** We could find and interval that gives plausible values for "the point cloud" of possible new observations, taking into account uncertainty in the slope and intercept, plus the residual variance. Another way of thinking about this is that it gives a plausible range of values for the response for one new datapoint with $X = x_*$.  Note that we've coined the new name *prediction interval* to differentiate it from the other one, this is really also a CI (just for a very specific scenario).
+- **A prediction interval:** We could find an interval that gives plausible values for "the point cloud" of possible new observations, taking into account uncertainty in the slope and intercept, plus the residual variance. Another way of thinking about this is that it gives a plausible range of values for the response for one new datapoint with $X = x_*$.  Note that we've coined the new name *prediction interval* to differentiate it from the other one, this is really also a CI (just for a very specific scenario).
 
 ### Practical Example and Calculations
 
@@ -303,7 +303,7 @@ For reference,  here are the ladder and bulge diagrams:
 
 It's a fair question!
 
-(What does it mean? Well, who says that you have to transform your variables only using integer powers?  If $x^2$ is too much and $x$ is not enough, why not try $x^1.64$?)
+(What do I mean by "rungs"? Well, who says that you have to transform your variables only using integer powers?  If $x^2$ is too much and $x$ is not enough, why not try $x^{1.64}$?)
 
 The problem is, if we're going to consider an infinite set of possible power transformations, then "guess and check" isn't going to cut it as a method to choose the one we ought to use...
 
@@ -336,7 +336,7 @@ Earlier, we used the bulge rules to determine that perhaps a regression of log(`
 Using `car::powerTransform()`, we can search for the best power transformation of the `BodyMass` variable (to get the most-normal-possible residuals):
 
 ```{r, echo = TRUE}
-power_trans <- powerTransform(BodyMass ~ HumerusLength, 
+power_trans <- car::powerTransform(BodyMass ~ HumerusLength, 
                               data = dinos)
 summary(power_trans)
 ```
@@ -359,7 +359,7 @@ We *could* consider a normalizing power transformation on *it*, although the arg
 If we try it:
 
 ```{r}
-summary(powerTransform(dinos$HumerusLength))
+summary(car::powerTransform(dinos$HumerusLength))
 ```
 
 Then, re-doing the response transformation with this predictor:
@@ -367,7 +367,7 @@ Then, re-doing the response transformation with this predictor:
 ```{r}
 dinos <- dinos %>%
   mutate(HL2 = HumerusLength^(-0.25))
-summary(powerTransform(BodyMass ~ HL2, 
+summary(car::powerTransform(BodyMass ~ HL2, 
                               data = dinos))
 ```
 
@@ -457,4 +457,4 @@ sim_y <- exp(0.1*x + rnorm(500))
 gf_point(sim_y ~ x) 
 ```
 
-Before using the log-transformed model, you should understand this key difference and think about whether hte transformed model is consistent with your data, and your understanding of the data-generating mechanism.
+Before using the log-transformed model, you should understand this key difference and think about whether the transformed model is consistent with your data, and your understanding of the data-generating mechanism.

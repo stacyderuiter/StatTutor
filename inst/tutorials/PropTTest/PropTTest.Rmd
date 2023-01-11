@@ -53,7 +53,7 @@ This module is designed to help you learn to:
 
 ### Conditions
 
-A note about conditions:  to streamline the tutorial, we won't be checking conditions for every example done here. But the same conditions still hold, just like when we are using the normal/t model shortcuts to compute CIs and do tests "by hand" -- the independence and sample size/nearly normal conditions still have to hold in order to get reliable results!
+A note about conditions:  to streamline the tutorial, we won't be checking conditions for every example done here. But the same conditions *must* still hold, just like when we are using the normal/t model shortcuts to compute CIs and do tests "by hand" -- the independence and sample size/nearly normal conditions still have to hold in order to get reliable results! We are *only* skipping the checks to save time as we learn to use R functions `prop.test()` and `t.test()`.
 
 ## Data
 
@@ -101,15 +101,15 @@ Try computing the number of observations in 2005 and 2006 (variable `Year`) in t
 
 
 ```{r robin-year-hint-1}
-tally(~..., data=...)
+tally(~..., data = ...)
 ```
 
 ```{r robin-year-hint-2}
-tally(~, data=robins)
+tally(~, data = robins)
 ```
 
-```{r robin-year-solution}
-tally(~Year, data=robins)
+```{r robin-year-hint3}
+tally(~Year, data = robins)
 ```
 
 ### Practice: tally() with proportion output
@@ -122,15 +122,15 @@ What about computing the same table with proportions rather than counts as the o
 
 
 ```{r robin-year2-hint-1}
-tally(~..., data=..., format=...)
+tally(~..., data = ..., format = ...)
 ```
 
 ```{r robin-year2-hint-2}
-tally(~, data=robins, format='prop')
+tally(~, data = robins, format = 'prop')
 ```
 
 ```{r robin-year2-solution}
-tally(~Year, data=robins, format='prop')
+tally(~Year, data = robins, format = 'prop')
 ```
 
 ## 1 proportion CI with summary data
@@ -168,15 +168,15 @@ tally(~DaySong, data  =  robins)
 
 
 ```{r day-song-hint-1}
-prop.test(x=...,n=..., conf.level=...)
+prop.test(x = ...,n = ..., conf.level = ...)
 ```
 
 ```{r day-song-hint-2}
-prop.test(x=...,n=..., conf.level=0.98)
+prop.test(x = ...,n = ..., conf.level = 0.98)
 ```
 
 ```{r day-song-solution}
-prop.test(x=67,n=54+67, conf.level=0.98)
+prop.test(x = 67,n = 54+67, conf.level = 0.98)
 ```
 
 ## 1 proportion test with summary data
@@ -202,6 +202,7 @@ To carry out the test with `prop.test()`, we need to specify two new input argum
 - `p`, the null hypothesis proportion (here $p = 0.5$)
 - `alternative`, which can be either 'two.sided' (the default if you leave this input out), 'greater' (one-sided test with $>$), or 'less' (one-sided test with $<$).
 - Note: we can now leave out `conf.level` as we are trying to obtain a p-value, not a CI.
+- Another note: we are doing some one-sided tests here mainly just to show you how to do them. Two-sided is still our default (always! forever!)
 
 Our test:
 
@@ -235,13 +236,13 @@ tally(~HighDensity, data = elephants)
 ```
 
 
-```{r, elephant-density-hint1, eval = FALSE}
-prop.test(x=...,n=..., p=...)
+```{r, elephant-density-hint-1, echo = FALSE, eval = FALSE}
+prop.test(x = ...,n = ..., p = ...)
 ```
 
-```{r, elephant-density-solution}
-prop.test(x=22,n=22+19, p=0.5
-          alternative='less')
+```{r, elephant-density-hint-2, echo = FALSE}
+prop.test(x = 22,n = 22+19, p = 0.5
+          alternative = 'less')
 ```
 
 With the same p-value as before, you will again fail to reject the null! Based on this dataset, it is reasonable to believe that the true proportion low-density sites is at least 0.5.
@@ -263,26 +264,26 @@ We are 95% confident that the true proportion high density sites is between 0.31
 Your turn: compute a 99% CI for the proportion low-density sites.
 
 
-```{r low-dens, exercise=TRUE}
+```{r low-dens, exercise = TRUE}
 
 ```
 
 
-```{r low-dens-hint-1, eval=FALSE}
-prop.test(~..., data=..., success=..., 
-          conf.level=...)
+```{r low-dens-hint-1, eval = FALSE}
+prop.test(~..., data = ..., success = ..., 
+          conf.level = ...)
 
 ```
 
-```{r low-dens-hint-2, eval=FALSE}
-prop.test(~..., data=..., success='No', 
-          conf.level=0.99)
+```{r low-dens-hint-2, eval = FALSE}
+prop.test(~..., data = ..., success = 'No', 
+          conf.level = 0.99)
 
 ```
 
-```{r low-dens-solution, eval=FALSE}
-prop.test(~HighDensity, data=elephants, success='No', 
-          conf.level=0.99)
+```{r low-dens-hint-3, eval = FALSE}
+prop.test(~HighDensity, data = elephants, success = 'No', 
+          conf.level = 0.99)
 ```
 
 How would you state your conclusion in context?
@@ -291,23 +292,23 @@ How would you state your conclusion in context?
 To do a test instead, we simply need to specify `p`, as we did with the summary data. The quantity that `prop.test()` is calling `p` is what we often denote $p_0$ in by-hand calculations: the true proportion *according to the null hypothesis* we want to test.  
 
 
-```{r high-test, exercise=TRUE}
+```{r high-test, exercise = TRUE}
 
 ```
 
-```{r high-test-hint-1, eval=FALSE}
-prop.test(~..., data=elephants, p=...,
-          alternative=..., success=...)
+```{r high-test-hint-1, eval = FALSE}
+prop.test(~..., data = elephants, p = ...,
+          alternative = ..., success = ...)
 ```
 
-```{r high-test-hint-2, eval=FALSE}
-prop.test(~HighDensity, data=elephants, p=0.5,
-          alternative=..., success=...)
+```{r high-test-hint-2, eval = FALSE}
+prop.test(~HighDensity, data = elephants, p = 0.5,
+          alternative = ..., success = ...)
 ```
 
-```{r high-test-solution, eval=FALSE}
-prop.test(~HighDensity, data=elephants, p=0.5,
-          alternative='greater', success='Yes')
+```{r high-test-solution, eval = FALSE}
+prop.test(~HighDensity, data = elephants, p = 0.5,
+          alternative = 'greater', success = 'Yes')
 ```
 
 ```{r which-p, echo = FALSE}
@@ -345,23 +346,23 @@ prop.test(~DaySong | Year, data = robins,
 How would you compute a 95% CI for the difference in proportion sites with *Night* song in 2005 vs 2006?
 
 
-```{r night-song, exercise=TRUE}
+```{r night-song, exercise = TRUE}
 
 ```
 
 ```{r night-song-hint-1}
-prop.test(~... | ..., data=..., conf.level=...,
-          success=...)
+prop.test(~... | ..., data = ..., conf.level = ...,
+          success = ...)
 ```
 
 ```{r, night-song-hint-2}
-prop.test(~... | ..., data=robins, conf.level=...,
-          success='Present')
+prop.test(~... | ..., data = robins, conf.level = ...,
+          success = 'Present')
 ```
 
-```{r, night-song-solution}
-prop.test(~NightSong | Year, data=robins, conf.level=0.95,
-          success='Present')
+```{r, night-song-hint-3}
+prop.test(~NightSong | Year, data = robins, conf.level = 0.95,
+          success = 'Present')
 ```
 
 ## 2 proportion test with full dataset
@@ -375,28 +376,28 @@ $$H_0: p_{N2005} - p_{N2006} = 0 $$
 $$H_1: p_{N2005} - p_{N2006} \neq 0$$
 
 
-```{r night-test, exercise=TRUE}
+```{r night-test, exercise = TRUE}
 
 ```
 
 ```{r night-test-hint-1}
-prop.test(~...|..., data=..., 
-          alternative=..., success=...)
+prop.test(~...|..., data = ..., 
+          alternative = ..., success = ...)
 ```
 
 ```{r night-test-hint-2}
-prop.test(~NightSong|Year, data=robins, 
-          alternative=..., success=...)
+prop.test(~NightSong|Year, data = robins, 
+          alternative = ..., success = ...)
 ```
 
 ```{r night-test-hint-3}
-prop.test(~NightSong|Year, data=robins,
-          success=...)
+prop.test(~NightSong|Year, data = robins,
+          success = ...)
 ```
 
 ```{r night-test-solution}
-prop.test(~NightSong|Year, data=robins, 
-          alternative='two.sided')
+prop.test(~NightSong|Year, data = robins, 
+          alternative = 'two.sided')
 ```
 
 What do you conclude? Is the proportion night song different between two years? (This might be important if the researchers wanted to pool data from the two years and use it together to answer other questions...)
@@ -420,21 +421,21 @@ and then we could say we are 95% confident that the true mean density of elephan
 How would you find a 90% t-interval for the mean noise level (variable `NightNoise`) in the `robins` dataset?
 
 
-```{r night-robins, exercise=TRUE}
+```{r night-robins, exercise = TRUE}
 
 ```
 
 ```{r night-robins-hint-1}
-t.test(~..., data=..., conf.level=...)
+t.test(~..., data = ..., conf.level = ...)
 ```
 
 ```{r night-robins-hint-2}
-t.test(~NightNoise, data=robins, conf.level=...)
+t.test(~NightNoise, data = robins, conf.level = ...)
 ```
 
 
 ```{r night-robins-solution}
-t.test(~NightNoise, data=robins, conf.level=0.90)
+t.test(~NightNoise, data = robins, conf.level = 0.90)
 ```
 
 ## One-sample t-test
@@ -458,24 +459,24 @@ $$H_A: \mu \neq 50$$
 
 
 
-```{r day-mean, exercise=TRUE}
+```{r day-mean, exercise = TRUE}
 
 ```
 
 
-```{r day-mean-hint-1, eval=FALSE}
-t.test(~..., data=..., mu=..., alternative=...)
+```{r day-mean-hint-1, eval = FALSE}
+t.test(~..., data = ..., mu = ..., alternative = ...)
 
 ```
 
-```{r day-mean-hint-2, eval=FALSE}
-t.test(~..., data=robins, mu=..., 
-       alternative='two.sided')
+```{r day-mean-hint-2, eval = FALSE}
+t.test(~..., data = robins, mu = ..., 
+       alternative = 'two.sided')
 
 ```
 
-```{r day-mean-solution, eval=FALSE}
-t.test(~DayNoise, data=robins, mu=50, alternative='two.sided')
+```{r day-mean-hint-3, eval  =  FALSE}
+t.test(~DayNoise, data = robins, mu = 50, alternative = 'two.sided')
 ```
 
 
@@ -516,20 +517,20 @@ where $\mu_D$ is the true population mean of the day-night noise level differenc
 
 
 ```{r diurn-hint-1}
-t.test(~..., data=..., mu=...,
-       alternative=...)
+t.test(~..., data = ..., mu = ...,
+       alternative = ...)
 
 ```
 
 ```{r diurn-hint-2}
-t.test(~DiurnalDiff, data=robins, mu=0,
-       alternative=...)
+t.test(~DiurnalDiff, data = robins, mu = 0,
+       alternative = ...)
 
 ```
 
-```{r diurn-solution}
-t.test(~DiurnalDiff, data=robins, mu=0,
-       alternative='two.sided')
+```{r diurn-hint-3}
+t.test(~DiurnalDiff, data = robins, mu = 0,
+       alternative = 'two.sided')
 
 ```
 
@@ -539,17 +540,17 @@ What if we want to find a CI for a difference between the means of two groups?  
 For example, we might want to find a 98% CI for the difference in `DayNoise` levels between the two years 2005 and 2006. How would you do it?
 
 
-```{r day-year, exercise=TRUE}
+```{r day-year, exercise = TRUE}
 
 ```
 
 ```{r day-year-hint-1}
-t.test(~... | ..., data=..., conf.level=...)
+t.test(~... | ..., data = ..., conf.level = ...)
 ```
 
-```{r day-year-solution}
-t.test(~DayNoise | Year, data= robins,
-       conf.level=0.98)
+```{r day-year-hint-2}
+t.test(~DayNoise | Year, data =  robins,
+       conf.level = 0.98)
 ```
 
 We are 98% confident that the true difference in day noise levels by year is between -2.39 and 2.73.  
@@ -561,21 +562,21 @@ Since *0 is in the interval*, we know that we would *fail to reject the null hyp
 To convert the example above to a test, we just need to specify the `alternative` and `mu`, the difference in means according to the null hypothesis.
 
 
-```{r t2, exercise=TRUE}
+```{r t2, exercise = TRUE}
 
 
 ```
 
 
 ```{r t2-hint-1}
-t.test(~...|..., data=..., mu=...,
-       alternative=...)
+t.test(~...|..., data = ..., mu = ...,
+       alternative = ...)
 
 ```
 
 ```{r t2-solution}
-t.test(~DayNoise|Year, data=robins, mu=0,
-       alternative='two.sided')
+t.test(~DayNoise|Year, data = robins, mu = 0,
+       alternative = 'two.sided')
 
 ```
 

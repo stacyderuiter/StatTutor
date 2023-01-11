@@ -40,7 +40,7 @@ By the end of the module you will:
 4) You'll also be able to describe a t-distribution and how it differs from a normal distribution.
 5) Finally, you will be able to use t-distributions to find CIs and do tests for means (and differences in means for paired data, or between two groups).
 
-*These materials come from your text book, [Intro to Modern Statistics Chapter 7](https://openintro-ims.netlify.app/inference-num.html#inference-num). Book sections corresponding to parts of this tutorial will be linked throughout; you are encouraged but not required to read them before or after completing the tutorial.*
+*These materials come from your text book, [Intro to Modern Statistics Chapter 19](https://openintro-ims.netlify.app/inference-one-mean.html#inference-one-mean). Book sections corresponding to parts of this tutorial will be linked throughout; you are encouraged but not required to read them before or after completing the tutorial.*
 
 ## Reminder: Central Limit Theorem
 
@@ -52,7 +52,7 @@ Let's take three minutes to review the main point of the Central Limit Theorem, 
 To sum up:  The *sampling distribution* of a mean will be **normal**, if the sample size is big enough.  The bigger the sample size, the smaller the standard error (SE) will be. What was not mentioned in amongst the rabbits and dragons was *a specific expression for the SE of a mean*.
 
 ## SE for a Mean
-*Text book reference: [IMS Chapter 7.1.2](https://openintro-ims.netlify.app/inference-num.html#one-mean-math)*
+
 
 It turns out that the SE for a mean is:
 
@@ -88,7 +88,7 @@ gf_density(~population, color = 'grey44', fill = 'grey24') %>%
 
 
 ## SE for a Mean - For Real
-*Text book reference: [IMS, "Introducing the t-distribution"](https://openintro-ims.netlify.app/inference-num.html#introducing-the-t-distribution)*
+*Text book reference: [IMS, "Introducing the t-distribution"](https://openintro-ims.netlify.app/inference-one-mean.html#introducing-the-t-distribution)*
 
 Well, that's great.  But *we can't actually compute $\frac{\sigma}{\sqrt{n}}$!* If we have a sample...sure, we know what $n$ is. But $\sigma$ is the population standard deviation, which we *don't* know.
 
@@ -218,7 +218,7 @@ He turns them from normal distributions into t-distributions, that's what.  So i
 (Or [watch directly on YouTube if you want](https://youtu.be/LRhAeE-WgXQ).)
 
 ## Why it Matters
-*Text book reference: [IMS section "Introducing the t-distribution"](https://openintro-ims.netlify.app/inference-num.html#introducing-the-t-distribution)*
+*Text book reference: [IMS section "Introducing the t-distribution"](https://openintro-ims.netlify.app/inference-one-mean.html#introducing-the-t-distribution)*
 
 OK, so now we know a few things:
 
@@ -227,7 +227,7 @@ OK, so now we know a few things:
 - The result of all this is that **we should (ALWAYS) use t distributions rather than normal distributions to find CIs or do tests for a mean**.
 
 ## Confidence Intervals for a Mean
-*Text book reference: [IMS, "One sample t confidence intervals"](https://openintro-ims.netlify.app/inference-num.html#one-sample-t-confidence-intervals)*
+*Text book reference: [IMS, "One sample t confidence intervals"](https://openintro-ims.netlify.app/inference-one-mean.html#one-sample-t-intervals)*
 
 Before this, we have found CIs according to
 
@@ -321,7 +321,7 @@ $$ \bar{x} \pm t^* SE = 14.1 \pm 5.84 * 1.1$$
 The CI is (7.68, 20.52). We are 99% confident the true mean dragon wingspan is between 7.68 and 20.52 meters.
 
 ## Tests for a Mean
-*Text book reference: [IMS, "Tests for a mean"](https://openintro-ims.netlify.app/inference-num.html#one-sample-t-tests)*
+*Text book reference: [IMS, "Tests for a mean"](https://openintro-ims.netlify.app/inference-one-mean.html#one-sample-t-tests)*
 
 We can also use t-distributions to do tests for a mean ("t-tests"). We will *always work with the * **standardized** *test statistic t*, and we'll use a t distribution with $n - 1$ degrees of freedom to compute our p-value, instead of a standard normal.
 
@@ -371,7 +371,7 @@ Want a brief recap of everything just discussed -- in cartoon form?  You're in l
 (Or [watch directly on YouTube](https://www.youtube.com/watch?v=32CuxWdOlow).)
 
 ## Conditions
-*Text book reference: [IMS on conditions for the t model for a mean](https://openintro-ims.netlify.app/inference-num.html#evaluating-the-two-conditions-required-for-modeling-barx)*
+*Text book reference: [IMS on conditions for the t model for a mean](https://openintro-ims.netlify.app/inference-one-mean.html#evaluating-the-two-conditions-required-for-modeling-barx)*
 
 For the proportion tests/intervals, we had a bunch of conditions that had to hold in order to use the normal model "shortcut".
 
@@ -399,4 +399,4 @@ Right now, we've been doing a lot of the nuts and bolts of the calculations ours
 
 That becomes less practical for a test or interval for a difference in means; the expression for the SE is a bit more complicated, and the expression to estimate the degrees of freedom for this scenario is even more so.  It becomes less useful to do the work "by hand" and more appealing to let R do all the number crunching; we just control what numbers we want it to crunch via our inputs to the function `t.test()`.
 
-So next week, we will learn to let R do all the work for tests for one and two proportion tests and CIs (using function `prop.test()`), and also for one mean, paired means, and two means (using function `t.test()`). So now you have something lovely to look forward to!
+So later, we will learn to let R do all the work for tests for one and two proportion tests and CIs (using function `prop.test()`), and also for one mean, paired means, and two means (using function `t.test()`). So now you have something lovely to look forward to!

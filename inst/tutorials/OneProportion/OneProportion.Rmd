@@ -471,7 +471,7 @@ For short, we call the value of $p$ specified in the null hypothesis $p_0$ (whic
 ### So what?
 If $p_0$ is our best estimate of $p$, that has implications for our estimate of the SE.  
 
-**Instead of using the sample stat $\hat{p}$ in the SE formula like we did for a CI, **we should use $p_0$.**
+**Instead of using the sample stat $\hat{p}$ in the SE formula like we did for a CI, we should use $p_0$.**
 
 So if we are testing the hypotheses
 

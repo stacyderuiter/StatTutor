@@ -583,7 +583,7 @@ But what about uncertainty?
 We could do this two ways!
 
 - **A confidence interval:** We could find an interval that gives plausible values for "where the line is located", taking into account uncertainty in the intercept and slope estimates. Another way of thinking about this is that it gives a plausible range of values for the *expected value* (mean) of the response variable for **all hypothetical new observations with a certain predictor-variable value**.
-- **A prediction interval:** We could find and interval that gives plausible values for "the point cloud" of possible new observations, taking into account uncertainty in the slope and intercept, plus the residual variance. Another way of thinking about this is that it gives a **plausible range of values for the response for one new datapoint with a certain predictor-variable value**.  Note that we've coined the new name *prediction interval* to differentiate it from the other one, this is really also a CI (just for a very specific scenario).
+- **A prediction interval:** We could find an interval that gives plausible values for "the point cloud" of possible new observations, taking into account uncertainty in the slope and intercept, plus the residual variance. Another way of thinking about this is that it gives a **plausible range of values for the response for one new datapoint with a certain predictor-variable value**.  Note that we've coined the new name *prediction interval* to differentiate it from the other one, this is really also a CI (just for a very specific scenario).
 
 ## Confidence vs Prediction Intervals: video
 
