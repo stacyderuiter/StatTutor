@@ -19,11 +19,11 @@ library(patchwork)   # for combining plots
 # data wrangling
 library(tidyverse)
 
-# several packages for bayesian stuff -- more to come later
+# several packages for bayesian stuff -- more may come later
 library(rethinking)  # related to text
 library(tidybayes)    
 library(bayesplot)
-# library(CalvinBayes)
+library(CalvinBayes)
 
 
 # Some customization. You can alter or delete as desired (if you know what you are doing).
