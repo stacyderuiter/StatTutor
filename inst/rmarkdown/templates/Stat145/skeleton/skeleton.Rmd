@@ -1,5 +1,5 @@
 ---
-title: "Stat 145 -- PS ??"
+title: "Stat 145 -- Put the name of the assignment here"
 author: "Put your name here (keep the quotes)"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output: 
@@ -18,8 +18,7 @@ output:
 # load packages that are going to be used
 library(tidyverse)   # for glimpse() and some other useful functions
 library(mosaic)      # this loads ggformula (for plotting), etc. too
-library(openintro)   # this loads data sets intro to modern stats 
-library(oibiostat)   # this loads data sets open intro biostats 
+library(openintro)   # this loads data sets from intro to modern stats 
 library(pander)      # for tables
 
 
@@ -34,7 +33,7 @@ knitr::opts_chunk$set(
 
 <!-- Put your work below here.  Put text in text chunks, code in R chunks. -->
 
-### Problem 0.0
+## Problem 0.0 (or section header) - change to your own text!
 
-You will want to **delete this** and replace it with your *own work*.
+Please **delete this default text** and replace it with your *own work*.
 
